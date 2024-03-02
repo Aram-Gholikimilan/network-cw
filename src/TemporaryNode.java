@@ -2,9 +2,9 @@
 // Coursework 2023/2024
 //
 // Submission by
-// YOUR_NAME_GOES_HERE
-// YOUR_STUDENT_ID_NUMBER_GOES_HERE
-// YOUR_EMAIL_GOES_HERE
+// Aram Gholikimilan
+// 220036178
+// Aram.Gholikimilan@city.ac.uk
 
 
 // DO NOT EDIT starts
