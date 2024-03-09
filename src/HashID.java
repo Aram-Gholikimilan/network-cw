@@ -21,4 +21,35 @@ public class HashID {
 	    throw new Exception("No new line at the end of input to HashID");
 	}
     }
+
+	public static int calculateDistance(byte[] hashID1, byte[] hashID2){
+		int distance = 256; // Start with the maximum distance
+		for (int i=0 ; i<hashID1.length && i<hashID2.length; i++){            // XOR the bytes to find differing bits
+			int xorResult = hashID1[i] ^ hashID2[i];
+			if (xorResult == 0){                 // If XOR result is 0, all bits in this byte match, decrease distance by 8
+				distance -= 8;
+			} else{                 // If there are differing bits, find the position of the first differing bit in this byte
+				for (int bit=7; bit>=0; bit--){
+					if ((xorResult & (1 << bit)) != 0){
+						distance -= (7-bit);                         // Found the first differing bit, adjust distance and break
+						return distance;
+					}
+				}
+			}
+		}
+		return distance;
+	}
+
+	public static void main(String[] args){
+		try{
+			byte[] hashID1 = computeHashID("Hello World!\n");
+			byte[] hashID2 = computeHashID("Hello World 2!\n");
+
+
+			int distance = calculateDistance(hashID1,hashID2);
+			System.out.println("Distance " + distance);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
 }

@@ -26,7 +26,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
     private int startingNodePort; // Store the starting node port for potential later use
     private boolean isConnected = false; // Keep track of the connection state
     public boolean start(String startingNodeName, String startingNodeAddress) {
-        /*
+
         // Assuming startingNodeAddress is "host:port"
         String[] parts = startingNodeAddress.split(":");
         try (Socket socket = new Socket(parts[0], Integer.parseInt(parts[1]));
@@ -45,7 +45,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 	// Return false if the 2D#4 network can't be contacted
 	//return true;
 
-        */
+        /*
             // Split the startingNodeAddress into host and port
             String[] parts = startingNodeAddress.split(":");
             if (parts.length != 2) {
@@ -76,6 +76,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 System.err.println("Start failed due to an exception: " + e.getMessage());
                 return false;
             }
+
+         */
     }
 
     public boolean store(String key, String value) {
