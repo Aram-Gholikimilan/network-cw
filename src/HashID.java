@@ -20,7 +20,7 @@ public class HashID {
 	    // 2D#4 computes hashIDs of lines, i.e. strings ending with '\n'
 	    throw new Exception("No new line at the end of input to HashID");
 	}
-    }
+	}
 
 	public static int calculateDistance(byte[] hashID1, byte[] hashID2){
 		int distance = 256; // Start with the maximum distance

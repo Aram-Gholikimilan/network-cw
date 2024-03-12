@@ -7,10 +7,8 @@
 // Aram.Gholikimilan@city.ac.uk
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -98,6 +96,85 @@ public class FullNode implements FullNodeInterface {
         } catch (Exception e) {
             System.err.println("Error handling client connection: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    //   Full nodes MUST act
+    //   as TCP servers and accept incoming connections using the IP address
+    //   and port number in their address.  Full nodes MAY act as TCP clients.
+
+    public FullNode() {}
+    private static boolean actServer = true;
+    public static void main(String[] args) throws IOException {
+
+        // Act as server:
+        if (actServer) {
+
+            // IP Addresses will be discussed in detail in lecture 4
+            String IPAddressString = "127.0.0.1";
+            InetAddress host = InetAddress.getByName(IPAddressString);
+
+            // Port numbers will be discussed in detail in lecture 5
+            int port = 4567;
+
+            // The server side is slightly more complex
+            // First we have to create a ServerSocket
+            System.out.println("Opening the server socket on port " + port);
+            ServerSocket serverSocket = new ServerSocket(port);
+
+            // The ServerSocket listens and then creates as Socket object
+            // for each incoming connection
+            System.out.println("Server waiting for client...");
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("Client connected!");
+
+            // Like files, we use readers and writers for convenience
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // We can read what the client has said
+            String message = reader.readLine();
+            System.out.println("The client said : " + message);
+
+            // Sending a message to the client at the other end of the socket
+            System.out.println("Sending a message to the client");
+            writer.write("Nice to meet you\n");
+            writer.flush();
+            // To make better use of bandwidth, messages are not sent
+            // until the flush method is used
+
+            // Close down the connection
+            clientSocket.close();
+        } else {
+            // IP Addresses will be discussed in detail in lecture 4
+            String IPAddressString = "127.0.0.1";
+            InetAddress host = InetAddress.getByName(IPAddressString);
+
+            // Port numbers will be discussed in detail in lecture 5
+            int port = 4567;
+
+            // This is where we create a socket object
+            // That creates the TCP conection
+            System.out.println("TCPClient connecting to " + host.toString() + ":" + port);
+            Socket clientSocket = new Socket(host, port);
+
+            // Like files, we use readers and writers for convenience
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // Sending a message to the server at the other end of the socket
+            System.out.println("Sending a message to the server");
+            writer.write("Hello Server!\n");
+            writer.flush();
+            // To make better use of bandwidth, messages are not sent
+            // until the flush method is used
+
+            // We can read what the server has said
+            String response = reader.readLine();
+            System.out.println("The server said : " + response);
+
+            // Close down the connection
+            clientSocket.close();
         }
     }
 }
