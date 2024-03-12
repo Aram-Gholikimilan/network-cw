@@ -88,12 +88,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
             int keyLines = key.split("\n").length;
             int valueLines = value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
 
-            // compute the HashID for the key
-            byte [] keyHashID = HashID.computeHashID(key);
+            String closestNodeAddress = findClosestNode(key);
+            if (closestNodeAddress == null) {
+                System.err.println("Failed to find the closest node for storing.");
+                return false;
+            }
 
             // find the closest node using the keyHashID
             // connect directly to a known node
-            socket = connectToNode(startingNodeName, startingNodeHost + ":" + startingNodePort);
+            socket = connectToNode("Dynamic Node", closestNodeAddress); //startingNodeName, startingNodeHost + ":" + startingNodePort
             if (socket == null) {
                 System.out.println("Connection to node failed.");
                 return false;
@@ -107,7 +110,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
             String startResponse = in.readLine();
 
             // check for START acknowledgment
-            if(startResponse == null || !startResponse.startsWith("START")) return false;
+            if(startResponse == null || !startResponse.startsWith("START")){
+                System.err.println("Failed to start communication with the closest node.");
+                return false;
+            }
 
             // format and send PUT? request
             out.println("PUT? " + keyLines + " " + valueLines);
@@ -146,7 +152,13 @@ public class TemporaryNode implements TemporaryNodeInterface {
         // ensure the key ends with a newline
         if (!key.endsWith("\n")) key += "\n";
 
-        try(Socket socket = connectToNode(startingNodeName, startingNodeHost + ":" + startingNodePort);
+        String closestNodeAddress = findClosestNode(key);
+        if (closestNodeAddress == null) {
+            System.err.println("Failed to find the closest node for retrieving.");
+            return null;
+        }
+
+        try(Socket socket = connectToNode("Dynamic Node", closestNodeAddress); //startingNodeName, startingNodeHost + ":" + startingNodePort
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
