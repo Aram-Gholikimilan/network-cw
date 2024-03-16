@@ -7,6 +7,8 @@ import java.lang.StringBuilder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
+import static java.lang.Integer.numberOfLeadingZeros;
+
 public class HashID {
 
     public static byte [] computeHashID(String line) throws Exception {
@@ -38,6 +40,24 @@ public class HashID {
 			}
 		}
 		return distance;
+	}
+
+	public static int calDistance (byte[] hash1, byte[]hash2){
+		byte b1 = 0;
+		byte b2 = 0;
+		int counter = 0;
+		for(int i=0; i< hash1.length;i++){
+			if(hash1[i] != hash2[i]){
+				b1 = hash1[i];
+				b2 = hash2[i];
+				break;
+			} else {
+				counter++;
+			}
+		}
+		byte result = (byte) ((b1 ^ b2));
+		int numberDiff = numberOfLeadingZeros(result);
+		return 256 - ((counter * 8) -24 + numberDiff);
 	}
 
 	public static void main(String[] args){

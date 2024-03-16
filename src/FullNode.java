@@ -133,6 +133,7 @@ public class FullNode implements FullNodeInterface {
                 Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
 
                 String message = in.readLine();
+                System.out.println(message);
                 handleClient(message, in, out);
                 //new Thread(() -> handleClient(in,out)).start();
                 System.out.println("The client is handled");
@@ -225,17 +226,6 @@ public class FullNode implements FullNodeInterface {
          */
     }
 
-//    private void acceptConnections() {
-//        while (true) {
-//            try {
-//                //Socket clientSocket = serverSocket.accept();
-//                //threadPool.execute(() -> handleClient(clientSocket));
-//            } catch (IOException e) {
-//                System.err.println("Error accepting connection. Error: " + e.getMessage());
-//            }
-//        }
-//    }
-
     private void handleClient(String line,BufferedReader in, Writer out) {
         try{
 //            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -273,7 +263,9 @@ public class FullNode implements FullNodeInterface {
                     //  This message allows the requester to tell whether the connection is
                     //  still active and the responder is still working correctly.
                     out.write("OHCE");
+                    out.flush();
                 } else if (line.startsWith("END")) {
+                    serverSocket.close();
                     break; // Exit the loop and close the connection
                 }
                 line=null;
@@ -411,7 +403,11 @@ public class FullNode implements FullNodeInterface {
     private void handleNearestRequest(String line, BufferedReader in, Writer out) {
         // Extract and process the NEAREST? request according to the 2D#4 protocol
         try {
+            System.out.println(line);
             String hashID = line.split(" ")[1];
+
+
+            System.out.println(hashID);
 
             // Here, find the three closest nodes to the given hashID
             // For simplicity, assume we have a method findClosestNodes(hashID) that returns a list of node info
@@ -444,7 +440,7 @@ public class FullNode implements FullNodeInterface {
         List<NodeDistance> distances = new ArrayList<>();
 
         // Calculate the distance between each node's hashID and the target hashID
-        for (Map.Entry<String, String> entry : networkMap.entrySet()) {
+        for (Map.Entry<String, String> entry : keyValueStore.entrySet()) {
             String nodeName = entry.getKey();
             // Assuming a method to get the node's hashID in hex format
             String nodeHashIDHex;
@@ -553,8 +549,8 @@ public class FullNode implements FullNodeInterface {
          */
 
         FullNode fNode = new FullNode();
-        if (fNode.listen("127.0.0.1", 4567)) {
-            fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:4567");
+        if (fNode.listen("127.0.0.1", 3456)) {
+            fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:3456");
             System.out.println("DONE!");
         }
 

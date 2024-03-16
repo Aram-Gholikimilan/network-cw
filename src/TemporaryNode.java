@@ -60,9 +60,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 System.out.println("Sending a message to the server");
                 System.out.println(startingNodeName);
                 writer.write("START 1 " + startingNodeName +"\n");
-                System.out.println("sent0");
                 writer.flush();
-                System.out.println("sent1");
 
                 String response = reader.readLine();
                 System.out.println("The server said : " + response);
@@ -77,6 +75,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 clientSocket.close();
             } catch (Exception e){
                 System.out.println("Connecting attempt failed: " + e.getMessage());
+                e.printStackTrace();
             }
 
             /*
@@ -158,6 +157,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             clientSocket.close();
         } catch (Exception e){
             System.out.println("Error during PUT? request handling (Store operation): "+e.getMessage());
+            e.printStackTrace();
         }
 
         /*Socket socket = null;
@@ -264,6 +264,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             clientSocket.close();
         } catch (Exception e){
             System.out.println("Error during GET? request handling: " + e.getMessage());
+            e.printStackTrace();
         }
 
 
@@ -319,6 +320,128 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
 
          */
+        return null;
+    }
+
+    public void end (String reason){
+        try{
+            System.out.println("TCPClient connecting to " + startingNodeAddress);
+            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
+            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // Sending a message to the server at the other end of the socket
+            System.out.println("Sending a message to the server");
+            writer.write("END " + reason +"\n");
+            writer.flush();
+
+            isConnected = false;
+
+            // Close down the connection
+            clientSocket.close();
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    public boolean echo (){
+        try{
+            System.out.println("TCPClient connecting to " + startingNodeAddress);
+            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
+            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // Sending a message to the server at the other end of the socket
+            System.out.println("Sending a message to the server");
+            writer.write("ECHO? " +"\n");
+            writer.flush();
+
+            String response = reader.readLine();
+            System.out.println("The server said : " + response);
+
+            if (response != null && response.startsWith("OHCE"))
+            {
+                isConnected = true; // Update connection status
+                return true;
+            }
+
+            // Close down the connection
+            //TODO do i need to close the connection?
+            clientSocket.close();
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public boolean notifyRequest (String request) {
+        try{
+            String[] parts = request.split("\n");
+            if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
+            String fullNodeName = parts[0];
+            String fullNodeAddress = parts[1];
+
+            System.out.println("TCPClient connecting to " + startingNodeAddress);
+            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
+            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // Sending a message to the server at the other end of the socket
+            System.out.println("Sending a message to the server");
+            writer.write("NOTIFY? \n" + fullNodeName + "\n" + fullNodeAddress + "\n");
+            writer.flush();
+
+            String response = reader.readLine();
+            System.out.println("The server said : " + response);
+
+            if (response != null && response.startsWith("NOTIFIED"))
+            {
+                isConnected = true; // Update connection status
+                return true;
+            }
+
+            // Close down the connection
+            //TODO do i need to close the connection?
+            clientSocket.close();
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public String nearest (String hash){// the string is a hashID written in hex
+        try{
+            //System.out.println("TCPClient connecting to " + startingNodeAddress);
+            //System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
+            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // Sending a message to the server at the other end of the socket
+            System.out.println("Sending a message to the server");
+            writer.write("NEAREST? ");
+            writer.write(hash + "\n");
+            writer.flush();
+
+            String response = reader.readLine();
+            System.out.println("The server said : " + response);
+
+            if (response != null && response.startsWith("NODES"))
+            {
+                isConnected = true; // Update connection status
+                return response;
+            }
+
+            // Close down the connection
+            //TODO do i need to close the connection?
+            clientSocket.close();
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -481,15 +604,31 @@ public class TemporaryNode implements TemporaryNodeInterface {
         clientSocket.close();
 
          */
-
         TemporaryNode tNode = new TemporaryNode();
-        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:4567");
-        //System.out.println("start method done!");
+
         System.out.println("\n===================\n");
+        System.out.println("Start: ");
+        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
+        //System.out.println("start method done!");
+        /*
+        System.out.println("\n===================\n");
+        System.out.println("Store: ");
         tNode.store("Welcome",
                     "Hello\n" +
                     "World!");
         System.out.println("\n===================\n");
+        System.out.println("Get: ");
         tNode.get("Welcome");
+        System.out.println("\n===================\n");
+        System.out.println("Echo: ");
+        tNode.echo();
+        System.out.println("\n===================\n");
+        System.out.println("Notify: ");
+        tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:2244");
+
+         */
+        System.out.println("\n===================\n");
+        System.out.println("Nearest: ");
+        tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
     }
 }
