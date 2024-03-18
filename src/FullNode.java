@@ -39,6 +39,7 @@ interface FullNodeInterface {
 
 
 public class FullNode implements FullNodeInterface {
+    private boolean isConnected;
     public ServerSocket serverSocket;
     private final ConcurrentHashMap<String, String> networkMap = new ConcurrentHashMap<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -53,8 +54,6 @@ public class FullNode implements FullNodeInterface {
 	// Return true if the node can accept incoming connections
 	// Return false otherwise
 	//return true;
-
-
         try{
             System.out.println("Opening the server socket on port " + portNumber);
             serverSocket = new ServerSocket(portNumber);
@@ -69,42 +68,6 @@ public class FullNode implements FullNodeInterface {
             System.out.println("Failed to listen on " + ipAddress + ":" + portNumber + ". Error: " + e.getMessage());
             return false;
         }
-
-
-
-
-
-        /*
-        try {
-            serverSocket = new ServerSocket(portNumber);
-            System.out.println("Listening on " + ipAddress + ":" + portNumber);
-            threadPool.execute(this::acceptConnections);
-            return true;
-        } catch (IOException e) {
-            System.err.println("Failed to listen on " + ipAddress + ":" + portNumber + ". Error: " + e.getMessage());
-            return false;
-        }
-
-
-         */
-
-        /*
-        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
-            System.out.println("Server started and listening on port " + portNumber);
-
-            // The server should continuously listen for incoming connections
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                // Handle each connection in a separate thread
-                new Thread(() -> handleClient(clientSocket)).start();
-            }
-
-        } catch (IOException e) {
-            System.err.println("Could not listen on port: " + portNumber);
-            e.printStackTrace();
-            return false;
-        }
-         */
     }
 
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
@@ -128,7 +91,7 @@ public class FullNode implements FullNodeInterface {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New client connected!");
                 // Handle each connection in a separate thread
-
+                isConnected = true;
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
 
@@ -136,113 +99,22 @@ public class FullNode implements FullNodeInterface {
                 System.out.println(message);
                 handleClient(message, in, out);
                 //new Thread(() -> handleClient(in,out)).start();
-                System.out.println("The client is handled");
-                clientSocket.close();
+                //System.out.println("The client is handled");
+                //clientSocket.close();
             }
-            /*
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
-            System.out.println("here0");
-
-            // We can read what the client has said
-            String line = in.readLine();
-            System.out.println("The client said : " + line);
-            System.out.println("here00");
-
-            if (line.startsWith("START")) {
-                // Process START command
-                System.out.println("here1");
-                handleStartCommand(line, out);
-            }
-
-             */
-            /*
-            while (line  != null) {
-                if (line.startsWith("START")) {
-                    // Process START command
-                    handleStartCommand(line, out);
-                        //out.println("START 1 <NodeName>");
-                } else if (line.startsWith("PUT?")) {
-                    // Process PUT? command
-                    handlePutRequest(line, in, out);
-                } else if (line.startsWith("GET?")) {
-                    // Process GET? command
-                    handleGetRequest(line, in, out);
-                } else if (line.startsWith("NOTIFY?")) {
-                    // Process NOTIFY? command
-                    handleNotifyRequest(line, in, out);
-                } else if (line.startsWith("NEAREST?")) {
-                    // Process NEAREST? command
-                    handleNearestRequest(line, in, out);
-                } else if (line.startsWith("ECHO?")) {
-                    //  This message allows the requester to tell whether the connection is
-                    //  still active and the responder is still working correctly.
-                    out.write("OHCE");
-                } else if (line.startsWith("END")) {
-                    break; // Exit the loop and close the connection
-                }
-            }*/
-            //System.out.println("here2");
-
-            //clientSocket.close();
-            //System.out.println("here3");
-
         } catch (Exception e){
             System.out.println("eeerroorr: "+e.getMessage());
         }
-
-        /*
-        try {
-            // Split the starting node address into host and port
-            String[] parts = startingNodeAddress.split(":");
-            String host = parts[0];
-            int port = Integer.parseInt(parts[1]);
-
-            try (Socket socket = new Socket(host, port);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-
-                // First, initiate the START message exchange
-                out.println("START 1 " + this.nodeName);
-                String response = in.readLine(); // Read the starting node's START response
-
-                // Now, notify the starting node of your presence
-                out.println("NOTIFY " + this.nodeName + " " + socket.getLocalAddress().getHostAddress() + ":" + this.serverSocket.getLocalPort());
-                String notifyResponse = in.readLine(); // Expecting a NOTIFIED response
-
-                // Log or handle the NOTIFY response
-                System.out.println("NOTIFY response from starting node: " + notifyResponse);
-
-                // Optionally, you can query the starting node for the nearest nodes or for its network map
-                // This can help in populating your node's initial view of the network
-
-            } catch (IOException e) {
-                System.err.println("Error handling incoming connections: " + e.getMessage());
-            }
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid port number in starting node address.");
-        }
-
-         */
     }
 
     private void handleClient(String line,BufferedReader in, Writer out) {
-        try{
-//            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//            Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
-            //System.out.println("read1");
 
-            //String message = in.readLine();
-            //System.out.println(in.readLine());
-            //System.out.println("222222");
-//            switch (message){
-//                case "START ":
-//                    handleStartCommand(message,out);
-//                case "ECHO":
-//                    out.write("OHCE");
-//            }
-            //System.out.println("read3");
+        try{
             while (line != null) {
+                if (!isConnected){
+                    System.out.println("Not connected to any node. Please start connection first");
+                    break;
+                }
                 if (line.startsWith("START")) {
                     // Process START command
                     handleStartCommand(line, out);
@@ -271,20 +143,32 @@ public class FullNode implements FullNodeInterface {
                 line=null;
             }
 
-
-
         } catch (IOException e) {
             System.err.println("Error handling client. Error: " + e.getMessage());
         }
-       // finally {
-            //try {
-                //clientSocket.close();
-           // } catch (IOException e) {
-            //    System.err.println("Error closing client socket. Error: " + e.getMessage());
-           // }
-       // }
     }
 
+    public void end (String reason){
+        try{
+            System.out.println("TCPClient connecting to " + startingNodeAddress);
+            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
+            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // Sending a message to the server at the other end of the socket
+            System.out.println("Sending a message to the server");
+            writer.write("END " + reason +"\n");
+            writer.flush();
+
+            isConnected = false;
+            // Close down the connection
+            clientSocket.close();
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     // Placeholder for request handling methods
 
     private void handleStartCommand(String line, Writer out) throws IOException {
@@ -509,45 +393,6 @@ public class FullNode implements FullNodeInterface {
 
 
     public static void main(String[] args) throws IOException {
-        /*
-        // IP Addresses will be discussed in detail in lecture 4
-        String IPAddressString = "127.0.0.1";
-        InetAddress host = InetAddress.getByName(IPAddressString);
-
-        // Port numbers will be discussed in detail in lecture 5
-        int port = 4567;
-
-        // The server side is slightly more complex
-        // First we have to create a ServerSocket
-        System.out.println("Opening the server socket on port " + port);
-        ServerSocket serverSocket = new ServerSocket(port);
-
-        // The ServerSocket listens and then creates as Socket object
-        // for each incoming connection
-        System.out.println("Server waiting for client...");
-        Socket clientSocket = serverSocket.accept();
-        System.out.println("Client connected!");
-
-        // Like files, we use readers and writers for convenience
-        BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-        // We can read what the client has said
-        String message = reader.readLine();
-        System.out.println("The client said : " + message);
-
-        // Sending a message to the client at the other end of the socket
-        System.out.println("Sending a message to the client");
-        writer.write("Nice to meet you\n");
-        writer.flush();
-        // To make better use of bandwidth, messages are not sent
-        // until the flush method is used
-
-        // Close down the connection
-        clientSocket.close();
-
-         */
-
         FullNode fNode = new FullNode();
         if (fNode.listen("127.0.0.1", 3456)) {
             fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:3456");

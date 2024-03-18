@@ -31,6 +31,9 @@ interface TemporaryNodeInterface {
 //   nodes are limited members of the network.  They do not store values
 //   or respond to requests.
 public class TemporaryNode implements TemporaryNodeInterface {
+    private Socket clientSocket;
+    private BufferedReader reader;
+    private Writer writer;
     private String startingNodeName;
     private String startingNodeAddress;
     private InetAddress startingNodeHost; // Store the starting node host for potential later use
@@ -52,9 +55,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                 System.out.println("TCPClient connecting to " + startingNodeAddress);
                 System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-                Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+                clientSocket = new Socket(startingNodeHost, startingNodePort);
+                reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
                 // Sending a message to the server at the other end of the socket
                 System.out.println("Sending a message to the server");
@@ -71,44 +74,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     return true;
                 }
 
-                // Close down the connection
-                clientSocket.close();
             } catch (Exception e){
                 System.out.println("Connecting attempt failed: " + e.getMessage());
                 e.printStackTrace();
             }
-
-            /*
-        try {
-            String[] parts = startingNodeAddress.split(":");
-            if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
-            startingNodeHost = parts[0];
-            startingNodePort = Integer.parseInt(parts[1]);
-
-            Socket socket = new Socket(startingNodeHost, startingNodePort);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            // Send START message
-            out.println("START 1 " + startingNodeName);
-
-            // Wait for START message back
-            String response = in.readLine();
-            if (response != null && response.startsWith("START"))
-            {
-                isConnected = true; // Update connection status
-                return true;
-            }
-
-            socket.close();
-        } catch (IOException e) {
-            System.err.println("Connection attempt failed: " + e.getMessage());
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            System.err.println("Error: " + e.getMessage());
-        }
-        */
-
 
         return false;
     }
@@ -134,9 +103,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             // you have the host and port from start
             System.out.println("TCPClient connecting to " + startingNodeAddress);
-            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
@@ -154,74 +123,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 isConnected = true; // Update connection status
                 return true;
             }
-            clientSocket.close();
+
         } catch (Exception e){
             System.out.println("Error during PUT? request handling (Store operation): "+e.getMessage());
             e.printStackTrace();
         }
-
-        /*Socket socket = null;
-        PrintWriter out = null;
-        BufferedReader in = null;
-
-        try{
-            // Append new line if not present
-            if (!key.endsWith("\n")) key += "\n";
-            if (!value.endsWith("\n")) value += "\n";
-
-            // Count the number of lines in both key and value
-            int keyLines = key.split("\n").length;
-            int valueLines = value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
-
-            String closestNodeAddress = findClosestNode(key);
-            if (closestNodeAddress == null) {
-                System.err.println("Failed to find the closest node for storing.");
-                return false;
-            }
-
-            // find the closest node using the keyHashID
-            // connect directly to a known node
-            socket = connectToNode("Dynamic Node", closestNodeAddress); //startingNodeName, startingNodeHost + ":" + startingNodePort
-            if (socket == null) {
-                System.out.println("Connection to node failed.");
-                return false;
-            }
-
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            // sending START message (protocol version 1)
-            out.println("START 1 " + this.startingNodeName);
-            String startResponse = in.readLine();
-
-            // check for START acknowledgment
-            if(startResponse == null || !startResponse.startsWith("START")){
-                System.err.println("Failed to start communication with the closest node.");
-                return false;
-            }
-
-            // format and send PUT? request
-            out.println("PUT? " + keyLines + " " + valueLines);
-            out.print(key);
-            out.print(value);
-
-            //Await and handle response
-            String response = in.readLine();
-            return "SUCCESS".equals(response);
-        } catch (Exception e){
-            System.out.println("Error during PUT? request handling (Store operation): " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            try{
-                if (out != null) out.close();
-                if (in != null) in.close();
-                if (socket != null) socket.close();
-            } catch (IOException e){
-                System.out.println("Failed to close: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }*/
-
         return false;
     }
 
@@ -244,9 +150,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             // you have the host and port from start
             System.out.println("TCPClient connecting to " + startingNodeAddress);
-            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
@@ -261,75 +167,22 @@ public class TemporaryNode implements TemporaryNodeInterface {
             {
                 return response;
             }
-            clientSocket.close();
+
         } catch (Exception e){
             System.out.println("Error during GET? request handling: " + e.getMessage());
             e.printStackTrace();
         }
-
-
-        /*
-        String closestNodeAddress = findClosestNode(key);
-        if (closestNodeAddress == null) {
-            System.err.println("Failed to find the closest node for retrieving.");
-            return null;
-        }
-
-        try(Socket socket = connectToNode("Dynamic Node", closestNodeAddress); //startingNodeName, startingNodeHost + ":" + startingNodePort
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-
-            if (socket == null){
-                System.out.println("Connection to node failed.");
-                return null;
-            }
-
-            // sending START message to conform to protocol requirements before making any request
-            out.println("START 1" + this.startingNodeName);
-            String startResponse = in.readLine();
-            if (startResponse == null || !startResponse.startsWith("START")){
-                System.out.println("Failed to start communication properly.");
-                return null;
-            }
-
-            // sending the GET? request
-            int keyLines = key.split(":").length;
-            out.println("GET? " + keyLines);
-            out.print(key); // send the key
-
-            // await and handle response
-            String responseType = in.readLine();
-            if (responseType != null && responseType.startsWith("VALUE")){
-                int valueLines = Integer.parseInt(responseType.split(" ")[1]);
-                StringBuilder value = new StringBuilder();
-                for (int i=0; i<valueLines;i++){
-                    value.append(in.readLine());
-                    if (i < valueLines - 1){
-                        value.append("\n");
-                    }
-                }
-                return value.toString();
-            } else if ("NOPE".equals(responseType)) {
-                return null;
-            } else {
-                System.out.println("Unexpected response: " + responseType);
-            }
-        } catch (Exception e){
-            System.out.println("Error during GET? request handling: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-         */
         return null;
     }
 
     public void end (String reason){
+
         try{
             System.out.println("TCPClient connecting to " + startingNodeAddress);
             System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
@@ -346,12 +199,18 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
     }
     public boolean echo (){
+
+        if (!isConnected){
+            System.out.println("Not connected to any node. Please start connection first");
+            return false;
+        }
+
         try{
             System.out.println("TCPClient connecting to " + startingNodeAddress);
             System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+            //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
@@ -367,9 +226,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 return true;
             }
 
-            // Close down the connection
-            //TODO do i need to close the connection?
-            clientSocket.close();
         } catch (Exception e){
             System.out.println("Connecting attempt failed: " + e.getMessage());
             e.printStackTrace();
@@ -377,6 +233,12 @@ public class TemporaryNode implements TemporaryNodeInterface {
         return false;
     }
     public boolean notifyRequest (String request) {
+
+        if (!isConnected){
+            System.out.println("Not connected to any node. Please start connection first");
+            return false;
+        }
+
         try{
             String[] parts = request.split("\n");
             if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
@@ -385,9 +247,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             System.out.println("TCPClient connecting to " + startingNodeAddress);
             System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
@@ -403,9 +262,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 return true;
             }
 
-            // Close down the connection
-            //TODO do i need to close the connection?
-            clientSocket.close();
         } catch (Exception e){
             System.out.println("Connecting attempt failed: " + e.getMessage());
             e.printStackTrace();
@@ -413,13 +269,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
         return false;
     }
     public String nearest (String hash){// the string is a hashID written in hex
+        if (!isConnected){
+            System.out.println("Not connected to any node. Please start connection first");
+            return null;
+        }
         try{
-            //System.out.println("TCPClient connecting to " + startingNodeAddress);
-            //System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-            Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
             writer.write("NEAREST? ");
@@ -435,9 +289,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 return response;
             }
 
-            // Close down the connection
-            //TODO do i need to close the connection?
-            clientSocket.close();
         } catch (Exception e){
             System.out.println("Connecting attempt failed: " + e.getMessage());
             e.printStackTrace();
@@ -572,45 +423,12 @@ public class TemporaryNode implements TemporaryNodeInterface {
     }
 
     public static void main(String[] args) throws IOException {
-        /*
-        // IP Addresses will be discussed in detail in lecture 4
-        String IPAddressString = "127.0.0.1";
-        InetAddress host = InetAddress.getByName(IPAddressString);
-
-        // Port numbers will be discussed in detail in lecture 5
-        int port = 4567;
-
-        // This is where we create a socket object
-        // That creates the TCP conection
-        System.out.println("TCPClient connecting to " + host.toString() + ":" + port);
-        Socket clientSocket = new Socket(host, port);
-
-        // Like files, we use readers and writers for convenience
-        BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-        // Sending a message to the server at the other end of the socket
-        System.out.println("Sending a message to the server");
-        writer.write("Hello Server!\n");
-        writer.flush();
-        // To make better use of bandwidth, messages are not sent
-        // until the flush method is used
-
-        // We can read what the server has said
-        String response = reader.readLine();
-        System.out.println("The server said : " + response);
-
-        // Close down the connection
-        clientSocket.close();
-
-         */
         TemporaryNode tNode = new TemporaryNode();
 
         System.out.println("\n===================\n");
         System.out.println("Start: ");
         tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
-        //System.out.println("start method done!");
-        /*
+
         System.out.println("\n===================\n");
         System.out.println("Store: ");
         tNode.store("Welcome",
@@ -626,7 +444,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Notify: ");
         tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:2244");
 
-         */
         System.out.println("\n===================\n");
         System.out.println("Nearest: ");
         tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
