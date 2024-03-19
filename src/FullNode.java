@@ -282,6 +282,7 @@ public class FullNode implements FullNodeInterface {
                 // Store the (key, value) pair if the current node is among the three closest
                 directory.put(key, value);
                 out.write("SUCCESS\n");
+                System.out.println("valueee: "+ value);
             } else {
                 out.write("FAILED\n");
             }
@@ -531,6 +532,10 @@ public class FullNode implements FullNodeInterface {
     public static void main(String[] args) throws IOException {
         FullNode fNode = new FullNode();
         if (fNode.listen("127.0.0.1", 3456)) {
+            fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-20","127.0.0.1:3456");
+            fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-21","127.0.0.1:3456");
+            fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-22","127.0.0.1:3456");
+            fNode.networkMap.put("metin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
             fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:3456");
             System.out.println("DONE!");
         }

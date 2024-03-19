@@ -8,30 +8,7 @@
 // DO NOT EDIT starts
 public class CmdLineStore {
 
-
-	public static int calculateDistance(byte[] hashID1, byte[] hashID2){
-		int distance = 256; // Start with the maximum distance
-		for (int i=0 ; i<hashID1.length && i<hashID2.length; i++){            // XOR the bytes to find differing bits
-			int xorResult = hashID1[i] ^ hashID2[i];
-			if (xorResult == 0){                 // If XOR result is 0, all bits in this byte match, decrease distance by 8
-				distance -= 8;
-			} else{                 // If there are differing bits, find the position of the first differing bit in this byte
-				for (int bit=7; bit>=0; bit--){
-					if ((xorResult & (1 << bit)) != 0){
-						distance -= (7-bit);                         // Found the first differing bit, adjust distance and break
-						return distance;
-					}
-				}
-			}
-		}
-		return distance;
-	}
-
-
-
-
-
-	public static void main(String[] args) {
+    public static void main(String[] args) {
         if (args.length != 4) {
             System.err.println("Usage error!");
             System.err.println("DSTStoreCmdLine startingNodeName startingNodeAddress key value");

@@ -454,10 +454,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Nearest: ");
         tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
 
+*/
         System.out.println("\n===================\n");
         System.out.println("End: ");
         tNode.end("no requests!");
 
-         */
+
     }
 }
