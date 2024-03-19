@@ -74,6 +74,7 @@ public class FullNode implements FullNodeInterface {
 
         this.startingNodeName=startingNodeName;
         this.startingNodeAddress=startingNodeAddress;
+        networkMap.put(startingNodeName,startingNodeAddress);
         try{
             String[] parts = startingNodeAddress.split(":");
             if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
@@ -276,7 +277,7 @@ public class FullNode implements FullNodeInterface {
             List<String> closestNodesAddresses = findClosestNodes(keyHashID);
 
             // Check if the current node is among the three closest
-            boolean isCurrentNodeClosest = isCurrentNodeClosest(keyHashID, closestNodesAddresses);
+            boolean isCurrentNodeClosest = isCurrentNodeClosest(closestNodesAddresses);
 
             if (isCurrentNodeClosest) {
                 // Store the (key, value) pair if the current node is among the three closest
@@ -294,9 +295,9 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
-    private boolean isCurrentNodeClosest(byte[] keyHashID, List<String> closestNodesAddresses) throws Exception {
+    private boolean isCurrentNodeClosest(List<String> closestNodesAddresses) throws Exception {
         // Compute the current node's hashID from its name
-        byte[] currentNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+        //byte[] currentNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
 
         // You need to implement a way to determine if the current node's address is among the closest nodes' addresses
         // This is a conceptual implementation; adjust according to your network map and addressing scheme
@@ -412,7 +413,7 @@ public class FullNode implements FullNodeInterface {
         for (Map.Entry<String, String> entry : networkMap.entrySet()) {
             String nodeName = entry.getKey(); // Extract the node's name
             byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
-            int distance = HashID.calDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
+            int distance = HashID.calDistance2(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
 
             // Add the node's address and its calculated distance to the list
             distances.add(new NodeDistance(entry.getValue(), distance));
@@ -532,9 +533,9 @@ public class FullNode implements FullNodeInterface {
     public static void main(String[] args) throws IOException {
         FullNode fNode = new FullNode();
         if (fNode.listen("127.0.0.1", 3456)) {
-            fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-20","127.0.0.1:3456");
+            fNode.networkMap.put("aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-20","127.0.0.1:3457");
             fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-21","127.0.0.1:3456");
-            fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-22","127.0.0.1:3456");
+            fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-22","127.0.0.1:3457");
             fNode.networkMap.put("metin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
             fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:3456");
             System.out.println("DONE!");

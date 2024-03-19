@@ -6,6 +6,7 @@
 import java.lang.StringBuilder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Arrays;
 
 import static java.lang.Integer.numberOfLeadingZeros;
 
@@ -26,6 +27,7 @@ public class HashID {
 
 
 	public static int calDistance (byte[] hash1, byte[]hash2){
+
 		byte b1 = 0;
 		byte b2 = 0;
 		int counter = 0;
@@ -43,16 +45,78 @@ public class HashID {
 		return 256 - ((counter * 8) -24 + numberDiff);
 	}
 
-	public static void main(String[] args){
-		try{
-			byte[] hashID1 = computeHashID("Hello World!\n");
-			byte[] hashID2 = computeHashID("Hello World 2!\n");
-
-
-			int distance = calDistance(hashID1,hashID2);
-			System.out.println("Distance " + distance);
-		} catch (Exception e){
-			e.printStackTrace();
+	public static int calDistance2(byte[] hash1, byte[] hash2) {
+		int matchBits = 0;
+		for (int i = 0; i < hash1.length; i++) {
+			byte xorResult = (byte) (hash1[i] ^ hash2[i]);
+			if (xorResult == 0) {
+				matchBits += 8; // If bytes are equal, all 8 bits match
+			} else {
+				// Count the number of leading zeros in the XOR result
+				for (int j = 7; j >= 0; j--) {
+					if ((xorResult & (1 << j)) == 0) {
+						matchBits++;
+					} else {
+						break; // Stop at the first 1 bit
+					}
+				}
+				break; // Stop after finding the first byte that is not equal
+			}
 		}
+		return 256 - matchBits;
+	}
+
+	public static void main(String[] args) throws Exception {
+		String hexHash1 = "0f033be6cea034bd45a0352775a219ef5dc7825ce55d1f7dae9762d80ce64411";
+		String hexHash2 = "0f0139b167bb7b4a416b8f6a7e0daa7e24a08172b9892171e5fdc615bb7f999b";
+
+		// Convert hex strings to byte arrays
+		byte[] hash1 = hexStringToByteArray(hexHash1);
+		byte[] hash2 = hexStringToByteArray(hexHash2);
+
+		// Calculate and print the distance between the two hash IDs
+		int distance = calDistance(hash1, hash2);
+		System.out.println("Distance: " + distance);
+
+		/*
+		// Two example strings, ensuring they end with a newline as required
+		String text1 = "Hello World!\n";
+		String text2 = "Hello World!?\n"; // Slightly different to ensure some difference in hash
+
+		// Compute hash IDs for both strings
+		byte[] hash1 = computeHashID("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n");
+		byte[] hash2 = computeHashID("Welcome\n");
+
+		// Convert hash bytes to hex format for displaying
+		String hexHash1 = bytesToHex(hash1);
+		String hexHash2 = bytesToHex(hash2);
+
+		// Print out the hash IDs in hex format
+		System.out.println("HashID 1: " + hexHash1);
+		System.out.println("HashID 2: " + hexHash2);
+
+		// Calculate and print the distance between the two hash IDs
+		int distance = calDistance2(hash1, hash2);
+		System.out.println("Distance: " + distance);
+
+		 */
+	}
+	// Helper method to convert byte array to hex string
+
+	public static byte[] hexStringToByteArray(String s) {
+		int len = s.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+					+ Character.digit(s.charAt(i+1), 16));
+		}
+		return data;
+	}
+	public static String bytesToHex(byte[] bytes) {
+		StringBuilder sb = new StringBuilder();
+		for (byte b : bytes) {
+			sb.append(String.format("%02x", b));
+		}
+		return sb.toString();
 	}
 }
