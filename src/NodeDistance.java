@@ -1,14 +1,14 @@
 public class NodeDistance {
-    private String address;
-    private int distance;
+    private final String value;
+    private final int distance;
 
-    public NodeDistance(String address, int distance) {
-        this.address = address;
+    public NodeDistance(String value, int distance) {
+        this.value = value;
         this.distance = distance;
     }
 
-    public String getAddress() {
-        return address;
+    public String getValue() {
+        return value;
     }
 
     public int getDistance() {

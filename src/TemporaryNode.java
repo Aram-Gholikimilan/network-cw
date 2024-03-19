@@ -54,7 +54,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 startingNodePort = Integer.parseInt(parts[1]);
 
                 System.out.println("TCPClient connecting to " + startingNodeAddress);
-                System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
+                //System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
                 clientSocket = new Socket(startingNodeHost, startingNodePort);
                 reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 writer = new OutputStreamWriter(clientSocket.getOutputStream());
@@ -437,6 +437,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     "Hello\n" +
                     "World!");
 
+        /*
         System.out.println("\n===================\n");
         System.out.println("Get: ");
         tNode.get("Welcome");
@@ -457,6 +458,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("End: ");
         tNode.end("no requests!");
 
-
+         */
     }
 }

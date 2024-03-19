@@ -38,8 +38,9 @@ interface FullNodeInterface {
 public class FullNode implements FullNodeInterface {
     private boolean isConnected;
     public ServerSocket serverSocket;
-    private final ConcurrentHashMap<String, String> networkMap = new ConcurrentHashMap<>();
+    private final HashMap<String, String> networkMap = new HashMap<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private Hashtable<String, String> directory = new Hashtable<>();
     private ConcurrentHashMap<String, String> keyValueStore = new ConcurrentHashMap<>();
     private String startingNodeName;
     private String startingNodeAddress;
@@ -188,7 +189,7 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
-    private void handlePutRequest(String line, BufferedReader in, Writer out) throws IOException {
+   /* private void handlePutRequest(String line, BufferedReader in, Writer out) throws IOException {
 
         // Extract and process the PUT? request according to the 2D#4 protocol
         try {
@@ -215,19 +216,91 @@ public class FullNode implements FullNodeInterface {
 
             System.out.println("key: \n" + key);
             System.out.println("value: \n" + value);
-            keyValueStore.put(key,value);
-            // When the responder gets a PUT request it must compute the hashID for the value to be stored.
-            // Here, implement logic to decide whether to store the key-value pair
-            // For simplicity, this example assumes the storage operation is successful
-            // You should include your logic for checking hashID distance, etc.
 
-            out.write("SUCCESS\n"); // Or "FAILED" based on your logic
-            out.flush();
+            //When the responder gets a PUT request it must compute the hashID
+            //   for the value to be stored.  Then it must check the network
+            //   directory for the three closest nodes to the key's hashID.  If the
+            //   responder is one of the three nodes that are closest then
+            //   it MUST store the (key, value) pair and MUST respond with a single
+            //   line:
+            //   SUCCESS
+            byte[] keyHashID = HashID.computeHashID(key);
+            List<String> closestNodes  = findClosestNodes(keyHashID);
+            byte[] currentNodeHashID = HashID.computeHashID(this.startingNodeName);
+//            if(threeClosestNodes.contains()){
+//                out.write("FAILED\n");
+//                out.flush();
+//            }
+
+            boolean isCurrentNodeClosest = closestNodes.stream()
+                    .anyMatch(nodeDistance -> Arrays.equals(nodeDistance.getNodeHashID(), currentNodeHashID));
+
+            if (isCurrentNodeClosest) {
+                // Current node is one of the three closest nodes
+                directory.put(key, value); // Store the key-value pair
+                out.write("SUCCESS\n");
+            } else {
+                // There are three other nodes closer to the key's hashID
+                out.write("FAILED\n");
+            }
         } catch (Exception e) {
             System.err.println("Error processing PUT? request: " + e.getMessage());
             out.write("FAILED\n");
             out.flush();
         }
+    }*/
+
+    private void handlePutRequest(String line, BufferedReader in, Writer out) throws IOException {
+        try {
+            String[] parts = line.split(" ", 3);
+            int keyLinesCount = Integer.parseInt(parts[1]);
+            int valueLinesCount = Integer.parseInt(parts[2]);
+
+            StringBuilder keyBuilder = new StringBuilder();
+            for (int i = 0; i < keyLinesCount; i++) {
+                keyBuilder.append(in.readLine()).append("\n");
+            }
+
+            StringBuilder valueBuilder = new StringBuilder();
+            for (int i = 0; i < valueLinesCount; i++) {
+                valueBuilder.append(in.readLine()).append("\n");
+            }
+
+            String key = keyBuilder.toString();
+            String value = valueBuilder.toString();
+
+            // Compute the hashID for the key
+            byte[] keyHashID = HashID.computeHashID(key);
+
+            // Determine the three closest nodes to the key's hashID
+            List<String> closestNodesAddresses = findClosestNodes(keyHashID);
+
+            // Check if the current node is among the three closest
+            boolean isCurrentNodeClosest = isCurrentNodeClosest(keyHashID, closestNodesAddresses);
+
+            if (isCurrentNodeClosest) {
+                // Store the (key, value) pair if the current node is among the three closest
+                directory.put(key, value);
+                out.write("SUCCESS\n");
+            } else {
+                out.write("FAILED\n");
+            }
+        } catch (Exception e) {
+            System.err.println("Error processing PUT? request: " + e.getMessage());
+            out.write("FAILED\n");
+        } finally {
+            out.flush();
+        }
+    }
+
+    private boolean isCurrentNodeClosest(byte[] keyHashID, List<String> closestNodesAddresses) throws Exception {
+        // Compute the current node's hashID from its name
+        byte[] currentNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+
+        // You need to implement a way to determine if the current node's address is among the closest nodes' addresses
+        // This is a conceptual implementation; adjust according to your network map and addressing scheme
+        String currentNodeAddress = this.startingNodeAddress;
+        return closestNodesAddresses.contains(currentNodeAddress);
     }
 
     //TODO: Extract and process the GET? request according to the 2D#4 protocol and the output
@@ -298,8 +371,8 @@ public class FullNode implements FullNodeInterface {
         // Extract and process the NEAREST? request according to the 2D#4 protocol
         try {
             //System.out.println(line);
-            String hashID = line.split(" ")[1];
-
+            String hashIDHex = line.split(" ")[1];
+            byte[] hashID = hexStringToByteArray(hashIDHex);
 
             //System.out.println(hashID);
 
@@ -330,43 +403,95 @@ public class FullNode implements FullNodeInterface {
         // Simply put the nodeName and nodeAddress into the map. This updates existing entries or adds new ones.
         networkMap.put(nodeName, nodeAddress);
     }
-    private List<String> findClosestNodes(String targetHashIDHex) {
+    private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
+        // List to hold nodes and their distances to the target hashID
+        List<NodeDistance> distances = new ArrayList<>();
+
+        // Iterate over each node in the networkMap
+        for (Map.Entry<String, String> entry : networkMap.entrySet()) {
+            String nodeName = entry.getKey(); // Extract the node's name
+            byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
+            int distance = HashID.calDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
+
+            // Add the node's address and its calculated distance to the list
+            distances.add(new NodeDistance(entry.getValue(), distance));
+        }
+
+        // Sort the list of nodes by their distance to the target hashID in ascending order
+        distances.sort(Comparator.comparingInt(NodeDistance::getDistance));
+
+        // Select and return the addresses of the top three closest nodes
+        return distances.stream()
+                .limit(3)
+                .map(NodeDistance::getValue) // Extract the node's address
+                .collect(Collectors.toList());
+    }
+
+
+    /*private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
         // This list will hold nodes and their distances to the target hashID
         List<NodeDistance> distances = new ArrayList<>();
 
-        // Calculate the distance between each node's hashID and the target hashID
-        for (Map.Entry<String, String> entry : keyValueStore.entrySet()) {
-            String nodeName = entry.getKey();
-            // Assuming a method to get the node's hashID in hex format
-            String nodeHashIDHex;
-            try {
-                byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Ensure node names end with a newline character for consistency
-                nodeHashIDHex = bytesToHex(nodeHashID); // Convert the byte array to hex string
-            } catch (Exception e) {
-                e.printStackTrace();
-                continue; // Skip this node on error
-            }
-
-            int distance = calculateDistance(nodeHashIDHex, targetHashIDHex);
-            distances.add(new NodeDistance(entry.getValue(), distance)); // entry.getValue() is assumed to be the node address
+        // Iterate through the networkMap to calculate distances based on node names
+        for (Map.Entry<String, String> entry : networkMap.entrySet()) {
+            String nodeName = entry.getKey(); // Node name is the key in 'networkMap'
+            byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute hashID for the node name
+            int distance = HashID.calDistance(targetHashIDHex, nodeHashID); // Calculate distance
+            distances.add(new NodeDistance(entry.getValue(), distance)); // Add node address and distance
         }
 
         // Sort by distance
         distances.sort(Comparator.comparingInt(NodeDistance::getDistance));
 
         // Select the top three closest nodes
-        return distances.stream().limit(3)
-                .map(NodeDistance::getAddress)
+        return distances.stream()
+                .limit(3)
+                .map(NodeDistance::getValue) // 'getValue' returns the node's address
                 .collect(Collectors.toList());
-    }
-    private int calculateDistance(String hashID1, String hashID2) {
-        // Convert hashIDs from hex to byte arrays
-        byte[] hash1 = hexStringToByteArray(hashID1);
-        byte[] hash2 = hexStringToByteArray(hashID2);
+/*
+//        // This list will hold nodes and their distances to the target hashID
+//        List<NodeDistance> distances = new ArrayList<>();
+//
+//        // Calculate the distance between each node's hashID and the target hashID
+//
+//        // Getting the enumeration of keys
+//        Enumeration<String> keys = directory.keys();
+//
+//        // Iterating through the enumeration of keys
+//        while (keys.hasMoreElements()) {
+//            // Accessing each key
+//            String key = keys.nextElement();
+//            byte[] nodeHashID = HashID.computeHashID(key + "\n");
+//            int distance = HashID.calDistance(targetHashIDHex,nodeHashID);
+//            distances.add(new NodeDistance(directory.get(key), distance));
+//        }
+//
+////         When the responder gets a PUT request it must compute the hashID
+////   for the value to be stored.  Then it must check the network
+////   directory for the three closest nodes to the key's hashID.  If the
+////   responder is one of the three nodes that are closest then
+////   it MUST store the (key, value) pair and MUST respond with a single
+////   line:
+//
+//
+////        for (Map.Entry<String,String> entry : directory.keySet()) {
+////            String nodeName = entry.getKey();
+////            byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
+////            int distance = HashID.calDistance(targetHashIDHex,nodeHashID);
+////            distances.add(new NodeDistance(entry.getValue(), distance)); // entry.getValue() is assumed to be the node address
+////       }
+//
+//        // Sort by distance
+//        distances.sort(Comparator.comparingInt(NodeDistance::getDistance));
+//        System.out.println(distances);
+//        // Select the top three closest nodes
+//        return distances.stream().limit(3)
+//                .map(NodeDistance::getValue)
+//
+            .collect(Collectors.toList());
 
-        // Call your existing HashID.calculateDistance method
-        return HashID.calculateDistance(hash1, hash2);
     }
+     */
     public static String bytesToHex(byte[] hash) {
         StringBuilder hexString = new StringBuilder(2 * hash.length);
         for (byte b : hash) {
