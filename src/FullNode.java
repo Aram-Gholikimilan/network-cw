@@ -13,10 +13,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.spec.ECField;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -86,20 +83,23 @@ public class FullNode implements FullNodeInterface {
             //Socket clientSocket = serverSocket.accept();
             //System.out.println("Client connected!");
             // handleClient(clientSocket);
-            while (true) {
-                //System.out.println("Waiting for a client...!");
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("New client connected!");
-                // Handle each connection in a separate thread
-                isConnected = true;
+            //System.out.println("Waiting for a client...!");
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("New client connected!");
+
+            // Handle each connection in a separate thread
+            isConnected = true;
+
+
+            while (isConnected) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
 
                 String message = in.readLine();
                 System.out.println(message);
                 handleClient(message, in, out);
-                //new Thread(() -> handleClient(in,out)).start();
-                //System.out.println("The client is handled");
+                //new Thread(() -> handleClient(message,in,out)).start();
+                System.out.println("The client is handled: " + message);
                 //clientSocket.close();
             }
         } catch (Exception e){
@@ -134,10 +134,11 @@ public class FullNode implements FullNodeInterface {
                 } else if (line.startsWith("ECHO?")) {
                     //  This message allows the requester to tell whether the connection is
                     //  still active and the responder is still working correctly.
-                    out.write("OHCE");
+                    out.write("OHCE\n");
                     out.flush();
                 } else if (line.startsWith("END")) {
-                    serverSocket.close();
+                    isConnected = false;
+                    //serverSocket.close();
                     break; // Exit the loop and close the connection
                 }
                 line=null;
@@ -240,18 +241,27 @@ public class FullNode implements FullNodeInterface {
                 keyBuilder.append(in.readLine()).append("\n");
             }
 
+
             String key = keyBuilder.toString();
 
             //The responder MUST compute the hashID of the key.
             // Here, implement logic to retrieve the value associated with the key
             // For simplicity, assume we have a method getValue(key) to get the value
-            String value = getValue(key); // Placeholder method
+            String value1 = getValue(key); // Placeholder method
+
             System.out.println("key: \n" + key);
-            System.out.println("value: \n" + value);
-            if (value != null) {
-                int valueLines = value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
-                out.write("VALUE " + valueLines +"\n");
-                out.write(value+"\n");
+            System.out.println("value: \n" + value1);
+            if (value1 != null) {
+                String[] parts = value1.split("\n");
+                StringBuilder v = new StringBuilder();
+                for (String s : parts){
+                    v.append(s);
+                }
+                String value = v.toString();
+                int valueLines = parts.length; //value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
+                out.write("VALUE " + valueLines+"\n");
+                //out.flush();
+                //out.write(value +"\n");
                 out.flush();
             } else {
                 out.write("NOPE\n");
@@ -287,22 +297,23 @@ public class FullNode implements FullNodeInterface {
     private void handleNearestRequest(String line, BufferedReader in, Writer out) {
         // Extract and process the NEAREST? request according to the 2D#4 protocol
         try {
-            System.out.println(line);
+            //System.out.println(line);
             String hashID = line.split(" ")[1];
 
 
-            System.out.println(hashID);
+            //System.out.println(hashID);
 
             // Here, find the three closest nodes to the given hashID
             // For simplicity, assume we have a method findClosestNodes(hashID) that returns a list of node info
             List<String> closestNodes = findClosestNodes(hashID); // Placeholder method
 
             out.write("NODES " + closestNodes.size() +"\n");
-            for (String nodeInfo : closestNodes) {
-                out.write(nodeInfo); // Node name
-                out.flush();
+            out.flush();
+            //for (String nodeInfo : closestNodes) {
+              //  out.write(nodeInfo); // Node name
+                //out.flush();
                 //out.println(nodeAddress); // Node address, assume nodeInfo contains this info
-            }
+            //}
         } catch (Exception e) {
             System.err.println("Error processing NEAREST? request: " + e.getMessage());
             // Handle error case

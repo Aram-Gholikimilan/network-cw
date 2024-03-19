@@ -162,6 +162,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             String response = reader.readLine();
             System.out.println("The server said : " + response);
+            //String response2 = reader.readLine();
+            //System.out.println("The server said2 : " + response2);
 
             if (response != null && response.startsWith("VALUE"))
             {
@@ -434,12 +436,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
         tNode.store("Welcome",
                     "Hello\n" +
                     "World!");
+
         System.out.println("\n===================\n");
         System.out.println("Get: ");
         tNode.get("Welcome");
+
         System.out.println("\n===================\n");
         System.out.println("Echo: ");
         tNode.echo();
+
         System.out.println("\n===================\n");
         System.out.println("Notify: ");
         tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:2244");
@@ -447,5 +452,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Nearest: ");
         tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
+
+        System.out.println("\n===================\n");
+        System.out.println("End: ");
+        tNode.end("no requests!");
+
+
     }
 }
