@@ -112,6 +112,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.write("PUT? " + keyLines + " " + valueLines + "\n"); //  + "\n" + key + "\n" + value
             writer.write(key);
             writer.write(value+"\n");
+            System.out.println(writer);
             System.out.println("the value in temp: \n"+value);
             writer.flush();
 
@@ -156,8 +157,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
-            writer.write("GET? " + keyLines + "\n");
-            writer.write(key+"\n");
+            writer.write("GET? " + keyLines + "\n"+key+"\n");
             writer.flush();
 
             String response = reader.readLine();
@@ -429,7 +429,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
         System.out.println("\n===================\n");
         System.out.println("Start: ");
-        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","10.0.0.164:20000");
+        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
 
         System.out.println("\n===================\n");
         System.out.println("Store: ");
