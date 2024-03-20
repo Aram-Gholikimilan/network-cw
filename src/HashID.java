@@ -75,7 +75,7 @@ public class HashID {
 		byte[] hash2 = hexStringToByteArray(hexHash2);
 
 		// Calculate and print the distance between the two hash IDs
-		int distance = calDistance(hash1, hash2);
+		int distance = calDistance2(hash1, hash2);
 		System.out.println("Distance: " + distance);
 
 		/*

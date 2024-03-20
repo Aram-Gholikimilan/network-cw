@@ -429,15 +429,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
         System.out.println("\n===================\n");
         System.out.println("Start: ");
-        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
-
+        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","10.0.0.164:20000");
+/*
         System.out.println("\n===================\n");
         System.out.println("Store: ");
         tNode.store("Welcome",
                     "Hello\n" +
                     "World!");
 
-        /*
+
         System.out.println("\n===================\n");
         System.out.println("Get: ");
         tNode.get("Welcome");
@@ -454,11 +454,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Nearest: ");
         tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
 
-*/
+
         System.out.println("\n===================\n");
         System.out.println("End: ");
         tNode.end("no requests!");
-
+*/
 
     }
 }
