@@ -430,7 +430,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Start: ");
         tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","10.0.0.164:20000");
-/*
+
         System.out.println("\n===================\n");
         System.out.println("Store: ");
         tNode.store("Welcome",
@@ -458,7 +458,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("End: ");
         tNode.end("no requests!");
-*/
 
     }
 }
