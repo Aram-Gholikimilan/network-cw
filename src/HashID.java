@@ -30,19 +30,23 @@ public class HashID {
 
 		byte b1 = 0;
 		byte b2 = 0;
-		int counter = 0;
-		for(int i=0; i< hash1.length;i++){
+		int counter = 256;
+		for(int i=0; i< hash1.length-1;i++){
 			if(hash1[i] != hash2[i]){
 				b1 = hash1[i];
 				b2 = hash2[i];
-				break;
+				int result = ((b1 ^ b2)&0xff);
+				int numberDiff = 32 - numberOfLeadingZeros(result);
+				System.out.println(result);
+				System.out.println(numberDiff);
+				System.out.println(counter);
+				return counter - numberDiff;
 			} else {
-				counter++;
+				counter-=8;
 			}
 		}
-		byte result = (byte) ((b1 ^ b2));
-		int numberDiff = numberOfLeadingZeros(result);
-		return 256 - ((counter * 8) -24 + numberDiff);
+		return 0;
+
 	}
 
 	public static int calDistance2(byte[] hash1, byte[] hash2) {

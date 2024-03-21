@@ -408,16 +408,21 @@ public class FullNode implements FullNodeInterface {
     private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
         // List to hold nodes and their distances to the target hashID
         List<NodeDistance> distances = new ArrayList<>();
-
+        byte[] name = HashID.computeHashID(startingNodeName+"\n");
+        byte[] name2 = HashID.computeHashID(startingNodeName+"\n");
         // Iterate over each node in the networkMap
         for (Map.Entry<String, String> entry : networkMap.entrySet()) {
             String nodeName = entry.getKey(); // Extract the node's name
             byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
-            int distance = HashID.calDistance2(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
-
+            System.out.println("b: "+nodeName+"hashID: " + Arrays.toString(nodeHashID));
+            int distance = HashID.calDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
+            int distance2 = HashID.calDistance(name, nodeHashID);
+            System.out.println("D2: "+distance2);
             // Add the node's address and its calculated distance to the list
             distances.add(new NodeDistance(entry.getValue(), distance));
         }
+        int dist = HashID.calDistance(name,name2);
+        System.out.println("dist: " + dist);
 
         // Sort the list of nodes by their distance to the target hashID in ascending order
         distances.sort(Comparator.comparingInt(NodeDistance::getDistance));
@@ -533,7 +538,7 @@ public class FullNode implements FullNodeInterface {
     public static void main(String[] args) throws IOException {
         FullNode fNode = new FullNode();
         if (fNode.listen("127.0.0.1", 3456)) {
-            fNode.networkMap.put("aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-20","127.0.0.1:3457");
+            fNode.networkMap.put("aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0","127.0.0.1:3457");
             fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-21","127.0.0.1:3456");
             fNode.networkMap.put("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-22","127.0.0.1:3457");
             fNode.networkMap.put("metin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");

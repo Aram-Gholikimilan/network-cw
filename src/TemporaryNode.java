@@ -441,14 +441,14 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Get: ");
         tNode.get("Welcome");
-
+/*
         System.out.println("\n===================\n");
         System.out.println("Echo: ");
         tNode.echo();
 
         System.out.println("\n===================\n");
         System.out.println("Notify: ");
-        tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:2244");
+        tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:3456");
 
         System.out.println("\n===================\n");
         System.out.println("Nearest: ");
@@ -459,5 +459,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("End: ");
         tNode.end("no requests!");
 
+
+ */
     }
 }
