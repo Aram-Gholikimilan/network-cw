@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class FullNode implements FullNodeInterface {
     private boolean isConnected;
     public ServerSocket serverSocket;
     private final HashMap<String, String> networkMap = new HashMap<>();
-    private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    //private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private Hashtable<String, String> directory = new Hashtable<>();
     private ConcurrentHashMap<String, String> keyValueStore = new ConcurrentHashMap<>();
     private String startingNodeName;
@@ -410,36 +411,61 @@ public class FullNode implements FullNodeInterface {
     }
     private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
         // List to hold nodes and their distances to the target hashID
-        List<NodeDistance> distances = new ArrayList<>();
+        //List<String> distances = new ArrayList<>();
+        HashMap<String,Integer> nodeNameDist = new HashMap<>();
+
         //byte[] name = HashID.computeHashID(startingNodeName+"\n");
         //byte[] name2 = HashID.computeHashID(startingNodeName+"\n");
         // Iterate over each node in the networkMap
         for (Map.Entry<String, String> entry : networkMap.entrySet()) {
             String nodeName = entry.getKey(); // Extract the node's name
+           // String nodeAddress = entry.getValue();
             byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
             System.out.println("b: "+nodeName+"hashID: " + Arrays.toString(nodeHashID));
             int distance = HashID.calculateDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
             //int distance2 = HashID.calDistance(name, nodeHashID);
             System.out.println("D: "+distance);
             // Add the node's address and its calculated distance to the list
-            distances.add(new NodeDistance(nodeName, distance));
+            //distances.add(new NodeDistance(nodeName, distance));
+            //distances.add(Map.ofEntries(entry));
+            nodeNameDist.put(nodeName,distance);
+            //distances.add(nodeNameDist);
+
         }
        // int dist = HashID.calDistance(name,name2);
        // System.out.println("dist: " + dist);
-
-        // Sort the list of nodes by their distance to the target hashID in ascending order
-        distances.sort(Comparator.comparingInt(NodeDistance::getDistance));
-
-        for (NodeDistance n : distances) {
-            System.out.println(n.getName()+": "+n.getDistance());
-        }
-        // Select and return the addresses of the top three closest nodes
-        return distances.stream()
-                .limit(3)
-                .map(NodeDistance::getName) // Extract the node's name
+/*
+        List<String> distances = nodeNameDist.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .toList();
+*/
+        List<String> distances = nodeNameDist.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .limit(3) // Limit to top 3
                 .collect(Collectors.toList());
+
+        // Select and return the addresses of the top three closest nodes
+        return distances;
     }
 
+    private List<String> closestNodes(){
+        HashMap<String, Integer> nodeNameDist = new HashMap<>();
+
+        // Example data
+        nodeNameDist.put("NodeA", 10);
+        nodeNameDist.put("NodeB", 5);
+        nodeNameDist.put("NodeC", 7);
+
+        List<String> distances = nodeNameDist.entrySet().stream()
+                .sorted((entry1, entry2) -> entry1.getValue().compareTo(entry2.getValue()))
+                .map(entry -> entry.getKey())
+                .collect(Collectors.toList());
+
+        System.out.println(distances); // This will print the keys sorted by their values in ascending order
+        return null;
+    }
 
     /*private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
         // This list will hold nodes and their distances to the target hashID
