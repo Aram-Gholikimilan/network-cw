@@ -112,7 +112,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.write("PUT? " + keyLines + " " + valueLines + "\n"); //  + "\n" + key + "\n" + value
             writer.write(key);
             writer.write(value+"\n");
-            System.out.println(writer);
             System.out.println("the value in temp: \n"+value);
             writer.flush();
 

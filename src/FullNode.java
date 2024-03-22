@@ -9,10 +9,10 @@
 
 import java.io.*;
 import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.security.spec.ECField;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -39,7 +39,9 @@ interface FullNodeInterface {
 public class FullNode implements FullNodeInterface {
     private boolean isConnected;
     public ServerSocket serverSocket;
-    private final HashMap<String, String> networkMap = new HashMap<>();
+    private ArrayList<String> nodeList = new ArrayList<>();
+    private HashMap<Integer, ArrayList<NodeInfo>> networkMap2 = new HashMap<>();
+
     //private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private Hashtable<String, String> directory = new Hashtable<>();
     private ConcurrentHashMap<String, String> keyValueStore = new ConcurrentHashMap<>();
@@ -47,6 +49,7 @@ public class FullNode implements FullNodeInterface {
     private String startingNodeAddress;
     private String startingNodeHost; // Store the starting node host for potential later use
     private int startingNodePort; // Store the starting node port for potential later use
+    private byte[] nodeHashID;
 
     public boolean listen(String ipAddress, int portNumber) {
 	// Implement this!
@@ -57,6 +60,7 @@ public class FullNode implements FullNodeInterface {
             System.out.println("Opening the server socket on port " + portNumber);
             serverSocket = new ServerSocket(portNumber);
             System.out.println("Server waiting for a client...");
+
 
             //Socket clientSocket = serverSocket.accept();
             //System.out.println("Client connected!");
@@ -75,7 +79,7 @@ public class FullNode implements FullNodeInterface {
 
         this.startingNodeName=startingNodeName;
         this.startingNodeAddress=startingNodeAddress;
-        networkMap.put(startingNodeName,startingNodeAddress);
+        //networkMap2.put(startingNodeName,startingNodeAddress);
         try{
             String[] parts = startingNodeAddress.split(":");
             if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
@@ -89,6 +93,7 @@ public class FullNode implements FullNodeInterface {
             //System.out.println("Waiting for a client...!");
             Socket clientSocket = serverSocket.accept();
             System.out.println("New client connected!");
+
 
 
             // Handle each connection in a separate thread
@@ -148,7 +153,7 @@ public class FullNode implements FullNodeInterface {
                 line=null;
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error handling client. Error: " + e.getMessage());
         }
     }
@@ -176,16 +181,23 @@ public class FullNode implements FullNodeInterface {
     }
     // Placeholder for request handling methods
 
-    private void handleStartCommand(String line, Writer out) throws IOException {
+    private void handleStartCommand(String line, Writer out) throws Exception {
         // Split the line by spaces to extract the parts
         String[] parts = line.split(" ");
         if (parts.length >= 3) {
             // Assuming the START command format is: START <number> <string>
             String protocolVersion = parts[1];
-            String nodeName = parts[2]; // This could potentially include more parts if the name contains spaces
-            String[] nodeNamePart = nodeName.split(":");
+            String newNodeName = parts[2]; // This could potentially include more parts if the name contains spaces
+            String[] nodeNamePart = newNodeName.split(":");
             String nodeAddress = nodeNamePart[1];
-            networkMap.put(nodeName,nodeAddress);
+
+            byte[] newNodeHashID = HashID.computeHashID(newNodeName);
+            nodeHashID = HashID.computeHashID(this.startingNodeName);
+            int distance = HashID.calculateDistance(nodeHashID,newNodeHashID);
+            String newNodeTime = getCurrentTime();
+            NodeInfo newNodeInfo = new NodeInfo(newNodeName,newNodeTime);
+            updateNetworkMap(distance,newNodeInfo);
+
             out.write("START " + protocolVersion + " " + startingNodeName +"\n");
             out.flush();
         } else {
@@ -194,7 +206,13 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
-   /* private void handlePutRequest(String line, BufferedReader in, Writer out) throws IOException {
+    public static String getCurrentTime() {
+        LocalTime time = LocalTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return time.format(formatter);
+    }
+
+    /* private void handlePutRequest(String line, BufferedReader in, Writer out) throws IOException {
 
         // Extract and process the PUT? request according to the 2D#4 protocol
         try {
@@ -281,7 +299,7 @@ public class FullNode implements FullNodeInterface {
             List<String> closestNodesAddresses = findClosestNodes(keyHashID);
 
             // Check if the current node is among the three closest
-            boolean isCurrentNodeClosest = closestNodesAddresses.contains(this);      // isCurrentNodeClosest(closestNodesAddresses);
+            boolean isCurrentNodeClosest = closestNodesAddresses.contains(this.startingNodeName);      // isCurrentNodeClosest(closestNodesAddresses);
 
             if (isCurrentNodeClosest) {
                 // Store the (key, value) pair if the current node is among the three closest
@@ -405,9 +423,19 @@ public class FullNode implements FullNodeInterface {
         // Directly return the value from the store; if key is not present, this returns null
         return keyValueStore.get(key);
     }
-    private void updateNetworkMap(String nodeName, String nodeAddress) {
-        // Simply put the nodeName and nodeAddress into the map. This updates existing entries or adds new ones.
-        networkMap.put(nodeName, nodeAddress);
+    private void updateNetworkMap(int distance, NodeInfo nodeInfo) throws UnknownHostException {
+        if (!networkMap2.containsKey(distance)) {
+            ArrayList<NodeInfo> threeNodesList = new ArrayList<>();
+            threeNodesList.add(nodeInfo);
+            networkMap2.put(distance, threeNodesList);
+        } else if (networkMap2.get(distance).isEmpty()) {
+            if(!networkMap2.get(distance).contains(nodeInfo)){
+                networkMap2.get(distance).add(nodeInfo);
+            }
+        } else {
+            
+            // remove the longest nodeName
+        }
     }
     private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
         // List to hold nodes and their distances to the target hashID
@@ -417,20 +445,25 @@ public class FullNode implements FullNodeInterface {
         //byte[] name = HashID.computeHashID(startingNodeName+"\n");
         //byte[] name2 = HashID.computeHashID(startingNodeName+"\n");
         // Iterate over each node in the networkMap
-        for (Map.Entry<String, String> entry : networkMap.entrySet()) {
-            String nodeName = entry.getKey(); // Extract the node's name
+        for (Map.Entry<Integer, ArrayList<NodeInfo>> entry : networkMap2.entrySet()) {
+            //String nodeName = entry.getKey(); // Extract the node's name
            // String nodeAddress = entry.getValue();
-            byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
-            System.out.println("b: "+nodeName+"hashID: " + Arrays.toString(nodeHashID));
-            int distance = HashID.calculateDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
-            //int distance2 = HashID.calDistance(name, nodeHashID);
-            System.out.println("D: "+distance);
-            // Add the node's address and its calculated distance to the list
-            //distances.add(new NodeDistance(nodeName, distance));
-            //distances.add(Map.ofEntries(entry));
-            nodeNameDist.put(nodeName,distance);
-            //distances.add(nodeNameDist);
-
+            ArrayList<NodeInfo> nodeList = entry.getValue();
+            // Iterate over each NodeInfo in the list
+            for (NodeInfo node : nodeList) {
+                // Add the node's name to the list of names
+                String nodeName = node.getNodeName(); // Extract the node's name
+                byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
+                System.out.println("b: " + nodeName + "hashID: " + Arrays.toString(nodeHashID));
+                int distance = HashID.calculateDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
+                //int distance2 = HashID.calDistance(name, nodeHashID);
+                System.out.println("D: " + distance);
+                // Add the node's address and its calculated distance to the list
+                //distances.add(new NodeDistance(nodeName, distance));
+                //distances.add(Map.ofEntries(entry));
+                nodeNameDist.put(nodeName, distance);
+                //distances.add(nodeNameDist);
+            }
         }
        // int dist = HashID.calDistance(name,name2);
        // System.out.println("dist: " + dist);
@@ -567,13 +600,32 @@ public class FullNode implements FullNodeInterface {
     }
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         FullNode fNode = new FullNode();
         if (fNode.listen("127.0.0.1", 3456)) {
-            fNode.networkMap.put("aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0","127.0.0.1:3457");
+
+            /*fNode.nodeList.add();
+            String newNodeTime = getCurrentTime();
+            NodeInfo newNodeInfo = new NodeInfo("aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0",newNodeTime);
+            byte[] newNodeHashID = HashID.computeHashID(newNodeInfo.getNodeName());
+            byte[] nodeHashID = HashID.computeHashID(fNode.startingNodeName);
+            int distance = HashID.calculateDistance(nodeHashID,newNodeHashID);
+            fNode.updateNetworkMap(distance,newNodeInfo);
+
             fNode.networkMap.put("martin@city.ac.uk:MyCoolImplementation,1.41,test-node-21","127.0.0.1:3456");
             fNode.networkMap.put("betul.wejbdwhb@city.ac.uk:MyCoolImplementation,1.41,test-node-22","127.0.0.1:3457");
             fNode.networkMap.put("metin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
+
+
+            byte[] newNodeHashID = HashID.computeHashID(newNodeName);
+            nodeHashID = HashID.computeHashID(this.startingNodeName);
+            int distance = HashID.calculateDistance(nodeHashID,newNodeHashID);
+            String newNodeTime = getCurrentTime();
+            NodeInfo newNodeInfo = new NodeInfo(newNodeName,newNodeTime);
+            updateNetworkMap(distance,newNodeInfo);
+             */
+
+
             fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:3456");
             System.out.println("DONE!");
         }
