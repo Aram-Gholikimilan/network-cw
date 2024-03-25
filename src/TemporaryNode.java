@@ -53,15 +53,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 startingNodeHost = InetAddress.getByName(IPAddressString);
                 startingNodePort = Integer.parseInt(parts[1]);
 
-                System.out.println("TCPClient connecting to " + startingNodeAddress);
+                //System.out.println("TCPClient connecting to " + startingNodeAddress);
                 //System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
                 clientSocket = new Socket(startingNodeHost, startingNodePort);
                 reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
                 // Sending a message to the server at the other end of the socket
-                System.out.println("Sending a message to the server");
-                System.out.println(startingNodeName);
+//                System.out.println("Sending a message to the server");
+//                System.out.println(startingNodeName);
                 writer.write("START 1 " + startingNodeName +"\n");
                 writer.flush();
 
@@ -156,7 +156,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             //String threeClosestNodes = nearest(key);
             // Sending a message to the server at the other end of the socket
-            System.out.println("Sending a message to the server");
+            //System.out.println("Sending a message to the server");
             writer.write("GET? " + keyLines + "\n"+key+"\n");
             writer.flush();
 
@@ -172,13 +172,13 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             String valueResponse = valueBuilder.toString();
 
-            System.out.println("The server said : \n" + valueResponse);
+            System.out.println("The sdjcbshkhgsraubserver said : \n" + valueResponse);
             //String response2 = reader.readLine();
             //System.out.println("The server said2 : " + response2);
 
             if (response != null && response.startsWith("VALUE"))
             {
-                return response;
+                return valueResponse;
 
             }
 
