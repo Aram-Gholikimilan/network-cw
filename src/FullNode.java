@@ -95,7 +95,7 @@ public class FullNode implements FullNodeInterface {
             System.out.println("New client connected!");
 
             nodeTime = getCurrentTime();
-            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName,nodeTime);
+            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName,startingNodeAddress,nodeTime);
             nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
            // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
             byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
@@ -202,11 +202,11 @@ public class FullNode implements FullNodeInterface {
             // i think we do not have to add those,
             // so i need an if statement to check if it is FullNode then update the network map,
             // otherwise do not add it.
-            byte[] newNodeHashID = HashID.computeHashID(newNodeName+"\n");
-            int distance = HashID.calculateDistance(nodeHashID, newNodeHashID);
-            String newNodeTime = getCurrentTime();
-            NodeInfo newNodeInfo = new NodeInfo(newNodeName, newNodeTime);
-            updateNetworkMap(distance, newNodeInfo);
+//            byte[] newNodeHashID = HashID.computeHashID(newNodeName+"\n");
+//            int distance = HashID.calculateDistance(nodeHashID, newNodeHashID);
+//            String newNodeTime = getCurrentTime();
+//            NodeInfo newNodeInfo = new NodeInfo(newNodeName,nodeAddress, newNodeTime);
+//            updateNetworkMap(distance, newNodeInfo);
 
             out.write("START " + protocolVersion + " " + startingNodeName + "\n");
             out.flush();
@@ -221,67 +221,6 @@ public class FullNode implements FullNodeInterface {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         return time.format(formatter);
     }
-
-    /* private void handlePutRequest(String line, BufferedReader in, Writer out) throws IOException {
-
-        // Extract and process the PUT? request according to the 2D#4 protocol
-        try {
-            //   PUT? 1 2
-            //   Welcome
-            //   Hello
-            //   World!
-            String[] parts = line.split(" ", 3);
-            int keyLinesCount = Integer.parseInt(parts[1]);
-            int valueLinesCount = Integer.parseInt(parts[2]);
-
-            StringBuilder keyBuilder = new StringBuilder();
-            for (int i = 0; i < keyLinesCount; i++) {
-                keyBuilder.append(in.readLine()).append("\n");
-            }
-
-            StringBuilder valueBuilder = new StringBuilder();
-            for (int i = 0; i < valueLinesCount; i++) {
-                valueBuilder.append(in.readLine()).append("\n");
-            }
-
-            String key = keyBuilder.toString();
-            String value = valueBuilder.toString();
-
-            System.out.println("key: \n" + key);
-            System.out.println("value: \n" + value);
-
-            //When the responder gets a PUT request it must compute the hashID
-            //   for the value to be stored.  Then it must check the network
-            //   directory for the three closest nodes to the key's hashID.  If the
-            //   responder is one of the three nodes that are closest then
-            //   it MUST store the (key, value) pair and MUST respond with a single
-            //   line:
-            //   SUCCESS
-            byte[] keyHashID = HashID.computeHashID(key);
-            List<String> closestNodes  = findClosestNodes(keyHashID);
-            byte[] currentNodeHashID = HashID.computeHashID(this.startingNodeName);
-//            if(threeClosestNodes.contains()){
-//                out.write("FAILED\n");
-//                out.flush();
-//            }
-
-            boolean isCurrentNodeClosest = closestNodes.stream()
-                    .anyMatch(nodeDistance -> Arrays.equals(nodeDistance.getNodeHashID(), currentNodeHashID));
-
-            if (isCurrentNodeClosest) {
-                // Current node is one of the three closest nodes
-                directory.put(key, value); // Store the key-value pair
-                out.write("SUCCESS\n");
-            } else {
-                // There are three other nodes closer to the key's hashID
-                out.write("FAILED\n");
-            }
-        } catch (Exception e) {
-            System.err.println("Error processing PUT? request: " + e.getMessage());
-            out.write("FAILED\n");
-            out.flush();
-        }
-    }*/
 
     private void handlePutRequest(String line, BufferedReader in, Writer out) throws IOException {
         try {
@@ -354,7 +293,8 @@ public class FullNode implements FullNodeInterface {
             //The responder MUST compute the hashID of the key.
             // Here, implement logic to retrieve the value associated with the key
             // For simplicity, assume we have a method getValue(key) to get the value
-            String value1 = getValue(key); // Placeholder method
+
+            String value1 =  directory.get(key); //getValue(key); // Placeholder method
 
             System.out.println("key: \n" + key);
             System.out.println("value: \n" + value1);
@@ -364,9 +304,15 @@ public class FullNode implements FullNodeInterface {
                 for (String s : parts) {
                     v.append(s);
                 }
-                String value = v.toString();
-                int valueLines = parts.length; //value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
-                out.write("VALUE " + valueLines + "\n");
+                //String value = v.toString();
+//            if (value1 == null){
+//                out.write("NOPE\n");
+//                out.flush();
+//            }
+                System.out.println("value in FullNode : \n"+value1);
+            assert value1 != null;
+            int valueLines = value1.split("\n").length;  // parts.length; //value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
+                out.write("VALUE " + valueLines + "\n" + value1 + "\n");
                 //out.flush();
                 //out.write(value +"\n");
                 out.flush();
@@ -412,9 +358,13 @@ public class FullNode implements FullNodeInterface {
 
             // Here, find the three closest nodes to the given hashID
             // For simplicity, assume we have a method findClosestNodes(hashID) that returns a list of node info
-            List<String> closestNodes = findClosestNodes(hashID); // Placeholder method
-
+            List<NodeInfo> closestNodes = findClosestNodesNearest(hashID); // Placeholder method
             out.write("NODES " + closestNodes.size() + "\n");
+            for(NodeInfo n : closestNodes){
+                out.write(n.getNodeName()+"\n");
+                out.write(n.getNodeAddress()+"\n");
+            }
+
             out.flush();
             //for (String nodeInfo : closestNodes) {
             //  out.write(nodeInfo); // Node name
@@ -473,43 +423,23 @@ public class FullNode implements FullNodeInterface {
 
     private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
         // List to hold nodes and their distances to the target hashID
-        //List<String> distances = new ArrayList<>();
         HashMap<String, Integer> nodeNameDist = new HashMap<>();
-
-        /*
-        int distance = HashID.calculateDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
-        for (NodeInfo nodeInfo : networkMap2.get(distance)) {
-            nodeNameDist.put(nodeInfo.getNodeName(), distance);
-        }
-
-         */
 
         // Iterate over each node in the networkMap
         for (Map.Entry<Integer, ArrayList<NodeInfo>> entry : networkMap2.entrySet()) {
-            //String nodeName = entry.getKey(); // Extract the node's name
-           // String nodeAddress = entry.getValue();
             ArrayList<NodeInfo> nodeList = entry.getValue();
             // Iterate over each NodeInfo in the list
             for (NodeInfo node : nodeList) {
                 // Add the node's name to the list of names
                 String nodeName = node.getNodeName(); // Extract the node's name
                 byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
-                System.out.println("b: " + nodeName + "\nhashID: " + Arrays.toString(nodeHashID));
                 int distance = HashID.calculateDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
-                //int distance2 = HashID.calDistance(name, nodeHashID);
-                System.out.println("D: " + distance);
                 // Add the node's address and its calculated distance to the list
                 nodeNameDist.put(nodeName, distance);
             }
 
          }
 
-/*
-        List<String> distances = nodeNameDist.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .toList();
-*/
         List<String> distances = nodeNameDist.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
@@ -518,6 +448,34 @@ public class FullNode implements FullNodeInterface {
 
         // Select and return the addresses of the top three closest nodes
         return distances;
+    }
+
+    private List<NodeInfo> findClosestNodesNearest(byte[] targetHashIDHex) throws Exception {
+        // Map to hold nodes and their distances to the target hashID
+        HashMap<NodeInfo, Integer> nodeDistanceMap = new HashMap<>();
+
+        // Iterate over each node in the networkMap
+        for (Map.Entry<Integer, ArrayList<NodeInfo>> entry : networkMap2.entrySet()) {
+            ArrayList<NodeInfo> nodeList = entry.getValue();
+            // Iterate over each NodeInfo in the list
+            for (NodeInfo node : nodeList) {
+                String nodeName = node.getNodeName(); // Extract the node's name
+                byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
+                int distance = HashID.calculateDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
+                // Add the node and its calculated distance to the map
+                nodeDistanceMap.put(node, distance);
+            }
+        }
+
+        // Select and return the NodeInfo objects of the top three closest nodes
+        return nodeDistanceMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .limit(3) // Limit to top 3
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        // Select and return the addresses of the top three closest nodes
+        //return distances;
     }
 
     private List<String> closestNodes(){
@@ -643,28 +601,28 @@ public class FullNode implements FullNodeInterface {
 
             String startingnodename ="martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n";
             String newNodeTime = getCurrentTime();
-            NodeInfo newNodeInfo = new NodeInfo("3aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0\n",newNodeTime);
+            NodeInfo newNodeInfo = new NodeInfo("aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0\n","127.0.0.1:3456",newNodeTime);
             byte[] newNodeHashID = HashID.computeHashID(newNodeInfo.getNodeName());
             byte[] nodeHashID = HashID.computeHashID(startingnodename);
             int distance = HashID.calculateDistance(nodeHashID,newNodeHashID);
             fNode.updateNetworkMap(distance,newNodeInfo);
 
             String newNodeTime1 = getCurrentTime();
-            NodeInfo newNodeInfo1 = new NodeInfo("6martin@city.ac.uk:MyCoolImplementation,1.41,test-node-21\n",newNodeTime1);
+            NodeInfo newNodeInfo1 = new NodeInfo("6martin@city.ac.uk:MyCoolImplementation,1.41,test-node-21\n","127.0.0.1:3456",newNodeTime1);
             byte[] newNodeHashID1 = HashID.computeHashID(newNodeInfo1.getNodeName());
             byte[] nodeHashID1 = HashID.computeHashID(startingnodename);
             int distance1 = HashID.calculateDistance(nodeHashID1,newNodeHashID1);
             fNode.updateNetworkMap(distance1,newNodeInfo1);
 
             String newNodeTime2 = getCurrentTime();
-            NodeInfo newNodeInfo2 = new NodeInfo("betul.wejbdwhb@city.ac.uk:MyCoolImplementation,1.41,test-node-22\n",newNodeTime2);
+            NodeInfo newNodeInfo2 = new NodeInfo("betul.wejbdwhb@city.ac.uk:MyCoolImplementation,1.41,test-node-22\n","127.0.0.1:3456",newNodeTime2);
             byte[] newNodeHashID2 = HashID.computeHashID(newNodeInfo2.getNodeName());
             byte[] nodeHashID2 = HashID.computeHashID(startingnodename);
             int distance2 = HashID.calculateDistance(nodeHashID2,newNodeHashID2);
             fNode.updateNetworkMap(distance2,newNodeInfo2);
 
             String newNodeTime3 = getCurrentTime();
-            NodeInfo newNodeInfo3 = new NodeInfo("eetin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n",newNodeTime3);
+            NodeInfo newNodeInfo3 = new NodeInfo("eetin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n","127.0.0.1:3456",newNodeTime3);
             byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName());
             byte[] nodeHashID3 = HashID.computeHashID(startingnodename);
             int distance3 = HashID.calculateDistance(nodeHashID3,newNodeHashID3);

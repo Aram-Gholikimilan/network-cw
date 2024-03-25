@@ -29,8 +29,8 @@ public class HashID {
 	public static int calculateDistance(byte[] hash01, byte[] hash02) {
 		String hash1 = bytesToHex(hash01);
 		String hash2 = bytesToHex(hash02);
-		System.out.println("HASH 1: " + hash1);
-		System.out.println("HASH 2: " + hash2);
+//		System.out.println("HASH 1: " + hash1);
+//		System.out.println("HASH 2: " + hash2);
 		int traversed = 0;
 		String binaryString = "";
 
@@ -59,8 +59,8 @@ public class HashID {
 				break;
 			}
 		}
-		System.out.println(finalBinaryString.toCharArray());
-		System.out.println(count);
+		//System.out.println(finalBinaryString.toCharArray());
+		//System.out.println(count);
 		return 256 - (4 * (traversed) + count);
 	}
 

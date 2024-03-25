@@ -149,24 +149,37 @@ public class TemporaryNode implements TemporaryNodeInterface {
             int keyLines = key.split("\n").length;
 
             // you have the host and port from start
-            System.out.println("TCPClient connecting to " + startingNodeAddress);
+            //System.out.println("TCPClient connecting to " + startingNodeAddress);
             //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
             //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
+            //String threeClosestNodes = nearest(key);
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
             writer.write("GET? " + keyLines + "\n"+key+"\n");
             writer.flush();
 
             String response = reader.readLine();
-            System.out.println("The server said : " + response);
+
+            String[] parts = response.split(" ", 2);
+
+            int valueLinesCount = Integer.parseInt(parts[1]);
+            StringBuilder valueBuilder = new StringBuilder();
+            for (int i = 0; i < valueLinesCount; i++) {
+                valueBuilder.append(reader.readLine()).append("\n");
+            }
+
+            String valueResponse = valueBuilder.toString();
+
+            System.out.println("The server said : \n" + valueResponse);
             //String response2 = reader.readLine();
             //System.out.println("The server said2 : " + response2);
 
             if (response != null && response.startsWith("VALUE"))
             {
                 return response;
+
             }
 
         } catch (Exception e){
@@ -449,16 +462,16 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Notify: ");
         tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:3456");
 
-        System.out.println("\n===================\n");
-        System.out.println("Nearest: ");
-        tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
 
 
         System.out.println("\n===================\n");
         System.out.println("End: ");
         tNode.end("no requests!");
 
-
  */
+        System.out.println("\n===================\n");
+        System.out.println("Nearest: ");
+        tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
+
     }
 }
