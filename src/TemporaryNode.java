@@ -295,7 +295,20 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
-            System.out.println("The server said : " + response);
+
+            String[] parts = response.split(" ", 2);
+
+            int valueLinesCount = Integer.parseInt(parts[1]) ;
+            StringBuilder valueBuilder = new StringBuilder();
+            valueBuilder.append(response).append("\n");
+            for (int i = 0; i < valueLinesCount; i++) {
+                valueBuilder.append(reader.readLine()).append("\n");
+                valueBuilder.append(reader.readLine()).append("\n");
+            }
+
+            String valueResponse = valueBuilder.toString();
+
+            System.out.println("The server said : \n" + valueResponse);
 
             if (response != null && response.startsWith("NODES"))
             {
@@ -442,7 +455,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Start: ");
         tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
-
+/*
         System.out.println("\n===================\n");
         System.out.println("Store: ");
         tNode.store("Welcome",
@@ -453,7 +466,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Get: ");
         tNode.get("Welcome");
-/*
+
         System.out.println("\n===================\n");
         System.out.println("Echo: ");
         tNode.echo();
