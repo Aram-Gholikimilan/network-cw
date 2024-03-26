@@ -314,6 +314,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             System.out.println("The server said : \n" + valueResponse);
 
+
             if (response != null && response.startsWith("NODES"))
             {
                 isConnected = true; // Update connection status
@@ -460,7 +461,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Start: ");
         tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
 
-
         System.out.println("\n===================\n");
         System.out.println("Store: ");
         tNode.store("Aram\n","The\nKing!");
@@ -470,12 +470,14 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Get: ");
         tNode.get("Aram\n");
 
-
-
+        System.out.println("\n===================\n");
+        System.out.println("Nearest: ");
+        tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
+/*
         System.out.println("\n===================\n");
         System.out.println("Echo: ");
         tNode.echo();
-/*
+
         System.out.println("\n===================\n");
         System.out.println("Notify: ");
         tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:3456");
@@ -485,11 +487,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("End: ");
         tNode.end("no requests!");
-
-
-        System.out.println("\n===================\n");
-        System.out.println("Nearest: ");
-        tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
 
 
  */

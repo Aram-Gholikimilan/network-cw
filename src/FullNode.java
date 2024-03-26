@@ -347,6 +347,7 @@ public class FullNode implements FullNodeInterface {
     }
 
     // TODO: Extract and process the NEAREST? request according to the 2D#4 protocol
+
     // Sometimes it works sometimes no
     private void handleNearestRequest(String line, BufferedReader in, Writer out) {
         // Extract and process the NEAREST? request according to the 2D#4 protocol
@@ -362,13 +363,13 @@ public class FullNode implements FullNodeInterface {
             List<NodeInfo> closestNodes = findClosestNodesNearest(hashID); // Placeholder method
             out.write("NODES " + closestNodes.size());
             out.flush();
+
             for(NodeInfo n : closestNodes){
-                out.write(n.getNodeName());
+                out.write(n.getNodeName()+"\n");
                 out.write(n.getNodeAddress()+"\n");
-                out.flush();
             }
 
-            //out.flush();
+            out.flush();
             //for (String nodeInfo : closestNodes) {
             //  out.write(nodeInfo); // Node name
             //out.flush();
