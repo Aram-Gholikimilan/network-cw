@@ -360,13 +360,13 @@ public class FullNode implements FullNodeInterface {
             // Here, find the three closest nodes to the given hashID
             // For simplicity, assume we have a method findClosestNodes(hashID) that returns a list of node info
             List<NodeInfo> closestNodes = findClosestNodesNearest(hashID); // Placeholder method
-            out.write("NODES " + closestNodes.size() + "\n");
+            out.write("NODES " + closestNodes.size());
             out.flush();
             for(NodeInfo n : closestNodes){
                 out.write(n.getNodeName());
                 out.write(n.getNodeAddress()+"\n");
+                out.flush();
             }
-            out.flush();
 
             //out.flush();
             //for (String nodeInfo : closestNodes) {
@@ -603,7 +603,7 @@ public class FullNode implements FullNodeInterface {
         if (fNode.listen("127.0.0.1", 3456)) {
 
             String startingnodename ="martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n";
-           /*
+
             String newNodeTime = getCurrentTime();
             NodeInfo newNodeInfo = new NodeInfo("aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0\n","127.0.0.1:3456",newNodeTime);
             byte[] newNodeHashID = HashID.computeHashID(newNodeInfo.getNodeName());
@@ -631,9 +631,6 @@ public class FullNode implements FullNodeInterface {
             byte[] nodeHashID3 = HashID.computeHashID(startingnodename);
             int distance3 = HashID.calculateDistance(nodeHashID3,newNodeHashID3);
             fNode.updateNetworkMap(distance3,newNodeInfo3);
-
-
-            */
 
             fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:3456");
             System.out.println("DONE!");

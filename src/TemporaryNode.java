@@ -18,6 +18,7 @@ import java.io.Writer;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 // DO NOT EDIT starts
 interface TemporaryNodeInterface {
@@ -144,7 +145,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
         try{
             // ensure the key ends with a newline
-            if (!key.endsWith("\n")) key += "\n";
+            //if (!key.endsWith("\n")) key += "\n";
             // Count the number of lines in both key and value
             int keyLines = key.split("\n").length;
 
@@ -230,7 +231,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
-            writer.write("ECHO? " +"\n");
+            writer.write("ECHO?" +"\n");
             writer.flush();
 
             String response = reader.readLine();
@@ -300,12 +301,13 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             String[] parts = response.split(" ", 2);
 
+            System.out.println(Arrays.toString(parts));
             int valueLinesCount = Integer.parseInt(parts[1]) ;
             StringBuilder valueBuilder = new StringBuilder();
             valueBuilder.append(response).append("\n");
             for (int i = 0; i < valueLinesCount; i++) {
                 valueBuilder.append(reader.readLine()).append("\n");
-                valueBuilder.append(reader.readLine()).append("\n");
+                //valueBuilder.append(reader.readLine()).append("\n");
             }
 
             String valueResponse = valueBuilder.toString();
@@ -458,20 +460,22 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Start: ");
         tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
 
+
         System.out.println("\n===================\n");
         System.out.println("Store: ");
-        tNode.store("Aram\n","The\nKing!\n");
+        tNode.store("Aram\n","The\nKing!");
 
 
         System.out.println("\n===================\n");
         System.out.println("Get: ");
         tNode.get("Aram\n");
 
-        /*
+
+
         System.out.println("\n===================\n");
         System.out.println("Echo: ");
         tNode.echo();
-
+/*
         System.out.println("\n===================\n");
         System.out.println("Notify: ");
         tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:3456");
@@ -487,6 +491,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Nearest: ");
         tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
 
+
  */
+
+
     }
 }
