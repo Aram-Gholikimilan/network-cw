@@ -66,7 +66,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 writer.flush();
 
                 String response = reader.readLine();
-                System.out.println("The server said : " + response);
+                //System.out.println("The server said : " + response);
 
                 if (response != null && response.startsWith("START"))
                 {
@@ -94,15 +94,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
         try{
             // Append new line if not present
-            if (!key.endsWith("\n")) key += "\n";
-            if (!value.endsWith("\n")) value += "\n";
+//            if (!key.endsWith("\n")) key += "\n";
+//            if (!value.endsWith("\n")) value += "\n";
 
             // Count the number of lines in both key and value
             int keyLines = key.split("\n").length;
             int valueLines = value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
 
             // you have the host and port from start
-            System.out.println("TCPClient connecting to " + startingNodeAddress);
+            //System.out.println("TCPClient connecting to " + startingNodeAddress);
             //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
             //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
@@ -120,7 +120,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             if (response != null && response.startsWith("SUCCESS"))
             {
-                isConnected = true; // Update connection status
+                //isConnected = true; // Update connection status
                 return true;
             }
 
@@ -167,9 +167,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
             //int valueLinesCount = Integer.parseInt(parts[1]);
             int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
             StringBuilder valueBuilder = new StringBuilder();
-            valueBuilder.append(response+"\n");
+            valueBuilder.append(response).append("\n");
             for (int i = 0; i < valueLinesCount2; i++) {
-                valueBuilder.append(reader.readLine()+"\n");
+                valueBuilder.append(reader.readLine()).append("\n");
             }
 
             String valueResponse = valueBuilder.toString();
@@ -178,7 +178,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             //String response2 = reader.readLine();
             //System.out.println("The server said2 : " + response2);
 
-            if (response != null && response.startsWith("VALUE"))
+            if (response.startsWith("VALUE"))
             {
                 return valueResponse;
 
