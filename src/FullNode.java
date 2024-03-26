@@ -310,7 +310,7 @@ public class FullNode implements FullNodeInterface {
 //                out.flush();
 //            }
                 System.out.println("value in FullNode : \n"+value1);
-            assert value1 != null;
+            //assert value1 != null;
             int valueLines = value1.split("\n").length;  // parts.length; //value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
                 out.write("VALUE " + valueLines + "\n" + value1 + "\n");
                 //out.flush();

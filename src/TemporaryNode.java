@@ -162,17 +162,18 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             String response = reader.readLine();
 
-            String[] parts = response.split(" ", 1);
+            //String[] parts = response.split(" ", 1);
 
-            int valueLinesCount = Integer.parseInt(parts[1]);
+            //int valueLinesCount = Integer.parseInt(parts[1]);
+            int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
             StringBuilder valueBuilder = new StringBuilder();
-            for (int i = 0; i < valueLinesCount; i++) {
-                valueBuilder.append(reader.readLine()).append("\n");
+            for (int i = 0; i < valueLinesCount2; i++) {
+                valueBuilder.append(reader.readLine()+"\n");
             }
 
             String valueResponse = valueBuilder.toString();
 
-            //System.out.println("The sdjcbshkhgsraubserver said : \n" + valueResponse); //valueResponse
+            System.out.println("The sdjcbshkhgsraubserver said : \n" + valueResponse); //valueResponse
             //String response2 = reader.readLine();
             //System.out.println("The server said2 : " + response2);
 
