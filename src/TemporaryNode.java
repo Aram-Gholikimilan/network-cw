@@ -162,7 +162,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             String response = reader.readLine();
 
-            String[] parts = response.split(" ", 2);
+            String[] parts = response.split(" ", 1);
 
             int valueLinesCount = Integer.parseInt(parts[1]);
             StringBuilder valueBuilder = new StringBuilder();
@@ -455,18 +455,19 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Start: ");
         tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
-/*
+
         System.out.println("\n===================\n");
         System.out.println("Store: ");
-        tNode.store("Welcome",
-                    "Hello\n" +
-                    "World!");
+        tNode.store("Aram",
+                    "The\n" +
+                    "King!");
 
 
         System.out.println("\n===================\n");
         System.out.println("Get: ");
-        tNode.get("Welcome");
+        tNode.get("Aram");
 
+        /*
         System.out.println("\n===================\n");
         System.out.println("Echo: ");
         tNode.echo();
@@ -481,10 +482,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("End: ");
         tNode.end("no requests!");
 
- */
+
         System.out.println("\n===================\n");
         System.out.println("Nearest: ");
         tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
 
+ */
     }
 }
