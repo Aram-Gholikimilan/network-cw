@@ -161,7 +161,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
-
+            System.out.println(response);
             //String[] parts = response.split(" ", 1);
 
             //int valueLinesCount = Integer.parseInt(parts[1]);
