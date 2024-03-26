@@ -299,11 +299,11 @@ public class FullNode implements FullNodeInterface {
             System.out.println("key: \n" + key);
             System.out.println("value: \n" + value1);
             if (value1 != null) {
-                String[] parts = value1.split("\n");
-                StringBuilder v = new StringBuilder();
-                for (String s : parts) {
-                    v.append(s);
-                }
+//                String[] parts = value1.split("\n");
+//                StringBuilder v = new StringBuilder();
+//                for (String s : parts) {
+//                    v.append(s);
+//                }
                 //String value = v.toString();
 //            if (value1 == null){
 //                out.write("NOPE\n");

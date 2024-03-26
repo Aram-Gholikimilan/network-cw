@@ -157,7 +157,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             //String threeClosestNodes = nearest(key);
             // Sending a message to the server at the other end of the socket
             //System.out.println("Sending a message to the server");
-            writer.write("GET? " + keyLines + "\n"+key+"\n");
+            writer.write("GET? " + keyLines + "\n"+key);
             writer.flush();
 
             String response = reader.readLine();
