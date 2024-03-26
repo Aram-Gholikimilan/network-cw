@@ -161,12 +161,13 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
-            System.out.println("the response, sdfof: "+ response);
+            //System.out.println("the response, sdfof: "+ response);
             //String[] parts = response.split(" ", 1);
 
             //int valueLinesCount = Integer.parseInt(parts[1]);
             int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
             StringBuilder valueBuilder = new StringBuilder();
+            valueBuilder.append(response+"\n");
             for (int i = 0; i < valueLinesCount2; i++) {
                 valueBuilder.append(reader.readLine()+"\n");
             }
