@@ -95,11 +95,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
         try{
             // Append new line if not present
 //            if (!key.endsWith("\n")) key += "\n";
-//            if (!value.endsWith("\n")) value += "\n";
+            if (!value.endsWith("\n")) value += "\n";
 
             // Count the number of lines in both key and value
             int keyLines = key.split("\n").length;
-            int valueLines = value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
+            int valueLines = value.split("\n", -1).length-1; // Adjusted to correctly handle the last newline
 
             // you have the host and port from start
             //System.out.println("TCPClient connecting to " + startingNodeAddress);
@@ -460,14 +460,12 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
         System.out.println("\n===================\n");
         System.out.println("Store: ");
-        tNode.store("Aram",
-                    "The\n" +
-                    "King!");
+        tNode.store("Aram\n","The\nKing!\n");
 
 
         System.out.println("\n===================\n");
         System.out.println("Get: ");
-        tNode.get("Aram");
+        tNode.get("Aram\n");
 
         /*
         System.out.println("\n===================\n");
