@@ -93,14 +93,14 @@ public class TemporaryNode implements TemporaryNodeInterface {
             return false;
         }
 
-        try{
+        try {
             // Append new line if not present
 //            if (!key.endsWith("\n")) key += "\n";
             if (!value.endsWith("\n")) value += "\n";
 
             // Count the number of lines in both key and value
             int keyLines = key.split("\n").length;
-            int valueLines = value.split("\n", -1).length-1; // Adjusted to correctly handle the last newline
+            int valueLines = value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
 
             // you have the host and port from start
             //System.out.println("TCPClient connecting to " + startingNodeAddress);
@@ -112,43 +112,44 @@ public class TemporaryNode implements TemporaryNodeInterface {
             System.out.println("Sending a message to the server");
             writer.write("PUT? " + keyLines + " " + valueLines + "\n"); //  + "\n" + key + "\n" + value
             writer.write(key);
-            writer.write(value+"\n");
-            System.out.println("the value in temp: \n"+value);
+            writer.write(value + "\n");
+            System.out.println("the value in temp: \n" + value);
             writer.flush();
 
             String response = reader.readLine();
             System.out.println("The server said : " + response);
 
-            if (response != null && response.startsWith("SUCCESS"))
-            {
+            if (response != null && response.startsWith("SUCCESS")) {
                 //isConnected = true; // Update connection status
                 return true;
             } else if (response.startsWith("FAILED")) {
-                // Assume computeHashID and bytesToHex are available to generate a hash string
-                byte[] keyHashID = HashID.computeHashID(key + "\n");
-                String hexKeyHashID = HashID.bytesToHex(keyHashID);
+                // Get the hash ID for the key to find nearest nodes
+                byte[] keyHash = HashID.computeHashID(key);
+                String hexKeyHash = HashID.bytesToHex(keyHash);
 
-                // Get the nearest nodes
-                String nearestNodesInfo = nearest(hexKeyHashID); // This returns the string as mentioned
+                // Call nearest to find nearest nodes
+                String nearestNodesInfo = nearest(hexKeyHash);
+                if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
+                    System.err.println("Failed to retrieve nearest nodes or none are available.");
+                    return false;
+                }
 
-                // Split the nearestNodesInfo by lines
-                String[] lines = nearestNodesInfo.split("\n");
+                // Split the nearestNodesInfo to get individual node details
+                String[] nodeDetails = nearestNodesInfo.split("\n");
 
-                // Start from 1 to skip the "NODES X" line
-                for (int i = 1; i < lines.length; i += 2) {
-                    String nodeName = lines[i].trim(); // Node name
-                    String nodeAddress = lines[i + 1].trim(); // Node address
+                // Skip the first line which is "NODES X"
+                for (int i = 2; i < nodeDetails.length; i += 2) {
+                    String nodeName = nodeDetails[i];
+                    String nodeAddress = nodeDetails[i + 1];
 
-                    // Attempt to store on the node
-                    boolean storeSuccess = attemptStoreOnNode(nodeName, nodeAddress, key, value);
-                    if (storeSuccess) {
-                        System.out.println("Successfully stored on node: " + nodeName);
-                        return true; // Successfully stored on a fallback node
+                    // Attempt to store on the nearest node
+                    if (attemptStoreOnNode(nodeName, nodeAddress, key, value)) {
+                        System.out.println("Successfully stored on fallback node: " + nodeName);
+                        return true;
                     }
                 }
 
-                // If we reach here, all attempts have failed
-                System.err.println("Failed to store the key-value pair on any node.");
+                System.err.println("Failed to store the key-value pair on any fallback node.");
                 return false;
             }
 
