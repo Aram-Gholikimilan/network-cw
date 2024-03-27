@@ -334,6 +334,13 @@ public class FullNode implements FullNodeInterface {
             String nodeName = in.readLine(); // Read node name
             String nodeAddress = in.readLine(); // Read node address
 
+            String nodeTime = getCurrentTime();
+            byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
+            this.nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
+            int distance = HashID.calculateDistance(nodeHashID,this.nodeHashID);
+
+            NodeInfo nodeInfo = new NodeInfo(nodeName,nodeAddress,nodeTime);
+            updateNetworkMap(distance,nodeInfo);
             // Here, update your network map with the new node
             // For simplicity, assume we have a method updateNetworkMap(nodeName, nodeAddress)
             //updateNetworkMap(nodeName, nodeAddress); // Placeholder method
@@ -361,15 +368,17 @@ public class FullNode implements FullNodeInterface {
             // Here, find the three closest nodes to the given hashID
             // For simplicity, assume we have a method findClosestNodes(hashID) that returns a list of node info
             List<NodeInfo> closestNodes = findClosestNodesNearest(hashID); // Placeholder method
-            out.write("NODES " + closestNodes.size());
-            out.flush();
+            out.write("NODES " + closestNodes.size() + "\n");
+           // out.flush();
 
             for(NodeInfo n : closestNodes){
-                out.write(n.getNodeName()+"\n");
-                out.write(n.getNodeAddress()+"\n");
+                out.write(n.getNodeName());
+                out.write(n.getNodeAddress()+'\n');
             }
 
             out.flush();
+
+
             //for (String nodeInfo : closestNodes) {
             //  out.write(nodeInfo); // Node name
             //out.flush();
@@ -382,11 +391,6 @@ public class FullNode implements FullNodeInterface {
     }
 
     // Additional helper methods as needed
-
-    private String getValue(String key) {
-        // Directly return the value from the store; if key is not present, this returns null
-        return keyValueStore.get(key);
-    }
 
     private void updateNetworkMap(int distance, NodeInfo nodeInfo) {
         if (!networkMap2.containsKey(distance)) {

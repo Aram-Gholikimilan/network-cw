@@ -262,9 +262,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
             String fullNodeName = parts[0];
             String fullNodeAddress = parts[1];
 
-            System.out.println("TCPClient connecting to " + startingNodeAddress);
-            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
             writer.write("NOTIFY? \n" + fullNodeName + "\n" + fullNodeAddress + "\n");
@@ -302,12 +299,13 @@ public class TemporaryNode implements TemporaryNodeInterface {
             String[] parts = response.split(" ", 2);
 
             System.out.println(Arrays.toString(parts));
-            int valueLinesCount = Integer.parseInt(parts[1]) ;
+            int valueLinesCount = Integer.parseInt(parts[1]);
+            System.out.println(valueLinesCount);
             StringBuilder valueBuilder = new StringBuilder();
             valueBuilder.append(response).append("\n");
-            for (int i = 0; i < valueLinesCount; i++) {
+            for (int i = 0; i < valueLinesCount ; i++) {
                 valueBuilder.append(reader.readLine()).append("\n");
-                //valueBuilder.append(reader.readLine()).append("\n");
+                valueBuilder.append(reader.readLine()).append("\n");
             }
 
             String valueResponse = valueBuilder.toString();
@@ -318,7 +316,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             if (response != null && response.startsWith("NODES"))
             {
                 isConnected = true; // Update connection status
-                return response;
+                return valueResponse;
             }
 
         } catch (Exception e){
@@ -460,7 +458,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Start: ");
         tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
-
+/*
         System.out.println("\n===================\n");
         System.out.println("Store: ");
         tNode.store("Aram\n","The\nKing!");
@@ -470,10 +468,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Get: ");
         tNode.get("Aram\n");
 
-        System.out.println("\n===================\n");
-        System.out.println("Nearest: ");
-        tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
-/*
+
+ */
+
+
         System.out.println("\n===================\n");
         System.out.println("Echo: ");
         tNode.echo();
@@ -481,8 +479,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Notify: ");
         tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:3456");
-
-
+/*
+        System.out.println("\n===================\n");
+        System.out.println("Nearest: ");
+        tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
 
         System.out.println("\n===================\n");
         System.out.println("End: ");
