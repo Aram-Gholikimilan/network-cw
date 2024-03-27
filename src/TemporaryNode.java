@@ -363,19 +363,19 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
-            if (response.startsWith("NODES")) {
-                int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
-                StringBuilder nodesInfo = new StringBuilder();
-                nodesInfo.append(response).append("\n"); // Include the "NODES X" line
-                for (int i = 0; i < numberOfNodes; i++) {
-                    String nodeName = reader.readLine().trim(); // Trim any trailing newlines
-                    String nodeAddress = reader.readLine().trim(); // Trim any trailing newlines
-                    nodesInfo.append(nodeName).append("\n").append(nodeAddress).append("\n");
-                }
-                // Print the complete nodes information for debugging before returning
-                System.out.println("Complete nodes information received:\n" + nodesInfo);
-                return nodesInfo.toString();
-            }
+//            if (response.startsWith("NODES")) {
+//                int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
+//                StringBuilder nodesInfo = new StringBuilder();
+//                nodesInfo.append(response).append("\n"); // Include the "NODES X" line
+//                for (int i = 0; i < numberOfNodes; i++) {
+//                    String nodeName = reader.readLine().trim(); // Trim any trailing newlines
+//                    String nodeAddress = reader.readLine().trim(); // Trim any trailing newlines
+//                    nodesInfo.append(nodeName).append("\n").append(nodeAddress).append("\n");
+//                }
+//                // Print the complete nodes information for debugging before returning
+//                System.out.println("Complete nodes information received:\n" + nodesInfo);
+//                return nodesInfo.toString();
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             return null;
