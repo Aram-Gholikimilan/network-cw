@@ -129,6 +129,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                 // Call nearest to find nearest nodes
                 String nearestNodesInfo = nearest(hexKeyHash);
+                System.out.println(nearestNodesInfo);
                 if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
                     System.err.println("Failed to retrieve nearest nodes or none are available.");
                     return false;
