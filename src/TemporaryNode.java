@@ -129,13 +129,14 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     return false;
                 }
 
+
                 // Split the nearestNodesInfo to get individual node details
                 String[] nodeDetails = nearestNodesInfo.split("\n");
-
+                int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
                 // Skip the first line which is "NODES X"
-                for (int i = 2; i < nodeDetails.length; i += 2) {
+                for (int i = 1; i < numNodes; i+=2) {
                     String nodeName = nodeDetails[i];
-                    String nodeAddress = nodeDetails[i + 1];
+                    String nodeAddress = nodeDetails[i+1];
 
                     // Attempt to store on the nearest node
                     if (attemptStoreOnNode(nodeName, nodeAddress, key, value)) {
