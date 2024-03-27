@@ -48,4 +48,8 @@ public class NodeInfo {
     public String getTime() {
         return time;
     }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
 }

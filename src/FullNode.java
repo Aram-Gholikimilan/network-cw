@@ -39,12 +39,10 @@ interface FullNodeInterface {
 public class FullNode implements FullNodeInterface {
     private boolean isConnected;
     public ServerSocket serverSocket;
-    private ArrayList<String> nodeList = new ArrayList<>();
     private HashMap<Integer, ArrayList<NodeInfo>> networkMap2 = new HashMap<>();
 
     //private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private Hashtable<String, String> directory = new Hashtable<>();
-    private ConcurrentHashMap<String, String> keyValueStore = new ConcurrentHashMap<>();
     private String startingNodeName;
     private String startingNodeAddress;
     private String startingNodeHost; // Store the starting node host for potential later use
@@ -190,7 +188,7 @@ public class FullNode implements FullNodeInterface {
     public void end(String reason) {
         try {
             System.out.println("TCPClient connecting to " + startingNodeAddress);
-            System.out.println(startingNodeHost.toString() + "  :  " + startingNodePort);
+            System.out.println(startingNodeHost + "  :  " + startingNodePort);
             Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
             BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
@@ -376,7 +374,7 @@ public class FullNode implements FullNodeInterface {
 
     // TODO: Extract and process the NEAREST? request according to the 2D#4 protocol
 
-    // Sometimes it works sometimes no
+    /*
     private void handleNearestRequest(String line, BufferedReader in, Writer out) {
         // Extract and process the NEAREST? request according to the 2D#4 protocol
         try {
@@ -415,7 +413,38 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
-    // Additional helper methods as needed
+
+     */
+
+
+    private void handleNearestRequest(String line, BufferedReader in, Writer out) throws Exception {
+        String hashIDHex = line.split(" ")[1].trim();
+        byte[] hashID = HashID.hexStringToByteArray(hashIDHex);
+
+        List<NodeInfo> closestNodes = findClosestNodes2(hashID);
+
+        // Start building the response
+        StringBuilder response = new StringBuilder();
+        response.append("NODES ").append(closestNodes.size()).append("\n");
+
+        for (NodeInfo node : closestNodes) {
+
+            // Ensure no extra newlines by trimming the node name and address
+            String nodeName = node.getNodeName().trim();
+            String nodeAddress = node.getNodeAddress().trim();
+
+            // Append each closest node's information
+            response.append(nodeName).append("\n").append(nodeAddress).append("\n");
+        }
+
+        // Print the full response for debugging purposes
+        System.out.println("Sending response:\n" + response.toString());
+
+
+        // Write the response to the output
+        out.write(response.toString());
+        out.flush();
+    }
 
     private void updateNetworkMap(int distance, NodeInfo nodeInfo) {
         if (!networkMap2.containsKey(distance)) {
@@ -454,6 +483,48 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
+    private List<NodeInfo> findClosestNodes2(byte[] targetHashID) throws Exception {
+        /*
+        // Create a list to store nodes and their distance to the target hashID
+        List<NodeInfo> sortedNodes = new ArrayList<>();
+
+        // Iterate through the network map to calculate distances
+        for (Map.Entry<Integer, ArrayList<NodeInfo>> entry : networkMap2.entrySet()) {
+            for (NodeInfo node : entry.getValue()) {
+                int distance = HashID.calculateDistance(targetHashID, HashID.computeHashID(node.getNodeName() + "\n"));
+                // Temporarily setting the distance in the NodeInfo object for sorting
+                node.setDistance(distance);
+                sortedNodes.add(node);
+            }
+        }
+
+        // Sort the list based on the distance
+        Collections.sort(sortedNodes, Comparator.comparingInt(NodeInfo::getDistance));
+
+        // Return the top 3 closest nodes or less if the network is smaller
+        return sortedNodes.stream().limit(3).collect(Collectors.toList());
+
+         */
+
+        List<NodeInfo> allNodes = new ArrayList<>();
+        // Assuming networkMap2 is a map where keys are distances and values are lists of NodeInfo objects
+        for (ArrayList<NodeInfo> nodesAtDistance : networkMap2.values()) {
+            allNodes.addAll(nodesAtDistance); // Flattening the list of nodes
+        }
+
+        // Calculate distance for each node and sort
+        allNodes.sort(Comparator.comparingInt(node -> {
+            try {
+                return HashID.calculateDistance(targetHashID, HashID.computeHashID(node.getNodeName() + "\n"));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }));
+
+        // Limit to the closest 3 nodes, or fewer if not available
+        return allNodes.stream().limit(3).collect(Collectors.toList());
+    }
+
     private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
         // List to hold nodes and their distances to the target hashID
         HashMap<String, Integer> nodeNameDist = new HashMap<>();
@@ -473,15 +544,15 @@ public class FullNode implements FullNodeInterface {
 
          }
 
-        List<String> distances = nodeNameDist.entrySet().stream()
+        // Select and return the addresses of the top three closest nodes
+        return nodeNameDist.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .limit(3) // Limit to top 3
                 .collect(Collectors.toList());
-
-        // Select and return the addresses of the top three closest nodes
-        return distances;
     }
+
+
 
     private List<NodeInfo> findClosestNodesNearest(byte[] targetHashIDHex) throws Exception {
         // Map to hold nodes and their distances to the target hashID
@@ -509,23 +580,6 @@ public class FullNode implements FullNodeInterface {
 
         // Select and return the addresses of the top three closest nodes
         //return distances;
-    }
-
-    private List<String> closestNodes(){
-        HashMap<String, Integer> nodeNameDist = new HashMap<>();
-
-        // Example data
-        nodeNameDist.put("NodeA", 10);
-        nodeNameDist.put("NodeB", 5);
-        nodeNameDist.put("NodeC", 7);
-
-        List<String> distances = nodeNameDist.entrySet().stream()
-                .sorted((entry1, entry2) -> entry1.getValue().compareTo(entry2.getValue()))
-                .map(entry -> entry.getKey())
-                .collect(Collectors.toList());
-
-        System.out.println(distances); // This will print the keys sorted by their values in ascending order
-        return null;
     }
 
     /*private List<String> findClosestNodes(byte[] targetHashIDHex) throws Exception {
@@ -630,7 +684,7 @@ public class FullNode implements FullNodeInterface {
 
     public static void main(String[] args) throws Exception {
         FullNode fNode = new FullNode();
-        if (fNode.listen("127.0.0.1", 3456)) {
+        if (fNode.listen("127.0.0.1", 6969)) {
 
             String startingnodename ="martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n";
 
@@ -662,7 +716,7 @@ public class FullNode implements FullNodeInterface {
             int distance3 = HashID.calculateDistance(nodeHashID3,newNodeHashID3);
             fNode.updateNetworkMap(distance3,newNodeInfo3);
 
-            fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:3456");
+            fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:6969");
             System.out.println("DONE!");
         }
 

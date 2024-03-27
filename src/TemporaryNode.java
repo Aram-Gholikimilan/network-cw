@@ -123,6 +123,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
             {
                 //isConnected = true; // Update connection status
                 return true;
+            } else{
+                // call nearest find the distance between those three nodes and the key,
+                // start a connection with the closest node, and try storing.
+                // if that was failed we continue the process.
             }
 
         } catch (Exception e){
@@ -282,6 +286,40 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
         return false;
     }
+
+    public String nearest(String hashID) {
+        if (!isConnected) {
+            System.out.println("Not connected to any node. Please start connection first.");
+            return null;
+        }
+
+        try {
+            writer.write("NEAREST? " + hashID + "\n");
+            writer.flush();
+
+            String response = reader.readLine();
+            if (response.startsWith("NODES")) {
+                int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
+                StringBuilder nodesInfo = new StringBuilder();
+                nodesInfo.append(response).append("\n"); // Include the "NODES X" line
+                for (int i = 0; i < numberOfNodes; i++) {
+                    String nodeName = reader.readLine().trim(); // Trim any trailing newlines
+                    String nodeAddress = reader.readLine().trim(); // Trim any trailing newlines
+                    nodesInfo.append(nodeName).append("\n").append(nodeAddress).append("\n");
+                }
+                // Print the complete nodes information for debugging before returning
+                System.out.println("Complete nodes information received:\n" + nodesInfo);
+                return nodesInfo.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
+
+/*
     public String nearest (String hash){// the string is a hashID written in hex
         if (!isConnected){
             System.out.println("Not connected to any node. Please start connection first");
@@ -299,11 +337,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
             String[] parts = response.split(" ", 2);
 
             System.out.println(Arrays.toString(parts));
-            int valueLinesCount = Integer.parseInt(parts[1]);
-            System.out.println(valueLinesCount);
+            int nodesCount = Integer.parseInt(parts[1]);
+            System.out.println(nodesCount);
             StringBuilder valueBuilder = new StringBuilder();
             valueBuilder.append(response).append("\n");
-            for (int i = 0; i < valueLinesCount ; i++) {
+            for (int i = 0; i < nodesCount ; i++) {
                 valueBuilder.append(reader.readLine()).append("\n");
                 valueBuilder.append(reader.readLine()).append("\n");
                 System.out.println(i+":"+valueBuilder);
@@ -315,7 +353,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             System.out.println("The server said : \n" + valueResponse);
 
 
-            if (response != null && response.startsWith("NODES"))
+            if (response.startsWith("NODES"))
             {
                 isConnected = true; // Update connection status
                 return valueResponse;
@@ -328,58 +366,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
         return null;
     }
 
-    /**
-     * Connects to a node in the 2D#4 network.
-     *
-     * @param nodeName The name of the node to connect to (not used in the connection itself, but might be useful for logging or future extensions).
-     * @param nodeAddress The address of the node, in the format "ipOrDnsName:portNumber".
-     * @return A Socket connected to the specified node, or null if the connection could not be established.
-     */
-    private Socket connectToNode(String nodeName, String nodeAddress) {
-        // Split the nodeAddress into IP/DNS name and port number
-        String[] parts = nodeAddress.split(":");
-        if (parts.length != 2) {
-            System.err.println("Invalid node address format: " + nodeAddress);
-            return null;
-        }
 
-        String ipOrDnsName = parts[0];
-        int portNumber;
-        try {
-            portNumber = Integer.parseInt(parts[1]);
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid port number in node address: " + nodeAddress);
-            return null;
-        }
-
-        try {
-            // Attempt to create a socket and connect to the node
-            Socket socket = new Socket(ipOrDnsName, portNumber);
-            System.out.println("Successfully connected to node: " + nodeName + " at address: " + nodeAddress);
-            return socket;
-        } catch (IOException e) {
-            System.err.println("Failed to connect to node: " + nodeName + " at address: " + nodeAddress);
-            e.printStackTrace();
-        }
-
-        /*
-        try {
-            String[] parts = nodeAddress.split(":");
-            if (parts.length != 2) {
-                throw new IllegalArgumentException("Invalid node address format.");
-            }
-            int port = Integer.parseInt(parts[1]);
-            return new Socket(parts[0], port);
-        } catch (IOException e) {
-            System.err.println("Failed to connect to node: " + nodeName + " due to: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-        }
-         */
-
-        return null;
-    }
-
+ */
     public static String bytesToHex(byte[] hash) {
         StringBuilder hexString = new StringBuilder(2 * hash.length);
         for (byte b : hash) {
@@ -392,74 +380,12 @@ public class TemporaryNode implements TemporaryNodeInterface {
         return hexString.toString();
     }
 
-
-    private String findClosestNode(String key) {
-        if (!key.endsWith("\n")) key += "\n"; // Ensure newline at the end
-
-        String keyHashIDHex;
-        try {
-            byte[] keyHashID = HashID.computeHashID(key); // Compute hashID
-            keyHashIDHex = bytesToHex(keyHashID); // Convert hashID to hex string
-        } catch (Exception e) {
-            System.err.println("Failed to compute hashID: " + e.getMessage());
-            return null;
-        }
-
-        try (Socket socket = connectToNode(startingNodeName, startingNodeHost + ":" + startingNodePort);
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-
-            if (socket == null) {
-                System.err.println("Connection to node failed for NEAREST? query.");
-                return null;
-            }
-
-            // START protocol initiation
-            out.println("START 1 " + this.startingNodeName);
-            String response = in.readLine();
-            if (response == null || !response.startsWith("START")) {
-                System.err.println("Failed to start communication properly for NEAREST? query.");
-                return null;
-            }
-
-            // Send NEAREST? request with the key's hashID
-            out.println("NEAREST? " + keyHashIDHex);
-
-            response = in.readLine();
-            if (response != null && response.startsWith("NODES")) {
-                int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
-                if (numberOfNodes > 0) {
-                    String closestNodeName = null;
-                    String closestNodeAddress = null;
-                    // For simplicity, choose the first node returned as the closest
-                    // More sophisticated selection could be implemented here
-                    for (int i = 0; i < numberOfNodes; i++) {
-                        String nodeName = in.readLine(); // Read node name
-                        String nodeAddress = in.readLine(); // Read node address
-                        if (i == 0) { // Select the first node as closest for simplicity
-                            closestNodeName = nodeName;
-                            closestNodeAddress = nodeAddress;
-                        }
-                    }
-                    System.out.println("Closest node found: " + closestNodeName + " at " + closestNodeAddress);
-                    return closestNodeAddress; // Return the address of the closest node
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("IOException during NEAREST? query: " + e.getMessage());
-        } catch (NumberFormatException e) {
-            System.err.println("Error parsing number of nodes: " + e.getMessage());
-        }
-
-        return null;
-    }
-
     public static void main(String[] args) throws IOException {
         TemporaryNode tNode = new TemporaryNode();
 
         System.out.println("\n===================\n");
         System.out.println("Start: ");
-        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:3456");
+        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:6969");
 /*
         System.out.println("\n===================\n");
         System.out.println("Store: ");
@@ -486,8 +412,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
  */
         System.out.println("\n===================\n");
         System.out.println("Nearest: ");
-        tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
-/*
+        String nearestNodes = tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
+        System.out.println(nearestNodes);
+
+        /*
         System.out.println("\n===================\n");
         System.out.println("End: ");
         tNode.end("no requests!");
