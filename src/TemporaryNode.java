@@ -123,10 +123,33 @@ public class TemporaryNode implements TemporaryNodeInterface {
             {
                 //isConnected = true; // Update connection status
                 return true;
-            } else{
-                // call nearest find the distance between those three nodes and the key,
-                // start a connection with the closest node, and try storing.
-                // if that was failed we continue the process.
+            } else if (response.startsWith("FAILED")) {
+                // Assume computeHashID and bytesToHex are available to generate a hash string
+                byte[] keyHashID = HashID.computeHashID(key + "\n");
+                String hexKeyHashID = HashID.bytesToHex(keyHashID);
+
+                // Get the nearest nodes
+                String nearestNodesInfo = nearest(hexKeyHashID); // This returns the string as mentioned
+
+                // Split the nearestNodesInfo by lines
+                String[] lines = nearestNodesInfo.split("\n");
+
+                // Start from 1 to skip the "NODES X" line
+                for (int i = 1; i < lines.length; i += 2) {
+                    String nodeName = lines[i].trim(); // Node name
+                    String nodeAddress = lines[i + 1].trim(); // Node address
+
+                    // Attempt to store on the node
+                    boolean storeSuccess = attemptStoreOnNode(nodeName, nodeAddress, key, value);
+                    if (storeSuccess) {
+                        System.out.println("Successfully stored on node: " + nodeName);
+                        return true; // Successfully stored on a fallback node
+                    }
+                }
+
+                // If we reach here, all attempts have failed
+                System.err.println("Failed to store the key-value pair on any node.");
+                return false;
             }
 
         } catch (Exception e){
@@ -135,6 +158,44 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
         return false;
     }
+
+    private boolean attemptStoreOnNode(String nodeName, String nodeAddress, String key, String value) {
+        try {
+            // Split the address to get IP and port
+            String[] addressParts = nodeAddress.split(":");
+            String ip = addressParts[0];
+            int port = Integer.parseInt(addressParts[1]);
+
+            // Open a new connection to the node
+            Socket socket = new Socket(ip, port);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            Writer writer = new OutputStreamWriter(socket.getOutputStream());
+
+            // Initiate protocol communication, e.g., send START command
+            writer.write("START 1 " + this.startingNodeName + "\n"); // Adjust as needed
+            writer.flush();
+
+            // Wait for a START response if necessary
+            // Assume the node responds with START, indicating ready to communicate
+            reader.readLine(); // Read the response to the START command
+
+            // Now send the PUT? request
+            writer.write("PUT? " + key.split("\n").length + " " + (value.split("\n", -1).length - 1) + "\n" + key + value);
+            writer.flush();
+
+            // Read and check the response
+            String response = reader.readLine();
+            socket.close(); // Always close the socket
+
+            // Check if the response indicates success
+            return "SUCCESS".equals(response);
+        } catch (Exception e) {
+            System.err.println("Error attempting to store on node " + nodeName + ": " + e.getMessage());
+            return false;
+        }
+    }
+
+
 
     public String get(String key) {
 	// Implement this!
@@ -187,6 +248,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
             {
                 return valueResponse;
 
+            } else if (response.startsWith("NOPE")) {
+                
             }
 
         } catch (Exception e){
