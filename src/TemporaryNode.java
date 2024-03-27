@@ -88,19 +88,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
 	// Return true if the store worked
 	// Return false if the store failed
 	//return true;
-        if (!isConnected) {
-            System.err.println("Not connected to any node. Please start connection first.");
-            return false;
-        }
 
         try {
             // Append new line if not present
 //            if (!key.endsWith("\n")) key += "\n";
-            if (!value.endsWith("\n")) value += "\n";
+//            if (!value.endsWith("\n")) value += "\n";
 
             // Count the number of lines in both key and value
             int keyLines = key.split("\n").length;
-            int valueLines = value.split("\n", -1).length - 1; // Adjusted to correctly handle the last newline
+            int valueLines = value.split("\n").length; // Adjusted to correctly handle the last newline
 
             // you have the host and port from start
             //System.out.println("TCPClient connecting to " + startingNodeAddress);
@@ -110,10 +106,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
-            writer.write("PUT? " + keyLines + " " + valueLines + "\n"); //  + "\n" + key + "\n" + value
-            writer.write(key);
-            writer.write(value + "\n");
-            System.out.println("the value in temp: \n" + value);
+            writer.write("PUT? " + keyLines + " " + valueLines + "\n" + key + value); //  + "\n" + key + "\n" + value
+//            System.out.println("the value in temp: \n" + value);
             writer.flush();
 
             String response = reader.readLine();
@@ -363,19 +357,19 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
-//            if (response.startsWith("NODES")) {
-//                int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
-//                StringBuilder nodesInfo = new StringBuilder();
-//                nodesInfo.append(response).append("\n"); // Include the "NODES X" line
-//                for (int i = 0; i < numberOfNodes; i++) {
-//                    String nodeName = reader.readLine().trim(); // Trim any trailing newlines
-//                    String nodeAddress = reader.readLine().trim(); // Trim any trailing newlines
-//                    nodesInfo.append(nodeName).append("\n").append(nodeAddress).append("\n");
-//                }
-//                // Print the complete nodes information for debugging before returning
-//                System.out.println("Complete nodes information received:\n" + nodesInfo);
-//                return nodesInfo.toString();
-//            }
+            if (response.startsWith("NODES")) {
+                int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
+                StringBuilder nodesInfo = new StringBuilder();
+                nodesInfo.append(response).append("\n"); // Include the "NODES X" line
+                for (int i = 0; i < numberOfNodes; i++) {
+                    String nodeName = reader.readLine().trim(); // Trim any trailing newlines
+                    String nodeAddress = reader.readLine().trim(); // Trim any trailing newlines
+                    nodesInfo.append(nodeName).append("\n").append(nodeAddress).append("\n");
+                }
+                // Print the complete nodes information for debugging before returning
+                System.out.println("Complete nodes information received:\n" + nodesInfo);
+                return nodesInfo.toString();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return null;
