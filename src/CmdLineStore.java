@@ -29,7 +29,6 @@ public class CmdLineStore {
 
 		// Store the (key, value) pair
 		if (tn.store(key, value)) {
-			System.out.println("=========");
 		    System.out.println("Store worked! :-)");
 		} else {
 		    System.out.println("Store failed! :-(");
