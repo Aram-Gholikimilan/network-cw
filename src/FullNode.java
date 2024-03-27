@@ -122,43 +122,66 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
-    private void handleClient(String line, BufferedReader in, Writer out) {
+    private enum CommandType {
+        START, PUT, GET, NOTIFY, NEAREST, ECHO, END, UNKNOWN
+    }
 
+    private CommandType getCommandType(String line) {
+        if (line.startsWith("START")) return CommandType.START;
+        if (line.startsWith("PUT?")) return CommandType.PUT;
+        if (line.startsWith("GET?")) return CommandType.GET;
+        if (line.startsWith("NOTIFY?")) return CommandType.NOTIFY;
+        if (line.startsWith("NEAREST?")) return CommandType.NEAREST;
+        if (line.startsWith("ECHO?")) return CommandType.ECHO;
+        if (line.startsWith("END")) return CommandType.END;
+        return CommandType.UNKNOWN;
+    }
+
+    private void handleClient(String line, BufferedReader in, Writer out) {
         try {
             while (line != null) {
                 if (!isConnected) {
                     System.out.println("Not connected to any node. Please start connection first");
                     break;
                 }
-                if (line.startsWith("START")) {
-                    // Process START command
-                    handleStartCommand(line, out);
-                    //out.println("START 1 <NodeName>");
-                } else if (line.startsWith("PUT?")) {
-                    // Process PUT? command
-                    handlePutRequest(line, in, out);
-                } else if (line.startsWith("GET?")) {
-                    // Process GET? command
-                    handleGetRequest(line, in, out);
-                } else if (line.startsWith("NOTIFY?")) {
-                    // Process NOTIFY? command
-                    handleNotifyRequest(line, in, out);
-                } else if (line.startsWith("NEAREST?")) {
-                    // Process NEAREST? command
-                    handleNearestRequest(line, in, out);
-                } else if (line.startsWith("ECHO?")) {
-                    //  This message allows the requester to tell whether the connection is
-                    //  still active and the responder is still working correctly.
-                    out.write("OHCE\n");
-                    out.flush();
-                } else if (line.startsWith("END")) {
-                    isConnected = false;
-                    //serverSocket.close();
-                    break; // Exit the loop and close the connection
-                }
-                line = null;
-            }
 
+                CommandType commandType = getCommandType(line);
+
+                switch (commandType) {
+                    case START:
+                        // Process START command
+                        handleStartCommand(line, out);
+                        break;
+                    case PUT:
+                        // Process PUT? command
+                        handlePutRequest(line, in, out);
+                        break;
+                    case GET:
+                        // Process GET? command
+                        handleGetRequest(line, in, out);
+                        break;
+                    case NOTIFY:
+                        // Process NOTIFY? command
+                        handleNotifyRequest(line, in, out);
+                        break;
+                    case NEAREST:
+                        // Process NEAREST? command
+                        handleNearestRequest(line, in, out);
+                        break;
+                    case ECHO:
+                        // ECHO command
+                        out.write("OHCE\n");
+                        out.flush();
+                        break;
+                    case END:
+                        isConnected = false;
+                        break; // Exit the loop and close the connection
+                    default:
+                        System.err.println("Unknown command: " + line);
+                        break;
+                }
+                line = null; // Or read the next line if in a loop
+            }
         } catch (Exception e) {
             System.err.println("Error handling client. Error: " + e.getMessage());
         }
@@ -276,7 +299,6 @@ public class FullNode implements FullNodeInterface {
         return closestNodesAddresses.contains(currentNodeAddress);
     }
 
-    //TODO: Extract and process the GET? request according to the 2D#4 protocol and the output
     private void handleGetRequest(String line, BufferedReader in, Writer out) {
         //Extract and process the GET? request according to the 2D#4 protocol
         try {
@@ -326,7 +348,6 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
-    //TODO: Extract and process the NOTIFY? request according to the 2D#4 protocol
     private void handleNotifyRequest(String line, BufferedReader in, Writer out) {
         // Extract and process the NOTIFY? request according to the 2D#4 protocol
         // The requester MAY send a NOTIFY request.  This informs the responder of the address of a full node.
@@ -368,16 +389,20 @@ public class FullNode implements FullNodeInterface {
             // Here, find the three closest nodes to the given hashID
             // For simplicity, assume we have a method findClosestNodes(hashID) that returns a list of node info
             List<NodeInfo> closestNodes = findClosestNodesNearest(hashID); // Placeholder method
-            out.write("NODES " + closestNodes.size() + "\n");
-           // out.flush();
+
+            out.write("NODES " + closestNodes.size()+'\n');
+            out.flush();
+
+
+            //StringBuilder valueBuilder = new StringBuilder();
+            //valueBuilder.append("NODES ").append(closestNodes.size());
 
             for(NodeInfo n : closestNodes){
                 out.write(n.getNodeName());
                 out.write(n.getNodeAddress()+'\n');
+
             }
-
             out.flush();
-
 
             //for (String nodeInfo : closestNodes) {
             //  out.write(nodeInfo); // Node name

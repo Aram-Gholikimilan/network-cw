@@ -306,9 +306,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
             for (int i = 0; i < valueLinesCount ; i++) {
                 valueBuilder.append(reader.readLine()).append("\n");
                 valueBuilder.append(reader.readLine()).append("\n");
+                System.out.println(i+":"+valueBuilder);
             }
 
             String valueResponse = valueBuilder.toString();
+            System.out.println("last: "+valueBuilder);
 
             System.out.println("The server said : \n" + valueResponse);
 
@@ -469,7 +471,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         tNode.get("Aram\n");
 
 
- */
+
 
 
         System.out.println("\n===================\n");
@@ -479,11 +481,13 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Notify: ");
         tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:3456");
-/*
+
+
+ */
         System.out.println("\n===================\n");
         System.out.println("Nearest: ");
         tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
-
+/*
         System.out.println("\n===================\n");
         System.out.println("End: ");
         tNode.end("no requests!");
