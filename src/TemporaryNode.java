@@ -134,16 +134,16 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 String[] nodeDetails = nearestNodesInfo.split("\n");
                 int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
                 // Skip the first line which is "NODES X"
-//                for (int i = 1; i < numNodes; i+=2) {
-//                    String nodeName = nodeDetails[i];
-//                    String nodeAddress = nodeDetails[i+1];
-//
-//                    // Attempt to store on the nearest node
-//                    if (attemptStoreOnNode(nodeName, nodeAddress, key, value)) {
-//                        System.out.println("Successfully stored on fallback node: " + nodeName);
-//                        return true;
-//                    }
-//                }
+                for (int i = 1; i < numNodes; i+=2) {
+                    String nodeName = nodeDetails[i];
+                    String nodeAddress = nodeDetails[i+1];
+
+                    // Attempt to store on the nearest node
+                    if (attemptStoreOnNode(nodeName, nodeAddress, key, value)) {
+                        System.out.println("Successfully stored on fallback node: " + nodeName);
+                        return true;
+                    }
+                }
 
                 String nodeName = nodeDetails[1];
                 String nodeAddress = nodeDetails[2];

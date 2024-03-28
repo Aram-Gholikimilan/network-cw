@@ -684,8 +684,8 @@ public class FullNode implements FullNodeInterface {
 
     public static void main(String[] args) throws Exception {
         FullNode fNode = new FullNode();
-        if (fNode.listen("127.0.0.1", 6969)) {
-
+        if (fNode.listen("10.0.1.8", 6969)) {
+/*
             String startingnodename ="martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n";
 
             String newNodeTime = getCurrentTime();
@@ -715,8 +715,8 @@ public class FullNode implements FullNodeInterface {
             byte[] nodeHashID3 = HashID.computeHashID(startingnodename);
             int distance3 = HashID.calculateDistance(nodeHashID3,newNodeHashID3);
             fNode.updateNetworkMap(distance3,newNodeInfo3);
-
-            fNode.handleIncomingConnections("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2", "127.0.0.1:6969");
+*/
+            fNode.handleIncomingConnections("Aram.Milan@city.ac.uk:Red-Wine", "10.0.1.8:6969");
             System.out.println("DONE!");
         }
 
