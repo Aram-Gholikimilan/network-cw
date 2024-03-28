@@ -320,6 +320,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
     private String attemptGetFromNode(String nodeName, String nodeAddress, String key) {
         try {
+            System.out.println("LOOK: "+nodeAddress);
             // Split the address to get IP and port
             String[] addressParts = nodeAddress.split(":");
             String ip = addressParts[0];
