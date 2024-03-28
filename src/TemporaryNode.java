@@ -276,20 +276,26 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                    System.out.println("i: " + i);
 //                }
 
+                int min=0;
+                String nodeName="";
+                String nodeAddress="";
                 // Adjusted loop to start from the first node's information
                 for (int i = 2; i < lines.length; i += 2) {
-                    String nodeName = lines[i - 1]; // Adjust index for node name
-                    String nodeAddress = lines[i]; // Adjust index for node address
-
-//                    System.out.println(nodeName);
-//                    System.out.println(nodeAddress);
-
-                    String value = attemptGetFromNode(nodeName, nodeAddress, key);
-                    //System.out.println(value);
-                    if (value != null && !value.equals("NOPE")) {
-                        System.out.println("Successfully retrieved value from fallback node: " + nodeName);
-                        return value;
+                    nodeName = lines[i - 1]; // Adjust index for node name
+                    nodeAddress = lines[i]; // Adjust index for node address
+                    byte[] nodeHashID = HashID.computeHashID(nodeName);
+                    byte[] keyHashId = HashID.computeHashID(key);
+                    int distance = HashID.calculateDistance(nodeHashID,keyHashId);
+                    if(distance<min){
+                        min = distance;
                     }
+                    System.out.println(nodeName+", distance: " + distance);
+                }
+                String value = attemptGetFromNode(nodeName, nodeAddress, key);
+                //System.out.println(value);
+                if (value != null && !value.equals("NOPE")) {
+                    System.out.println("Successfully retrieved value from fallback node: " + nodeName);
+                    return value;
                 }
 
 //                String nodeName = lines[1];
