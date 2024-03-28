@@ -50,11 +50,9 @@ public class FullNode implements FullNodeInterface {
     private byte[] nodeHashID;
     private String nodeTime;
 
-   // private Socket clientSocket;
+    //private Socket clientSocket;
     private BufferedReader reader;
     private Writer writer;
-    BufferedReader in;
-    Writer out;
 
     public boolean listen(String ipAddress, int portNumber) {
         // Implement this!
@@ -65,12 +63,6 @@ public class FullNode implements FullNodeInterface {
             System.out.println("Opening the server socket on port " + portNumber);
             serverSocket = new ServerSocket(portNumber);
             System.out.println("Server waiting for a client...");
-
-            isConnected = true;
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("New client connected!");
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            out = new OutputStreamWriter(clientSocket.getOutputStream());
 
 
             //Socket clientSocket = serverSocket.accept();
@@ -102,8 +94,8 @@ public class FullNode implements FullNodeInterface {
             //System.out.println("Client connected!");
             // handleClient(clientSocket);
             //System.out.println("Waiting for a client...!");
-//            Socket clientSocket = serverSocket.accept();
-//            System.out.println("New client connected!");
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("New client connected!");
 
             nodeTime = getCurrentTime();
             NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName,startingNodeAddress,nodeTime);
@@ -114,9 +106,13 @@ public class FullNode implements FullNodeInterface {
             updateNetworkMap(distance,newNodeInfo0);
 
             // Handle each connection in a separate thread
+            isConnected = true;
 
 
             while (isConnected) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
+
                 String message = in.readLine();
                 System.out.println(message);
                 handleClient(message, in, out);
