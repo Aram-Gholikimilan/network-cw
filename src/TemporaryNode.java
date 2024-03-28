@@ -327,7 +327,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             System.out.println("LOOK: "+nodeAddress);
             // Split the address to get IP and port
             String[] addressParts = nodeAddress.split(":");
-            String ip = addressParts[0];
+            InetAddress ip = InetAddress.getByName(addressParts[0]);
             int port = Integer.parseInt(addressParts[1]);
 
             // Open a new connection to the node
@@ -358,6 +358,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     for (int i = 0; i < lines; i++) {
                         valueBuilder.append("\n").append(reader.readLine());
                     }
+                    writer.write("END GOT-VALUE\n");
+                    writer.flush();
+                    clientSocket.close();
                     return valueBuilder.toString();
                 }
             }
