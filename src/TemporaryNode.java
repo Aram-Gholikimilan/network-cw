@@ -203,7 +203,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             return null;
         }
 
-        int min=0;
+        int min=99999;
         String minNodeName="";
         String minNodeAddress="";
 
@@ -284,7 +284,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 for (int i = 1; i < numNodes*2; i += 2) {
                     String nodeName = lines[i]; // Adjust index for node name
                     String nodeAddress = lines[i+1]; // Adjust index for node address
-                    System.out.println(nodeAddress);
+                    System.out.println(minNodeName);
+
                     byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
                     byte[] keyHashId = HashID.computeHashID(key+"\n");
                     int distance = HashID.calculateDistance(nodeHashID,keyHashId);
