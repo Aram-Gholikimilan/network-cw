@@ -264,7 +264,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 for (int i = 1; i < numNodes; i += 2) {
                     String nodeName = lines[i].trim(); // Node name
                     String nodeAddress = lines[i + 1].trim(); // Node address
-
+                    System.out.println(nodeName + "\n" + nodeAddress);
                     // Attempt to get from the nearest node
                     String value = attemptGetFromNode(nodeName, nodeAddress, key);
                     System.out.println("value " + i + " sdjhcb: " + value);
