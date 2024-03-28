@@ -50,12 +50,12 @@ public class FullNode implements FullNodeInterface {
     private byte[] nodeHashID;
     private String nodeTime;
 
-    private Socket clientSocket;
+   // private Socket clientSocket;
     private BufferedReader reader;
     private Writer writer;
-
-    BufferedReader in ;
+    BufferedReader in;
     Writer out;
+
     public boolean listen(String ipAddress, int portNumber) {
         // Implement this!
         // Return true if the node can accept incoming connections
@@ -66,32 +66,12 @@ public class FullNode implements FullNodeInterface {
             serverSocket = new ServerSocket(portNumber);
             System.out.println("Server waiting for a client...");
 
+            isConnected = true;
             Socket clientSocket = serverSocket.accept();
             System.out.println("New client connected!");
-
-            nodeTime = getCurrentTime();
-            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName,startingNodeAddress,nodeTime);
-            nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
-            // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
-            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
-            int distance = HashID.calculateDistance(nodeHashID,sameNodeHashID);
-            updateNetworkMap(distance,newNodeInfo0);
-
-            // Handle each connection in a separate thread
-            isConnected = true;
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new OutputStreamWriter(clientSocket.getOutputStream());
 
-            while (isConnected) {
-//                if (isConnected) {
-                message = in.readLine();
-                System.out.println(message);
-                //handleClient(message, in, out);
-                //new Thread(() -> handleClient(message,in,out)).start();
-                //System.out.println("The client is handled: " + message);
-                //clientSocket.close();
-//                }
-            }
 
             //Socket clientSocket = serverSocket.accept();
             //System.out.println("Client connected!");
@@ -103,7 +83,6 @@ public class FullNode implements FullNodeInterface {
             return false;
         }
     }
-    String message;
 
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
         // Implement this!
@@ -125,30 +104,26 @@ public class FullNode implements FullNodeInterface {
             //System.out.println("Waiting for a client...!");
 //            Socket clientSocket = serverSocket.accept();
 //            System.out.println("New client connected!");
-//
-//            nodeTime = getCurrentTime();
-//            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName,startingNodeAddress,nodeTime);
-//            nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
-//           // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
-//            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
-//            int distance = HashID.calculateDistance(nodeHashID,sameNodeHashID);
-//            updateNetworkMap(distance,newNodeInfo0);
-//
-//            // Handle each connection in a separate thread
-//            isConnected = true;
-//            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//            Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
-//
-//            while (isConnected) {
-////                if (isConnected) {
-//                    String message = in.readLine();
-//                    System.out.println(message);
-                    handleClient(message, in, out);
-//                    //new Thread(() -> handleClient(message,in,out)).start();
-                    System.out.println("The client is handled: " + message);
-//                    //clientSocket.close();
-////                }
-//            }
+
+            nodeTime = getCurrentTime();
+            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName,startingNodeAddress,nodeTime);
+            nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
+           // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
+            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
+            int distance = HashID.calculateDistance(nodeHashID,sameNodeHashID);
+            updateNetworkMap(distance,newNodeInfo0);
+
+            // Handle each connection in a separate thread
+
+
+            while (isConnected) {
+                String message = in.readLine();
+                System.out.println(message);
+                handleClient(message, in, out);
+                //new Thread(() -> handleClient(message,in,out)).start();
+                System.out.println("The client is handled: " + message);
+                //clientSocket.close();
+            }
         } catch (Exception e) {
             System.out.println("error: " + e.getMessage());
         }
