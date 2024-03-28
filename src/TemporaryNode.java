@@ -335,15 +335,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 writer.flush();
 
                 // Wait for a START response if necessary
-                reader.readLine(); // Assume the node responds
-
+                String res = reader.readLine(); // Assume the node responds
+                System.out.println(res);
                 // Now send the GET? request
                 writer.write("GET? " + key.split("\n").length + "\n" + key);
                 writer.flush();
 
                 // Read and process the response
                 String response = reader.readLine();
-                //System.out.println("start message 2: " + response);
+                System.out.println("start message 2: " + response);
 
                 if (response.startsWith("VALUE")) {
                     StringBuilder valueBuilder = new StringBuilder(response);
