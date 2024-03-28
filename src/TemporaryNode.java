@@ -262,8 +262,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 System.out.println(Arrays.toString(lines));
                 // Skip the first line which is "NODES X"
                 for (int i = 1; i < numNodes; i += 2) {
-                    String nodeName = lines[i].trim(); // Node name
-                    String nodeAddress = lines[i + 1].trim(); // Node address
+                    String nodeName = lines[i]; // Node name
+                    String nodeAddress = lines[i + 1]; // Node address
                     System.out.println(nodeName + "\n" + nodeAddress);
                     System.out.println("value " + i);
                     // Attempt to get from the nearest node
@@ -272,6 +272,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         System.out.println("Successfully retrieved value from fallback node: " + nodeName);
                         return value; // Successfully retrieved value from a fallback node
                     }
+                    System.out.println("i: " + i);
                 }
 
                 String nodeName = lines[1];
