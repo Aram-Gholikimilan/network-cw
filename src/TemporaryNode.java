@@ -311,7 +311,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                attemptGetFromNode(nodeName,nodeAddress,key);
                     InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
                     int port = Integer.parseInt(minNodeAddress.split(":")[1]);
-                    clientSocket = new Socket();
+                    clientSocket = new Socket(host, port);
                     reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     writer = new OutputStreamWriter(clientSocket.getOutputStream());
 //                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
