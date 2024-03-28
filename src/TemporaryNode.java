@@ -254,6 +254,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     System.err.println("Failed to retrieve nearest nodes or none are available.");
                     return null;
                 }
+                System.out.println("HERE: "+nearestNodesInfo);
 
                 // Parse the nearestNodesInfo to extract node details
                 String[] lines = nearestNodesInfo.split("\n");
