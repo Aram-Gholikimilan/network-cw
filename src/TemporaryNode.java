@@ -203,6 +203,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
             return null;
         }
 
+        int min=0;
+        String minNodeName="";
+        String minNodeAddress="";
+
         try{
             // ensure the key ends with a newline
             //if (!key.endsWith("\n")) key += "\n";
@@ -226,19 +230,19 @@ public class TemporaryNode implements TemporaryNodeInterface {
             //String[] parts = response.split(" ", 1);
             if (response.startsWith("VALUE"))
             {
-            //int valueLinesCount = Integer.parseInt(parts[1]);
-            int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
-            StringBuilder valueBuilder = new StringBuilder();
-            valueBuilder.append(response).append("\n");
-            for (int i = 0; i < valueLinesCount2; i++) {
+                //int valueLinesCount = Integer.parseInt(parts[1]);
+                int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
+                StringBuilder valueBuilder = new StringBuilder();
+                valueBuilder.append(response).append("\n");
+                for (int i = 0; i < valueLinesCount2; i++) {
                 valueBuilder.append(reader.readLine()).append("\n");
             }
 
-            String valueResponse = valueBuilder.toString();
+                String valueResponse = valueBuilder.toString();
 
-            System.out.println("The sdjcbshkhgsraubserver said : \n" + valueResponse); //valueResponse
-            //String response2 = reader.readLine();
-            //System.out.println("The server said2 : " + response2);
+                System.out.println("The sdjcbshkhgsraubserver said : \n" + valueResponse); //valueResponse
+                //String response2 = reader.readLine();
+                //System.out.println("The server said2 : " + response2);
 
 
                 return valueResponse;
@@ -276,10 +280,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                    }
 //                    System.out.println("i: " + i);
 //                }
-
-                int min=0;
-                String minNodeName="";
-                String minNodeAddress="";
                 // Adjusted loop to start from the first node's information
                 for (int i = 1; i < numNodes*2; i += 2) {
                     String nodeName = lines[i]; // Adjust index for node name
