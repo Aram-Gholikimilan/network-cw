@@ -682,6 +682,39 @@ public class FullNode implements FullNodeInterface {
     }
 
 
+    public boolean Nearest (String request) {
+        try{
+
+            String[] parts = request.split("\n");
+            if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
+            String fullNodeName = parts[0];
+            String fullNodeAddress = parts[1];
+
+            Socket clientSocket = serverSocket.accept();
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // Sending a message to the server at the other end of the socket
+            System.out.println("Sending a message to the server");
+            out.write("NOTIFY? \n" + fullNodeName + "\n" + fullNodeAddress + "\n");
+            out.flush();
+
+            String response = in.readLine();
+            System.out.println("The server said : " + response);
+
+            if (response != null && response.startsWith("NOTIFIED"))
+            {
+                isConnected = true; // Update connection status
+                return true;
+            }
+
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static void main(String[] args) throws Exception {
         FullNode fNode = new FullNode();
         if (fNode.listen("10.0.1.8", 6969)) {
