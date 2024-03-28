@@ -311,7 +311,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     clientSocket.close();
                     reader.close();
                     writer.close();
-                    
+
                     InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
                     int port = Integer.parseInt(minNodeAddress.split(":")[1]);
                     clientSocket = new Socket(host, port);
@@ -483,6 +483,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
+            reader.readLine();
             System.out.println("RESP: " + response);
             if (response.startsWith("NODES")) {
                 int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
