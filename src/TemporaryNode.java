@@ -315,6 +315,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                 // Read and process the response
                 String response = reader.readLine();
+                System.out.println("start message 2: " + response);
+
                 if (response.startsWith("VALUE")) {
                     StringBuilder valueBuilder = new StringBuilder(response);
                     String[] parts = response.split(" ");
