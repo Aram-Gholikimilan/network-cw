@@ -208,6 +208,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         String minNodeAddress="";
 
         try{
+            while(true){
 
                 // ensure the key ends with a newline
                 //if (!key.endsWith("\n")) key += "\n";
@@ -249,7 +250,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     return valueResponse;
 
                 } else if (response.startsWith("NOPE")) {
-                    while(true){
                     // Calculate the hashID of the key to find the nearest nodes
                     byte[] keyHashID = HashID.computeHashID(key + "\n");
                     String hexKeyHashID = HashID.bytesToHex(keyHashID);
@@ -309,10 +309,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
 //                attemptGetFromNode(nodeName,nodeAddress,key);
-
-
-                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
-                    return null;
+//
+//
+//                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
+//                    return null;
                 }
             }
 
