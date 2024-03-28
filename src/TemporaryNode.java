@@ -259,8 +259,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 String[] lines = nearestNodesInfo.split("\n");
                 int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
 
-                System.out.println(Arrays.toString(lines));
+                //System.out.println(Arrays.toString(lines));
                 // Skip the first line which is "NODES X"
+
 //                for (int i = 1; i < numNodes; i += 2) {
 //                    String nodeName = lines[i]; // Node name
 //                    String nodeAddress = lines[i + 1]; // Node address
@@ -275,12 +276,14 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                    System.out.println("i: " + i);
 //                }
 
+                // Adjusted loop to start from the first node's information
                 for (int i = 2; i < lines.length; i += 2) {
                     String nodeName = lines[i - 1]; // Adjust index for node name
                     String nodeAddress = lines[i]; // Adjust index for node address
 
-                    System.out.println(nodeName);
-                    System.out.println(nodeAddress);
+//                    System.out.println(nodeName);
+//                    System.out.println(nodeAddress);
+
                     String value = attemptGetFromNode(nodeName, nodeAddress, key);
                     if (value != null && !value.equals("NOPE")) {
                         System.out.println("Successfully retrieved value from fallback node: " + nodeName);
@@ -329,7 +332,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                 // Read and process the response
                 String response = reader.readLine();
-                System.out.println("start message 2: " + response);
+                //System.out.println("start message 2: " + response);
 
                 if (response.startsWith("VALUE")) {
                     StringBuilder valueBuilder = new StringBuilder(response);
