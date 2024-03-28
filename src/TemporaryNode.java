@@ -343,7 +343,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             try {
 
                 // Initiate protocol communication, e.g., send START command
-                writer.write("START 1 " + this.startingNodeName + "\n");
+                writer.write("START 1 " + name + "\n");
                 writer.flush();
                 System.out.println("hi!");
                 // Wait for a START response if necessary
@@ -365,11 +365,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     for (int i = 0; i < lines; i++) {
                         valueBuilder.append("\n").append(reader.readLine());
                     }
-                    writer.write("END GOT-VALUE\n");
-                    writer.flush();
-                    clientSocket.close();
                     return valueBuilder.toString();
                 }
+                return "NOPE";
 
             } catch (Exception e) {
                 System.err.println("Error attempting to get from node " + nodeName + ": " + e.getMessage());
