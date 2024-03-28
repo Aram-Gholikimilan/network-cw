@@ -272,6 +272,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
                 }
 
+                String nodeName = lines[1];
+                String nodeAddress = lines[2];
+                attemptGetFromNode(nodeName,nodeAddress,key);
+
+
                 System.err.println("Failed to retrieve the key-value pair from any fallback node.");
                 return null;
             }
