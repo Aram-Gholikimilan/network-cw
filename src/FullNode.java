@@ -49,6 +49,11 @@ public class FullNode implements FullNodeInterface {
     private int startingNodePort; // Store the starting node port for potential later use
     private byte[] nodeHashID;
     private String nodeTime;
+
+    private Socket clientSocket;
+    private BufferedReader reader;
+    private Writer writer;
+
     public boolean listen(String ipAddress, int portNumber) {
         // Implement this!
         // Return true if the node can accept incoming connections
@@ -102,12 +107,10 @@ public class FullNode implements FullNodeInterface {
 
             // Handle each connection in a separate thread
             isConnected = true;
-
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
 
             while (isConnected) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
-
                 String message = in.readLine();
                 System.out.println(message);
                 handleClient(message, in, out);
@@ -712,6 +715,52 @@ public class FullNode implements FullNodeInterface {
             System.out.println("Connecting attempt failed: " + e.getMessage());
             e.printStackTrace();
         }
+        return false;
+    }
+
+    public boolean start(String startingNodeName, String startingNodeAddress) throws IOException {
+        // Implement this!
+        // Return true if the 2D#4 network can be contacted
+        // Return false if the 2D#4 network can't be contacted
+        //return true;
+        this.startingNodeName=startingNodeName;
+        this.startingNodeAddress=startingNodeAddress;
+        Socket clientSocket = serverSocket.accept();
+        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
+        try{
+            String[] parts = startingNodeAddress.split(":");
+            if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
+            String IPAddressString = parts[0];
+            startingNodeHost = String.valueOf(InetAddress.getByName(IPAddressString));
+            startingNodePort = Integer.parseInt(parts[1]);
+
+            //System.out.println("TCPClient connecting to " + startingNodeAddress);
+            //System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
+            clientSocket = new Socket(startingNodeHost, startingNodePort);
+            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            // Sending a message to the server at the other end of the socket
+//                System.out.println("Sending a message to the server");
+//                System.out.println(startingNodeName);
+            writer.write("START 1 " + startingNodeName +"\n");
+            writer.flush();
+
+            String response = reader.readLine();
+            //System.out.println("The server said : " + response);
+
+            if (response != null && response.startsWith("START"))
+            {
+                isConnected = true; // Update connection status
+                return true;
+            }
+
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         return false;
     }
 
