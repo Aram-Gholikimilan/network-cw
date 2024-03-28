@@ -40,6 +40,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
     private InetAddress startingNodeHost; // Store the starting node host for potential later use
     private int startingNodePort; // Store the starting node port for potential later use
     private boolean isConnected = false; // Keep track of the connection state
+    String name = "aram@city.ac.uk:12345";
     public boolean start(String startingNodeName, String startingNodeAddress) {
         // Implement this!
         // Return true if the 2D#4 network can be contacted
@@ -63,7 +64,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 // Sending a message to the server at the other end of the socket
 //                System.out.println("Sending a message to the server");
 //                System.out.println(startingNodeName);
-                writer.write("START 1 " + startingNodeName +"\n");
+                writer.write("START 1 " + name +"\n");
                 writer.flush();
 
                 String response = reader.readLine();
@@ -314,6 +315,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     clientSocket = new Socket(host, port);
                     reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+                    writer.write("START 1 " + name +"\n");
 //                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
 //                    return null;
                 }
