@@ -208,64 +208,65 @@ public class TemporaryNode implements TemporaryNodeInterface {
         String minNodeAddress="";
 
         try{
-            // ensure the key ends with a newline
-            //if (!key.endsWith("\n")) key += "\n";
-            // Count the number of lines in both key and value
-            int keyLines = key.split("\n").length;
+            while(true){
+                // ensure the key ends with a newline
+                //if (!key.endsWith("\n")) key += "\n";
+                // Count the number of lines in both key and value
+                int keyLines = key.split("\n").length;
 
-            // you have the host and port from start
-            //System.out.println("TCPClient connecting to " + startingNodeAddress);
-            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
+                // you have the host and port from start
+                //System.out.println("TCPClient connecting to " + startingNodeAddress);
+                //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+                //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
-            //String threeClosestNodes = nearest(key);
-            // Sending a message to the server at the other end of the socket
-            //System.out.println("Sending a message to the server");
-            writer.write("GET? " + keyLines + "\n"+key);
-            writer.flush();
+                //String threeClosestNodes = nearest(key);
+                // Sending a message to the server at the other end of the socket
+                //System.out.println("Sending a message to the server");
+                writer.write("GET? " + keyLines + "\n"+key);
+                writer.flush();
 
-            String response = reader.readLine();
-            System.out.println("the response, sdfof: "+ response);
-            //String[] parts = response.split(" ", 1);
-            if (response.startsWith("VALUE"))
-            {
-                //int valueLinesCount = Integer.parseInt(parts[1]);
-                int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
-                StringBuilder valueBuilder = new StringBuilder();
-                valueBuilder.append(response).append("\n");
-                for (int i = 0; i < valueLinesCount2; i++) {
-                valueBuilder.append(reader.readLine()).append("\n");
-            }
+                String response = reader.readLine();
+                System.out.println("the response, sdfof: "+ response);
+                //String[] parts = response.split(" ", 1);
+                if (response.startsWith("VALUE"))
+                {
+                    //int valueLinesCount = Integer.parseInt(parts[1]);
+                    int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
+                    StringBuilder valueBuilder = new StringBuilder();
+                    valueBuilder.append(response).append("\n");
+                    for (int i = 0; i < valueLinesCount2; i++) {
+                        valueBuilder.append(reader.readLine()).append("\n");
+                    }
 
-                String valueResponse = valueBuilder.toString();
+                    String valueResponse = valueBuilder.toString();
 
-                System.out.println("The sdjcbshkhgsraubserver said : \n" + valueResponse); //valueResponse
-                //String response2 = reader.readLine();
-                //System.out.println("The server said2 : " + response2);
+                    System.out.println("The sdjcbshkhgsraubserver said : \n" + valueResponse); //valueResponse
+                    //String response2 = reader.readLine();
+                    //System.out.println("The server said2 : " + response2);
 
 
-                return valueResponse;
+                    return valueResponse;
 
-            } else if (response.startsWith("NOPE")) {
-                // Calculate the hashID of the key to find the nearest nodes
-                byte[] keyHashID = HashID.computeHashID(key + "\n");
-                String hexKeyHashID = HashID.bytesToHex(keyHashID);
+                } else if (response.startsWith("NOPE")) {
+                    // Calculate the hashID of the key to find the nearest nodes
+                    byte[] keyHashID = HashID.computeHashID(key + "\n");
+                    String hexKeyHashID = HashID.bytesToHex(keyHashID);
 
-                // Get the nearest nodes
-                String nearestNodesInfo = nearest(hexKeyHashID);
-                if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
-                    System.err.println("Failed to retrieve nearest nodes or none are available.");
-                    return null;
-                }
-                System.out.println("HERE: "+nearestNodesInfo);
+                    // Get the nearest nodes
+                    String nearestNodesInfo = nearest(hexKeyHashID);
+                    if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
+                        System.err.println("Failed to retrieve nearest nodes or none are available.");
+                        return null;
+                    }
+                    System.out.println("HERE: " + nearestNodesInfo);
 
-                // Parse the nearestNodesInfo to extract node details
-                String[] lines = nearestNodesInfo.split("\n");
-                int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
+                    // Parse the nearestNodesInfo to extract node details
+                    String[] lines = nearestNodesInfo.split("\n");
+                    int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
 
-                System.out.println(Arrays.toString(lines));
-                // Skip the first line which is "NODES X"
+                    System.out.println(Arrays.toString(lines));
+                    // Skip the first line which is "NODES X"
 
 //                for (int i = 1; i < numNodes; i += 2) {
 //                    String nodeName = lines[i]; // Node name
@@ -280,37 +281,38 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                    }
 //                    System.out.println("i: " + i);
 //                }
-                // Adjusted loop to start from the first node's information
-                for (int i = 1; i < numNodes*2; i += 2) {
-                    String nodeName = lines[i]; // Adjust index for node name
-                    String nodeAddress = lines[i+1]; // Adjust index for node address
-                    System.out.println(minNodeName);
+                    // Adjusted loop to start from the first node's information
+                    for (int i = 1; i < numNodes * 2; i += 2) {
+                        String nodeName = lines[i]; // Adjust index for node name
+                        String nodeAddress = lines[i + 1]; // Adjust index for node address
+                        System.out.println(minNodeName);
 
-                    byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
-                    byte[] keyHashId = HashID.computeHashID(key+"\n");
-                    int distance = HashID.calculateDistance(nodeHashID,keyHashId);
-                    if(distance<min){
-                        min = distance;
-                        minNodeName = nodeName;
-                        minNodeAddress = nodeAddress;
+                        byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
+                        byte[] keyHashId = HashID.computeHashID(key + "\n");
+                        int distance = HashID.calculateDistance(nodeHashID, keyHashId);
+                        if (distance < min) {
+                            min = distance;
+                            minNodeName = nodeName;
+                            minNodeAddress = nodeAddress;
+                        }
+                        System.out.println(nodeName + ", distance: " + distance);
                     }
-                    System.out.println(nodeName+", distance: " + distance);
-                }
-                System.out.println(minNodeName);
-                String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
-                //System.out.println(value);
-                if (value != null && !value.equals("NOPE")) {
-                    System.out.println("Successfully retrieved value from fallback node: " + minNodeName);
-                    return value;
-                }
+                    System.out.println(minNodeName);
+                    String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
+                    //System.out.println(value);
+                    if (value != null && !value.equals("NOPE")) {
+                        System.out.println("Successfully retrieved value from fallback node: " + minNodeName);
+                        return value;
+                    }
 
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
 //                attemptGetFromNode(nodeName,nodeAddress,key);
 
 
-                System.err.println("Failed to retrieve the key-value pair from any fallback node.");
-                return null;
+                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
+                    return null;
+                }
             }
 
         } catch (Exception e){
