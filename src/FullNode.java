@@ -116,7 +116,7 @@ public class FullNode implements FullNodeInterface {
                 //clientSocket.close();
             }
         } catch (Exception e) {
-            System.out.println("eeerroorr: " + e.getMessage());
+            System.out.println("error: " + e.getMessage());
         }
     }
 
