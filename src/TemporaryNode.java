@@ -281,11 +281,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     String nodeName = lines[i - 1]; // Adjust index for node name
                     String nodeAddress = lines[i]; // Adjust index for node address
 
-                    System.out.println(nodeName);
-                    System.out.println(nodeAddress);
+//                    System.out.println(nodeName);
+//                    System.out.println(nodeAddress);
 
                     String value = attemptGetFromNode(nodeName, nodeAddress, key);
-                    System.out.println(value);
+                    //System.out.println(value);
                     if (value != null && !value.equals("NOPE")) {
                         System.out.println("Successfully retrieved value from fallback node: " + nodeName);
                         return value;
