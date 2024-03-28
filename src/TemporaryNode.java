@@ -8,15 +8,13 @@
 
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.net.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 
@@ -331,16 +329,14 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
     private String attemptGetFromNode(String nodeName, String nodeAddress, String key) {
         try {
-            System.out.println("LOOK: "+nodeAddress);
+            System.out.println("LOOK: " + nodeAddress);
             // Split the address to get IP and port
             String[] addressParts = nodeAddress.split(":");
             InetAddress ip = InetAddress.getByName(addressParts[0]);
             int port = Integer.parseInt(addressParts[1]);
 
             // Open a new connection to the node
-            try (Socket socket = new Socket(ip, port);
-                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                 Writer writer = new OutputStreamWriter(socket.getOutputStream())) {
+            try {
 
                 // Initiate protocol communication, e.g., send START command
                 writer.write("START 1 " + this.startingNodeName + "\n");
@@ -370,15 +366,18 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     clientSocket.close();
                     return valueBuilder.toString();
                 }
+
+            } catch (Exception e) {
+                System.err.println("Error attempting to get from node " + nodeName + ": " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error attempting to get from node " + nodeName + ": " + e.getMessage());
+            return "NOPE";
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
         }
-        return "NOPE";
     }
 
 
-    public void end (String reason){
+        public void end (String reason){
 
         try{
             System.out.println("TCPClient connecting to " + startingNodeAddress);
