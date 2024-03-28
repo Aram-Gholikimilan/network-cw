@@ -291,6 +291,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
                     System.out.println(nodeName+", distance: " + distance);
                 }
+                System.out.println(nodeName);
                 String value = attemptGetFromNode(nodeName, nodeAddress, key);
                 //System.out.println(value);
                 if (value != null && !value.equals("NOPE")) {
