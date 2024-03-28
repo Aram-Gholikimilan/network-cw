@@ -348,6 +348,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 if (response.startsWith("VALUE")) {
                     StringBuilder valueBuilder = new StringBuilder(response);
                     String[] parts = response.split(" ");
+                    System.out.println("l:" + parts[0]);
                     int lines = Integer.parseInt(parts[1]);
                     for (int i = 0; i < lines; i++) {
                         valueBuilder.append("\n").append(reader.readLine());
