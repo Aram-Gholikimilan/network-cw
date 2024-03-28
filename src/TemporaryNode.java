@@ -261,23 +261,34 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                 System.out.println(Arrays.toString(lines));
                 // Skip the first line which is "NODES X"
-                for (int i = 1; i < numNodes; i += 2) {
-                    String nodeName = lines[i]; // Node name
-                    String nodeAddress = lines[i + 1]; // Node address
-                    System.out.println(nodeName + "\n" + nodeAddress);
-                    System.out.println("value " + i);
-                    // Attempt to get from the nearest node
+//                for (int i = 1; i < numNodes; i += 2) {
+//                    String nodeName = lines[i]; // Node name
+//                    String nodeAddress = lines[i + 1]; // Node address
+//                    System.out.println(nodeName + "\n" + nodeAddress);
+//                    System.out.println("value " + i);
+//                    // Attempt to get from the nearest node
+//                    String value = attemptGetFromNode(nodeName, nodeAddress, key);
+//                    if (value != null && !value.equals("NOPE")) {
+//                        System.out.println("Successfully retrieved value from fallback node: " + nodeName);
+//                        return value; // Successfully retrieved value from a fallback node
+//                    }
+//                    System.out.println("i: " + i);
+//                }
+
+                for (int i = 2; i < lines.length; i += 2) {
+                    String nodeName = lines[i - 1]; // Adjust index for node name
+                    String nodeAddress = lines[i]; // Adjust index for node address
+
                     String value = attemptGetFromNode(nodeName, nodeAddress, key);
                     if (value != null && !value.equals("NOPE")) {
                         System.out.println("Successfully retrieved value from fallback node: " + nodeName);
-                        return value; // Successfully retrieved value from a fallback node
+                        return value;
                     }
-                    System.out.println("i: " + i);
                 }
 
-                String nodeName = lines[1];
-                String nodeAddress = lines[2];
-                attemptGetFromNode(nodeName,nodeAddress,key);
+//                String nodeName = lines[1];
+//                String nodeAddress = lines[2];
+//                attemptGetFromNode(nodeName,nodeAddress,key);
 
 
                 System.err.println("Failed to retrieve the key-value pair from any fallback node.");
