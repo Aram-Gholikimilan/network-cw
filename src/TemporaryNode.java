@@ -283,8 +283,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 for (int i = 2; i < lines.length; i += 2) {
                     nodeName = lines[i - 1]; // Adjust index for node name
                     nodeAddress = lines[i]; // Adjust index for node address
-                    byte[] nodeHashID = HashID.computeHashID(nodeName);
-                    byte[] keyHashId = HashID.computeHashID(key);
+                    byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
+                    byte[] keyHashId = HashID.computeHashID(key+"\n");
                     int distance = HashID.calculateDistance(nodeHashID,keyHashId);
                     if(distance<min){
                         min = distance;
