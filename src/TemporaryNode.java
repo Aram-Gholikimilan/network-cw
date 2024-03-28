@@ -208,7 +208,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         String minNodeAddress="";
 
         try{
-            while(true){
+
                 // ensure the key ends with a newline
                 //if (!key.endsWith("\n")) key += "\n";
                 // Count the number of lines in both key and value
@@ -249,6 +249,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     return valueResponse;
 
                 } else if (response.startsWith("NOPE")) {
+                    while(true){
                     // Calculate the hashID of the key to find the nearest nodes
                     byte[] keyHashID = HashID.computeHashID(key + "\n");
                     String hexKeyHashID = HashID.bytesToHex(keyHashID);
