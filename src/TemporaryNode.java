@@ -259,7 +259,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 String[] lines = nearestNodesInfo.split("\n");
                 int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
 
-                //System.out.println(Arrays.toString(lines));
+                System.out.println(Arrays.toString(lines));
                 // Skip the first line which is "NODES X"
 
 //                for (int i = 1; i < numNodes; i += 2) {
@@ -281,8 +281,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     String nodeName = lines[i - 1]; // Adjust index for node name
                     String nodeAddress = lines[i]; // Adjust index for node address
 
-//                    System.out.println(nodeName);
-//                    System.out.println(nodeAddress);
+                    System.out.println(nodeName);
+                    System.out.println(nodeAddress);
 
                     String value = attemptGetFromNode(nodeName, nodeAddress, key);
                     if (value != null && !value.equals("NOPE")) {
