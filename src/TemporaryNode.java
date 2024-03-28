@@ -67,7 +67,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 writer.flush();
 
                 String response = reader.readLine();
-                //System.out.println("The server said : " + response);
+                System.out.println("The FullNode said : " + response);
 
                 if (response != null && response.startsWith("START"))
                 {
@@ -98,12 +98,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
             int keyLines = key.split("\n").length;
             int valueLines = value.split("\n").length; // Adjusted to correctly handle the last newline
 
-            // you have the host and port from start
-            //System.out.println("TCPClient connecting to " + startingNodeAddress);
-            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
             // Sending a message to the server at the other end of the socket
             System.out.println("Sending a message to the server");
             writer.write("PUT? " + keyLines + " " + valueLines + "\n" + key + value); //  + "\n" + key + "\n" + value
@@ -111,7 +105,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
-            System.out.println("The server said : " + response);
+           // System.out.println("The server said : " + response);
 
             if (response != null && response.startsWith("SUCCESS")) {
                 //isConnected = true; // Update connection status
@@ -250,7 +244,36 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 return valueResponse;
 
             } else if (response.startsWith("NOPE")) {
-                
+                // Calculate the hashID of the key to find the nearest nodes
+                byte[] keyHashID = HashID.computeHashID(key + "\n");
+                String hexKeyHashID = HashID.bytesToHex(keyHashID);
+
+                // Get the nearest nodes
+                String nearestNodesInfo = nearest(hexKeyHashID);
+                if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
+                    System.err.println("Failed to retrieve nearest nodes or none are available.");
+                    return null;
+                }
+
+                // Parse the nearestNodesInfo to extract node details
+                String[] lines = nearestNodesInfo.split("\n");
+                int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
+
+                // Skip the first line which is "NODES X"
+                for (int i = 1; i < numNodes; i += 2) {
+                    String nodeName = lines[i].trim(); // Node name
+                    String nodeAddress = lines[i + 1].trim(); // Node address
+
+                    // Attempt to get from the nearest node
+                    String value = attemptGetFromNode(nodeName, nodeAddress, key);
+                    if (value != null && !value.equals("NOPE")) {
+                        System.out.println("Successfully retrieved value from fallback node: " + nodeName);
+                        return value; // Successfully retrieved value from a fallback node
+                    }
+                }
+
+                System.err.println("Failed to retrieve the key-value pair from any fallback node.");
+                return null;
             }
 
         } catch (Exception e){
@@ -259,6 +282,48 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
         return null;
     }
+
+    private String attemptGetFromNode(String nodeName, String nodeAddress, String key) {
+        try {
+            // Split the address to get IP and port
+            String[] addressParts = nodeAddress.split(":");
+            String ip = addressParts[0];
+            int port = Integer.parseInt(addressParts[1]);
+
+            // Open a new connection to the node
+            try (Socket socket = new Socket(ip, port);
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                 Writer writer = new OutputStreamWriter(socket.getOutputStream())) {
+
+                // Initiate protocol communication, e.g., send START command
+                writer.write("START 1 " + this.startingNodeName + "\n");
+                writer.flush();
+
+                // Wait for a START response if necessary
+                reader.readLine(); // Assume the node responds
+
+                // Now send the GET? request
+                writer.write("GET? " + key.split("\n").length + "\n" + key);
+                writer.flush();
+
+                // Read and process the response
+                String response = reader.readLine();
+                if (response.startsWith("VALUE")) {
+                    StringBuilder valueBuilder = new StringBuilder(response);
+                    String[] parts = response.split(" ");
+                    int lines = Integer.parseInt(parts[1]);
+                    for (int i = 0; i < lines; i++) {
+                        valueBuilder.append("\n").append(reader.readLine());
+                    }
+                    return valueBuilder.toString();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error attempting to get from node " + nodeName + ": " + e.getMessage());
+        }
+        return "NOPE";
+    }
+
 
     public void end (String reason){
 
@@ -450,6 +515,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("\n===================\n");
         System.out.println("Start: ");
         tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:6969");
+
 /*
         System.out.println("\n===================\n");
         System.out.println("Store: ");

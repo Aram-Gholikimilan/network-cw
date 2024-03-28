@@ -53,17 +53,38 @@ public class FullNode implements FullNodeInterface {
     //private Socket clientSocket;
     private BufferedReader reader;
     private Writer writer;
-
+    private boolean isOpen;
+    BufferedReader in;
+    Writer out;
+    Socket clientSocket;
     public boolean listen(String ipAddress, int portNumber) {
         // Implement this!
         // Return true if the node can accept incoming connections
         // Return false otherwise
         //return true;
         try {
+            serverSocket = new ServerSocket(portNumber);
+            System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
+
+            Socket clientSocket = serverSocket.accept();
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            out = new OutputStreamWriter(clientSocket.getOutputStream());
+            isConnected = true;
+
+            return true;
+        } catch (IOException e) {
+            System.err.println("Could not listen on " + ipAddress + ":" + portNumber + ". " + e.getMessage());
+            return false;
+        }
+        /*
+        try {
             System.out.println("Opening the server socket on port " + portNumber);
             serverSocket = new ServerSocket(portNumber);
             System.out.println("Server waiting for a client...");
-
+            isOpen=true;
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("New client connected!");
+            isConnected = true;
 
             //Socket clientSocket = serverSocket.accept();
             //System.out.println("Client connected!");
@@ -74,28 +95,18 @@ public class FullNode implements FullNodeInterface {
             System.out.println("Failed to listen on " + ipAddress + ":" + portNumber + ". Error: " + e.getMessage());
             return false;
         }
+
+         */
     }
 
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
-        // Implement this!
-        //return;
-
         this.startingNodeName = startingNodeName;
         this.startingNodeAddress = startingNodeAddress;
-        //networkMap2.put(startingNodeName,startingNodeAddress);
         try {
             String[] parts = startingNodeAddress.split(":");
             if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
             startingNodeHost = parts[0];
             startingNodePort = Integer.parseInt(parts[1]);
-
-            //serverSocket = new ServerSocket(startingNodePort);
-            //Socket clientSocket = serverSocket.accept();
-            //System.out.println("Client connected!");
-            // handleClient(clientSocket);
-            //System.out.println("Waiting for a client...!");
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("New client connected!");
 
             nodeTime = getCurrentTime();
             NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName,startingNodeAddress,nodeTime);
@@ -105,23 +116,15 @@ public class FullNode implements FullNodeInterface {
             int distance = HashID.calculateDistance(nodeHashID,sameNodeHashID);
             updateNetworkMap(distance,newNodeInfo0);
 
-            // Handle each connection in a separate thread
-            isConnected = true;
-
-
-            while (isConnected) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
-
-                String message = in.readLine();
+            String message;
+            while ((message = in.readLine()) != null) {
                 System.out.println(message);
-                handleClient(message, in, out);
-                //new Thread(() -> handleClient(message,in,out)).start();
-                System.out.println("The client is handled: " + message);
-                //clientSocket.close();
-            }
+                handleClient(message);
+                System.out.println("The -- " + message + " -- is handled!");
+                }
+
         } catch (Exception e) {
-            System.out.println("error: " + e.getMessage());
+            System.out.println("Error during communication with the client: " + e.getMessage());
         }
     }
 
@@ -140,7 +143,7 @@ public class FullNode implements FullNodeInterface {
         return CommandType.UNKNOWN;
     }
 
-    private void handleClient(String line, BufferedReader in, Writer out) {
+    private void handleClient(String line) {
         try {
             while (line != null) {
                 if (!isConnected) {
@@ -153,23 +156,23 @@ public class FullNode implements FullNodeInterface {
                 switch (commandType) {
                     case START:
                         // Process START command
-                        handleStartCommand(line, out);
+                        handleStartCommand(line);
                         break;
                     case PUT:
                         // Process PUT? command
-                        handlePutRequest(line, in, out);
+                        handlePutRequest(line);
                         break;
                     case GET:
                         // Process GET? command
-                        handleGetRequest(line, in, out);
+                        handleGetRequest(line);
                         break;
                     case NOTIFY:
                         // Process NOTIFY? command
-                        handleNotifyRequest(line, in, out);
+                        handleNotifyRequest();
                         break;
                     case NEAREST:
                         // Process NEAREST? command
-                        handleNearestRequest(line, in, out);
+                        handleNearestRequest(line);
                         break;
                     case ECHO:
                         // ECHO command
@@ -213,7 +216,7 @@ public class FullNode implements FullNodeInterface {
     }
     // Placeholder for request handling methods
 
-    private void handleStartCommand(String line, Writer out) throws Exception {
+    private void handleStartCommand(String line) throws Exception {
         // Split the line by spaces to extract the parts
         String[] parts = line.split(" ");
         if (parts.length >= 3) {
@@ -248,7 +251,7 @@ public class FullNode implements FullNodeInterface {
         return time.format(formatter);
     }
 
-    private void handlePutRequest(String line, BufferedReader in, Writer out) throws IOException {
+    private void handlePutRequest(String line) throws IOException {
         try {
             String[] parts = line.split(" ", 3);
             int keyLinesCount = Integer.parseInt(parts[1]);
@@ -280,7 +283,7 @@ public class FullNode implements FullNodeInterface {
                 // Store the (key, value) pair if the current node is among the three closest
                 directory.put(key, value);
                 out.write("SUCCESS\n");
-                System.out.println("valueee: " + value);
+                //System.out.println("valueee: " + value);
             } else {
                 out.write("FAILED\n");
             }
@@ -292,17 +295,7 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
-    private boolean isCurrentNodeClosest(List<String> closestNodesAddresses) throws Exception {
-        // Compute the current node's hashID from its name
-        //byte[] currentNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-
-        // You need to implement a way to determine if the current node's address is among the closest nodes' addresses
-        // This is a conceptual implementation; adjust according to your network map and addressing scheme
-        String currentNodeAddress = this.startingNodeAddress;
-        return closestNodesAddresses.contains(currentNodeAddress);
-    }
-
-    private void handleGetRequest(String line, BufferedReader in, Writer out) {
+    private void handleGetRequest(String line) {
         //Extract and process the GET? request according to the 2D#4 protocol
         try {
             int keyLinesCount = Integer.parseInt(line.split(" ")[1]); // GET? <number>
@@ -351,7 +344,7 @@ public class FullNode implements FullNodeInterface {
         }
     }
 
-    private void handleNotifyRequest(String line, BufferedReader in, Writer out) {
+    private void handleNotifyRequest() {
         // Extract and process the NOTIFY? request according to the 2D#4 protocol
         // The requester MAY send a NOTIFY request.  This informs the responder of the address of a full node.
         try {
@@ -376,8 +369,6 @@ public class FullNode implements FullNodeInterface {
             // Handle error case, possibly with a specific protocol message
         }
     }
-
-    // TODO: Extract and process the NEAREST? request according to the 2D#4 protocol
 
     /*
     private void handleNearestRequest(String line, BufferedReader in, Writer out) {
@@ -421,8 +412,7 @@ public class FullNode implements FullNodeInterface {
 
      */
 
-
-    private void handleNearestRequest(String line, BufferedReader in, Writer out) throws Exception {
+    private void handleNearestRequest(String line) throws Exception {
         String hashIDHex = line.split(" ")[1].trim();
         byte[] hashID = HashID.hexStringToByteArray(hashIDHex);
 
@@ -443,8 +433,7 @@ public class FullNode implements FullNodeInterface {
         }
 
         // Print the full response for debugging purposes
-        System.out.println("Sending response:\n" + response.toString());
-
+        //System.out.println("Sending response:\n" + response.toString());
 
         // Write the response to the output
         out.write(response.toString());
@@ -456,7 +445,7 @@ public class FullNode implements FullNodeInterface {
             ArrayList<NodeInfo> newNodesList = new ArrayList<>();
             newNodesList.add(nodeInfo);
             networkMap2.put(distance, newNodesList);
-        } else if (networkMap2.get(distance).isEmpty()) {
+        } else if (networkMap2.get(distance).size()<3) {
             if (!networkMap2.get(distance).contains(nodeInfo)) {
                 networkMap2.get(distance).add(nodeInfo);
             }
@@ -557,8 +546,6 @@ public class FullNode implements FullNodeInterface {
                 .collect(Collectors.toList());
     }
 
-
-
     private List<NodeInfo> findClosestNodesNearest(byte[] targetHashIDHex) throws Exception {
         // Map to hold nodes and their distances to the target hashID
         HashMap<NodeInfo, Integer> nodeDistanceMap = new HashMap<>();
@@ -651,6 +638,7 @@ public class FullNode implements FullNodeInterface {
 
     }
      */
+
     public static String bytesToHex(byte[] hash) {
         StringBuilder hexString = new StringBuilder(2 * hash.length);
         for (byte b : hash) {
@@ -687,7 +675,7 @@ public class FullNode implements FullNodeInterface {
     }
 
 
-    public boolean Nearest (String request) {
+    public boolean Notify (String request) {
         try{
 
             String[] parts = request.split("\n");
@@ -768,29 +756,32 @@ public class FullNode implements FullNodeInterface {
 
     public static void main(String[] args) throws Exception {
         FullNode fNode = new FullNode();
-        if (fNode.listen("10.0.1.8", 6969)) {
-/*
-            String startingnodename ="martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n";
+        if (fNode.listen("127.0.0.1", 6969)) {
+
+            String startingnodename ="Aram.Milan@city.ac.uk:Red-Wine\n";
 
             String newNodeTime = getCurrentTime();
-            NodeInfo newNodeInfo = new NodeInfo("aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0\n","127.0.0.1:3456",newNodeTime);
+            NodeInfo newNodeInfo = new NodeInfo("2aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0\n","127.0.0.1:3456",newNodeTime);
             byte[] newNodeHashID = HashID.computeHashID(newNodeInfo.getNodeName());
             byte[] nodeHashID = HashID.computeHashID(startingnodename);
             int distance = HashID.calculateDistance(nodeHashID,newNodeHashID);
+            System.out.println("distance: " + distance);
             fNode.updateNetworkMap(distance,newNodeInfo);
 
             String newNodeTime1 = getCurrentTime();
-            NodeInfo newNodeInfo1 = new NodeInfo("6martin@city.ac.uk:MyCoolImplementation,1.41,test-node-21\n","127.0.0.1:3456",newNodeTime1);
+            NodeInfo newNodeInfo1 = new NodeInfo("66artin@city.ac.uk:MyCoolImplementation,1.41,test-node-21\n","127.0.0.1:3456",newNodeTime1);
             byte[] newNodeHashID1 = HashID.computeHashID(newNodeInfo1.getNodeName());
             byte[] nodeHashID1 = HashID.computeHashID(startingnodename);
             int distance1 = HashID.calculateDistance(nodeHashID1,newNodeHashID1);
+            System.out.println("distance2: " + distance1);
             fNode.updateNetworkMap(distance1,newNodeInfo1);
 
             String newNodeTime2 = getCurrentTime();
-            NodeInfo newNodeInfo2 = new NodeInfo("betul.wejbdwhb@city.ac.uk:MyCoolImplementation,1.41,test-node-22\n","127.0.0.1:3456",newNodeTime2);
+            NodeInfo newNodeInfo2 = new NodeInfo("fetul.wejbdwhb@city.ac.uk:MyCoolImplementation,1.41,test-node-22\n","127.0.0.1:3456",newNodeTime2);
             byte[] newNodeHashID2 = HashID.computeHashID(newNodeInfo2.getNodeName());
             byte[] nodeHashID2 = HashID.computeHashID(startingnodename);
             int distance2 = HashID.calculateDistance(nodeHashID2,newNodeHashID2);
+            System.out.println("distance2: " + distance2);
             fNode.updateNetworkMap(distance2,newNodeInfo2);
 
             String newNodeTime3 = getCurrentTime();
@@ -798,9 +789,10 @@ public class FullNode implements FullNodeInterface {
             byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName());
             byte[] nodeHashID3 = HashID.computeHashID(startingnodename);
             int distance3 = HashID.calculateDistance(nodeHashID3,newNodeHashID3);
+            System.out.println("distance3: " + distance3);
             fNode.updateNetworkMap(distance3,newNodeInfo3);
-*/
-            fNode.handleIncomingConnections("Aram.Milan@city.ac.uk:Red-Wine", "10.0.1.8:6969");
+
+            fNode.handleIncomingConnections("Aram.Milan@city.ac.uk:Red-Wine", "127.0.0.1:6969");
             System.out.println("DONE!");
         }
 
