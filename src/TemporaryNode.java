@@ -333,7 +333,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 // Initiate protocol communication, e.g., send START command
                 writer.write("START 1 " + this.startingNodeName + "\n");
                 writer.flush();
-
+                System.out.println("hi!");
                 // Wait for a START response if necessary
                 String res = reader.readLine(); // Assume the node responds
                 System.out.println(res);
