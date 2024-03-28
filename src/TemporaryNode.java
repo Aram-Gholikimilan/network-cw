@@ -224,7 +224,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
             String response = reader.readLine();
             System.out.println("the response, sdfof: "+ response);
             //String[] parts = response.split(" ", 1);
-
+            if (response.startsWith("VALUE"))
+            {
             //int valueLinesCount = Integer.parseInt(parts[1]);
             int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
             StringBuilder valueBuilder = new StringBuilder();
@@ -239,8 +240,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             //String response2 = reader.readLine();
             //System.out.println("The server said2 : " + response2);
 
-            if (response.startsWith("VALUE"))
-            {
+
                 return valueResponse;
 
             } else if (response.startsWith("NOPE")) {
