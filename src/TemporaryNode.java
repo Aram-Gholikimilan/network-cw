@@ -284,6 +284,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 for (int i = 1; i < numNodes*2; i += 2) {
                     String nodeName = lines[i]; // Adjust index for node name
                     String nodeAddress = lines[i+1]; // Adjust index for node address
+                    System.out.println(nodeName);
                     byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
                     byte[] keyHashId = HashID.computeHashID(key+"\n");
                     int distance = HashID.calculateDistance(nodeHashID,keyHashId);
