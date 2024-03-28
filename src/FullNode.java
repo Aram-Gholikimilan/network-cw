@@ -110,13 +110,15 @@ public class FullNode implements FullNodeInterface {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             Writer out = new OutputStreamWriter(clientSocket.getOutputStream());
 
-            while (isConnected) {
-                String message = in.readLine();
-                System.out.println(message);
-                handleClient(message, in, out);
-                //new Thread(() -> handleClient(message,in,out)).start();
-                System.out.println("The client is handled: " + message);
-                //clientSocket.close();
+//            while (isConnected) {
+                if (isConnected) {
+                    String message = in.readLine();
+                    System.out.println(message);
+                    handleClient(message, in, out);
+                    //new Thread(() -> handleClient(message,in,out)).start();
+                    System.out.println("The client is handled: " + message);
+                    //clientSocket.close();
+              //  }
             }
         } catch (Exception e) {
             System.out.println("error: " + e.getMessage());
