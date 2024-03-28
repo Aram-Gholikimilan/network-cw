@@ -483,7 +483,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
-            reader.readLine();
             System.out.println("RESP: " + response);
             if (response.startsWith("NODES")) {
                 int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
@@ -499,11 +498,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                System.out.println("Complete nodes information received:\n" + nodesInfo);
                 return nodesInfo.toString();
             }
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-        return null;
     }
 
 
