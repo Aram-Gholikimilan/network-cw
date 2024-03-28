@@ -308,6 +308,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
 //                attemptGetFromNode(nodeName,nodeAddress,key);
+                    clientSocket.close();
+                    reader.close();
+                    writer.close();
+                    
                     InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
                     int port = Integer.parseInt(minNodeAddress.split(":")[1]);
                     clientSocket = new Socket(host, port);
