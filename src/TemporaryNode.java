@@ -309,8 +309,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
 //                attemptGetFromNode(nodeName,nodeAddress,key);
-//
-//
+                    InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
+                    int port = Integer.parseInt(minNodeAddress.split(":")[1]);
+                    clientSocket = new Socket();
+                    reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    writer = new OutputStreamWriter(clientSocket.getOutputStream());
 //                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
 //                    return null;
                 }
