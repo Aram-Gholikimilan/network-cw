@@ -251,7 +251,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     return valueResponse;
 
                 } else if (response.startsWith("NOPE")) {
+                    int countNopes=0;
                     while(true){
+                        countNopes++;
+                        System.out.println("nopes: " + countNopes);
                     // Calculate the hashID of the key to find the nearest nodes
                     byte[] keyHashID = HashID.computeHashID(key + "\n");
                     String hexKeyHashID = HashID.bytesToHex(keyHashID);
@@ -310,10 +313,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     writer.close();
 
                     InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
-                    int port = Integer.parseInt(minNodeAddress.split(":")[1]);
-                    clientSocket = new Socket(host, port);
-                    reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    writer = new OutputStreamWriter(clientSocket.getOutputStream());
+//                    int port = Integer.parseInt(minNodeAddress.split(":")[1]);
+//                    Socket clientSocket = new Socket(host, port);
+//                    BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//                    Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
                     this.startingNodeAddress = minNodeAddress;
                     this.startingNodeName = minNodeName;
