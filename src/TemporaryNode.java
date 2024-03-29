@@ -373,8 +373,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                String nodeAddress = nodeDetails[2];
 //                attemptStoreOnNode(nodeName,nodeAddress,key,value);
 
-                        System.err.println("Failed to store the key-value pair on any fallback node.");
-                        return "NOPEE";
+//                        System.err.println("Failed to store the key-value pair on any fallback node.");
+//                        return "NOPEE";
                     }
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
