@@ -167,7 +167,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             Writer writer = new OutputStreamWriter(socket.getOutputStream());
 
             // Initiate protocol communication, e.g., send START command
-            writer.write("START 1 " + this.startingNodeName + "\n"); // Adjust as needed
+            writer.write("START 1 " + name + "\n"); // Adjust as needed
             writer.flush();
 
             // Wait for a START response if necessary
@@ -208,7 +208,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         String minNodeAddress="";
         int count = 0;
         try{
-            while(true){
+            //while(true){
                 count++;
                 System.out.println("get: "+count);
                 // ensure the key ends with a newline
@@ -364,7 +364,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                             String result = attemptGetOnNode2(nodeName, nodeAddress, key);
                             // Attempt to store on the nearest node
                             if (result.startsWith("VALUE")) {
-                                System.out.println("Successfully stored on fallback node: " + nodeName);
+                                System.out.println("Successfully got the value on fallback node: " + nodeName);
                                 return result;
                             }
                         }
@@ -386,7 +386,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
 //                    return null;
                 }
-            }
+          //  }
 
         } catch (Exception e){
             System.out.println("Error during GET? request handling: " + e.getMessage());
@@ -408,7 +408,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             Writer writer = new OutputStreamWriter(socket.getOutputStream());
 
             // Initiate protocol communication, e.g., send START command
-            writer.write("START 1 " + this.startingNodeName + "\n"); // Adjust as needed
+            writer.write("START 1 " + name + "\n"); // Adjust as needed
             writer.flush();
 
             // Wait for a START response if necessary
