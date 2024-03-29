@@ -251,6 +251,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     return valueResponse;
 
                 } else if (response.startsWith("NOPE")) {
+                    /*
                     int countNopes=0;
                     while(true){
                         countNopes++;
@@ -334,6 +335,45 @@ public class TemporaryNode implements TemporaryNodeInterface {
                             return value;
                         }
                     }
+
+                     */
+
+                    // Get the hash ID for the key to find nearest nodes
+                    byte[] keyHash = HashID.computeHashID(key);
+                    String hexKeyHash = HashID.bytesToHex(keyHash);
+
+                    // Call nearest to find nearest nodes
+                    String nearestNodesInfo = nearest(hexKeyHash);
+                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
+                    //System.out.println(nearestNodesInfo);
+                    if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
+                        System.err.println("Failed to retrieve nearest nodes or none are available.");
+                        return null;
+                    }
+
+
+                    // Split the nearestNodesInfo to get individual node details
+                    String[] nodeDetails = nearestNodesInfo.split("\n");
+                    int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
+                    // Skip the first line which is "NODES X"
+                    for (int i = 1; i < numNodes; i+=2) {
+                        String nodeName = nodeDetails[i];
+                        String nodeAddress = nodeDetails[i+1];
+
+                        String result = attemptGetOnNode2(nodeName, nodeAddress, key);
+                        // Attempt to store on the nearest node
+                        if (result.startsWith("VALUE")) {
+                            System.out.println("Successfully stored on fallback node: " + nodeName);
+                            return result;
+                        }
+                    }
+
+//                String nodeName = nodeDetails[1];
+//                String nodeAddress = nodeDetails[2];
+//                attemptStoreOnNode(nodeName,nodeAddress,key,value);
+
+                    System.err.println("Failed to store the key-value pair on any fallback node.");
+                    return "NOPEE";
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
 //                attemptGetFromNode(nodeName,nodeAddress,key);
@@ -351,6 +391,44 @@ public class TemporaryNode implements TemporaryNodeInterface {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String attemptGetOnNode2(String nodeName, String nodeAddress, String key) {
+        try {
+            // Split the address to get IP and port
+            String[] addressParts = nodeAddress.split(":");
+            String ip = addressParts[0];
+            int port = Integer.parseInt(addressParts[1]);
+
+            // Open a new connection to the node
+            Socket socket = new Socket(ip, port);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            Writer writer = new OutputStreamWriter(socket.getOutputStream());
+
+            // Initiate protocol communication, e.g., send START command
+            writer.write("START 1 " + this.startingNodeName + "\n"); // Adjust as needed
+            writer.flush();
+
+            // Wait for a START response if necessary
+            // Assume the node responds with START, indicating ready to communicate
+            reader.readLine(); // Read the response to the START command
+
+            writer.write("GET? " + key.split("\n").length + "\n" + key);
+            writer.flush();
+
+            // Read and check the response
+            String response = reader.readLine();
+            socket.close(); // Always close the socket
+
+            // Check if the response indicates success
+            if(response.startsWith("VALUE")){
+                return response;
+            }
+            return "NOPEE";
+        } catch (Exception e) {
+            System.err.println("Error attempting to store on node " + nodeName + ": " + e.getMessage());
+            return "NOPEE";
+        }
     }
 
     private String attemptGetFromNode(String nodeName, String nodeAddress, String key) {
