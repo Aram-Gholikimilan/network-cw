@@ -255,83 +255,85 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     while(true){
                         countNopes++;
                         System.out.println("nopes: " + countNopes);
-                    // Calculate the hashID of the key to find the nearest nodes
-                    byte[] keyHashID = HashID.computeHashID(key + "\n");
-                    String hexKeyHashID = HashID.bytesToHex(keyHashID);
+                        // Calculate the hashID of the key to find the nearest nodes
+                        byte[] keyHashID = HashID.computeHashID(key + "\n");
+                        String hexKeyHashID = HashID.bytesToHex(keyHashID);
 
-                    // Get the nearest nodes
-                    String nearestNodesInfo = nearest(hexKeyHashID);
-                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
-                    if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
-                        System.err.println("Failed to retrieve nearest nodes or none are available.");
-                        return null;
-                    }
-                    // System.out.println("HERE: " + nearestNodesInfo);
-
-                    // Parse the nearestNodesInfo to extract node details
-                    String[] lines = nearestNodesInfo.split("\n");
-                    int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
-
-                    // System.out.println(Arrays.toString(lines));
-                    // Skip the first line which is "NODES X"
-
-//                for (int i = 1; i < numNodes; i += 2) {
-//                    String nodeName = lines[i]; // Node name
-//                    String nodeAddress = lines[i + 1]; // Node address
-//                    System.out.println(nodeName + "\n" + nodeAddress);
-//                    System.out.println("value " + i);
-//                    // Attempt to get from the nearest node
-//                    String value = attemptGetFromNode(nodeName, nodeAddress, key);
-//                    if (value != null && !value.equals("NOPE")) {
-//                        System.out.println("Successfully retrieved value from fallback node: " + nodeName);
-//                        return value; // Successfully retrieved value from a fallback node
-//                    }
-//                    System.out.println("i: " + i);
-//                }
-                    // Adjusted loop to start from the first node's information
-                    for (int i = 1; i < numNodes * 2; i += 2) {
-                        String nodeName = lines[i]; // Adjust index for node name
-                        String nodeAddress = lines[i + 1]; // Adjust index for node address
-                        System.out.println(minNodeName);
-
-                        byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
-                        byte[] keyHashId = HashID.computeHashID(key + "\n");
-                        int distance = HashID.calculateDistance(nodeHashID, keyHashId);
-                        if (distance < min) {
-                            min = distance;
-                            minNodeName = nodeName;
-                            minNodeAddress = nodeAddress;
+                        System.out.println("name and address of new node: \n"+this.startingNodeName+" "+this.startingNodeAddress);
+                        // Get the nearest nodes
+                        String nearestNodesInfo = nearest(hexKeyHashID);
+                        System.out.println("nearest nodes: \n" + nearestNodesInfo);
+                        if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
+                            System.err.println("Failed to retrieve nearest nodes or none are available.");
+                            return null;
                         }
-                        System.out.println(nodeName + ", distance: " + distance);
+                        // System.out.println("HERE: " + nearestNodesInfo);
+
+                        // Parse the nearestNodesInfo to extract node details
+                        String[] lines = nearestNodesInfo.split("\n");
+                        int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
+
+                        // System.out.println(Arrays.toString(lines));
+                        // Skip the first line which is "NODES X"
+
+    //                for (int i = 1; i < numNodes; i += 2) {
+    //                    String nodeName = lines[i]; // Node name
+    //                    String nodeAddress = lines[i + 1]; // Node address
+    //                    System.out.println(nodeName + "\n" + nodeAddress);
+    //                    System.out.println("value " + i);
+    //                    // Attempt to get from the nearest node
+    //                    String value = attemptGetFromNode(nodeName, nodeAddress, key);
+    //                    if (value != null && !value.equals("NOPE")) {
+    //                        System.out.println("Successfully retrieved value from fallback node: " + nodeName);
+    //                        return value; // Successfully retrieved value from a fallback node
+    //                    }
+    //                    System.out.println("i: " + i);
+    //                }
+                        // Adjusted loop to start from the first node's information
+                        for (int i = 1; i < numNodes * 2; i += 2) {
+                            String nodeName = lines[i]; // Adjust index for node name
+                            String nodeAddress = lines[i + 1]; // Adjust index for node address
+                            System.out.println(minNodeName);
+
+                            byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
+                            byte[] keyHashId = HashID.computeHashID(key + "\n");
+                            int distance = HashID.calculateDistance(nodeHashID, keyHashId);
+                            if (distance < min) {
+                                min = distance;
+                                minNodeName = nodeName;
+                                minNodeAddress = nodeAddress;
+                            }
+                            System.out.println(nodeName + ", distance: " + distance);
+                        }
+
+
+                        System.out.println("min node name: " + minNodeName);
+
+                        clientSocket.close();
+                        reader.close();
+                        writer.close();
+
+                        InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
+                        int port = Integer.parseInt(minNodeAddress.split(":")[1]);
+                        clientSocket = new Socket(host, port);
+                        reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                        writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+                        this.startingNodeAddress = minNodeAddress;
+                        this.startingNodeName = minNodeName;
+                        start(minNodeName, minNodeAddress);
+
+    //                    writer.write("START 1 " + name +"\n");
+    //                    writer.flush();
+
+                        String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
+                        System.out.println("attempGetFromNode value: " + response);
+
+                        if (value != null && !value.equals("NOPE")) {
+                            System.out.println("Successfully retrieved value from fallback node: " + minNodeName);
+                            return value;
+                        }
                     }
-
-
-                    System.out.println("min node name: " + minNodeName);
-
-                    clientSocket.close();
-                    reader.close();
-                    writer.close();
-
-                    InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
-//                    int port = Integer.parseInt(minNodeAddress.split(":")[1]);
-//                    Socket clientSocket = new Socket(host, port);
-//                    BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//                    Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-                    this.startingNodeAddress = minNodeAddress;
-                    this.startingNodeName = minNodeName;
-                    start(minNodeName, minNodeAddress);
-
-//                    writer.write("START 1 " + name +"\n");
-//                    writer.flush();
-
-                    String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
-                    //System.out.println(value);
-                    if (value != null && !value.equals("NOPE")) {
-                        System.out.println("Successfully retrieved value from fallback node: " + minNodeName);
-                        return value;
-                    }
-                }
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
 //                attemptGetFromNode(nodeName,nodeAddress,key);
@@ -380,7 +382,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                 // Read and process the response
                 String response = reader.readLine();
-                System.out.println("get message 2: " + response);
+            //    System.out.println("get message 2: " + response);
 
                 if (response.startsWith("VALUE")) {
                     StringBuilder valueBuilder = new StringBuilder(response);
