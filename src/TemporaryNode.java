@@ -308,11 +308,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     reader.close();
                     writer.close();
 
-                    InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
-                    int port = Integer.parseInt(minNodeAddress.split(":")[1]);
-                    clientSocket = new Socket(host, port);
-                    reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    writer = new OutputStreamWriter(clientSocket.getOutputStream());
+//                    InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
+//                    int port = Integer.parseInt(minNodeAddress.split(":")[1]);
+//                    clientSocket = new Socket(host, port);
+//                    reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//                    writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
                     start(minNodeName,minNodeAddress);
 
@@ -502,7 +502,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
-            System.out.println("RESP: " + response);
+        //    System.out.println("RESP: " + response);
             if (response.startsWith("NODES")) {
                 int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
                 StringBuilder nodesInfo = new StringBuilder();
@@ -512,7 +512,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     String nodeAddress = reader.readLine().trim(); // Trim any trailing newlines
                     nodesInfo.append(nodeName).append("\n").append(nodeAddress).append("\n");
                 }
-                System.out.println(nodesInfo);
+        //        System.out.println(nodesInfo);
                 // Print the complete nodes information for debugging before returning
 //                System.out.println("Complete nodes information received:\n" + nodesInfo);
                 return nodesInfo.toString();
