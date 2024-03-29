@@ -206,10 +206,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
         int min=99999;
         String minNodeName="";
         String minNodeAddress="";
-
+        int count = 0;
         try{
             while(true){
-
+                count++;
+                System.out.println("get: "+count);
                 // ensure the key ends with a newline
                 //if (!key.endsWith("\n")) key += "\n";
                 // Count the number of lines in both key and value
@@ -261,13 +262,13 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         System.err.println("Failed to retrieve nearest nodes or none are available.");
                         return null;
                     }
-                    System.out.println("HERE: " + nearestNodesInfo);
+                   // System.out.println("HERE: " + nearestNodesInfo);
 
                     // Parse the nearestNodesInfo to extract node details
                     String[] lines = nearestNodesInfo.split("\n");
                     int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
 
-                    System.out.println(Arrays.toString(lines));
+                   // System.out.println(Arrays.toString(lines));
                     // Skip the first line which is "NODES X"
 
 //                for (int i = 1; i < numNodes; i += 2) {
@@ -299,17 +300,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         }
                         System.out.println(nodeName + ", distance: " + distance);
                     }
-                    System.out.println("min node name: "+minNodeName);
-                    String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
-                    //System.out.println(value);
-                    if (value != null && !value.equals("NOPE")) {
-                        System.out.println("Successfully retrieved value from fallback node: " + minNodeName);
-                        return value;
-                    }
 
-//                String nodeName = lines[1];
-//                String nodeAddress = lines[2];
-//                attemptGetFromNode(nodeName,nodeAddress,key);
+
+                    System.out.println("min node name: "+minNodeName);
+
                     clientSocket.close();
                     reader.close();
                     writer.close();
@@ -321,6 +315,22 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
                     writer.write("START 1 " + name +"\n");
+                    writer.flush();
+
+                    String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
+                    //System.out.println(value);
+                    if (value != null && !value.equals("NOPE")) {
+                        System.out.println("Successfully retrieved value from fallback node: " + minNodeName);
+                        return value;
+                    }
+
+//                String nodeName = lines[1];
+//                String nodeAddress = lines[2];
+//                attemptGetFromNode(nodeName,nodeAddress,key);
+
+
+
+
 //                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
 //                    return null;
                 }
@@ -341,17 +351,18 @@ public class TemporaryNode implements TemporaryNodeInterface {
             InetAddress ip = InetAddress.getByName(addressParts[0]);
             int port = Integer.parseInt(addressParts[1]);
 
-            clientSocket = new Socket(ip, port);
-            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            writer = new OutputStreamWriter(clientSocket.getOutputStream());
+//            clientSocket = new Socket(ip, port);
+//            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//            writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Open a new connection to the node
            // try {
 
                 // Initiate protocol communication, e.g., send START command
-                writer.write("START 1 " + name + "\n");
-                writer.flush();
-                System.out.println("hi!");
+//                writer.write("START 1 " + name + "\n");
+//                writer.flush();
+//                System.out.println("hi!");
+
                 // Wait for a START response if necessary
                 String res = reader.readLine(); // Assume the node responds
                 System.out.println("result of start: \n"+res);
@@ -361,7 +372,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                 // Read and process the response
                 String response = reader.readLine();
-                System.out.println("start message 2: " + response);
+                System.out.println("get message 2: " + response);
 
                 if (response.startsWith("VALUE")) {
                     StringBuilder valueBuilder = new StringBuilder(response);
