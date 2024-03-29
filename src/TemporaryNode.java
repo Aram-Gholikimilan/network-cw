@@ -338,42 +338,44 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                      */
 
-                    // Get the hash ID for the key to find nearest nodes
-                    byte[] keyHash = HashID.computeHashID(key);
-                    String hexKeyHash = HashID.bytesToHex(keyHash);
+                    while(true) {
+                        // Get the hash ID for the key to find nearest nodes
+                        byte[] keyHash = HashID.computeHashID(key);
+                        String hexKeyHash = HashID.bytesToHex(keyHash);
 
-                    // Call nearest to find nearest nodes
-                    String nearestNodesInfo = nearest(hexKeyHash);
-                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
-                    //System.out.println(nearestNodesInfo);
-                    if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
-                        System.err.println("Failed to retrieve nearest nodes or none are available.");
-                        return null;
-                    }
-
-
-                    // Split the nearestNodesInfo to get individual node details
-                    String[] nodeDetails = nearestNodesInfo.split("\n");
-                    int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
-                    // Skip the first line which is "NODES X"
-                    for (int i = 1; i < numNodes; i+=2) {
-                        String nodeName = nodeDetails[i];
-                        String nodeAddress = nodeDetails[i+1];
-
-                        String result = attemptGetOnNode2(nodeName, nodeAddress, key);
-                        // Attempt to store on the nearest node
-                        if (result.startsWith("VALUE")) {
-                            System.out.println("Successfully stored on fallback node: " + nodeName);
-                            return result;
+                        // Call nearest to find nearest nodes
+                        String nearestNodesInfo = nearest(hexKeyHash);
+                        System.out.println("nearest nodes: \n" + nearestNodesInfo);
+                        //System.out.println(nearestNodesInfo);
+                        if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
+                            System.err.println("Failed to retrieve nearest nodes or none are available.");
+                            return null;
                         }
-                    }
+
+
+                        // Split the nearestNodesInfo to get individual node details
+                        String[] nodeDetails = nearestNodesInfo.split("\n");
+                        int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
+                        // Skip the first line which is "NODES X"
+                        for (int i = 1; i < numNodes; i += 2) {
+                            String nodeName = nodeDetails[i];
+                            String nodeAddress = nodeDetails[i + 1];
+
+                            String result = attemptGetOnNode2(nodeName, nodeAddress, key);
+                            // Attempt to store on the nearest node
+                            if (result.startsWith("VALUE")) {
+                                System.out.println("Successfully stored on fallback node: " + nodeName);
+                                return result;
+                            }
+                        }
 
 //                String nodeName = nodeDetails[1];
 //                String nodeAddress = nodeDetails[2];
 //                attemptStoreOnNode(nodeName,nodeAddress,key,value);
 
-                    System.err.println("Failed to store the key-value pair on any fallback node.");
-                    return "NOPEE";
+                        System.err.println("Failed to store the key-value pair on any fallback node.");
+                        return "NOPEE";
+                    }
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
 //                attemptGetFromNode(nodeName,nodeAddress,key);
