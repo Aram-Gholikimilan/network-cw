@@ -256,6 +256,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     // Get the nearest nodes
                     String nearestNodesInfo = nearest(hexKeyHashID);
+                    System.out.println("nearest nodes: \n"+nearestNodesInfo);
                     if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
                         System.err.println("Failed to retrieve nearest nodes or none are available.");
                         return null;
