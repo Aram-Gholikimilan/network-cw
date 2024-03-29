@@ -504,6 +504,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
 
         try {
+            System.out.println("writer: "+writer.toString());
             writer.write("NEAREST? " + hashID + "\n");
             writer.flush();
 
