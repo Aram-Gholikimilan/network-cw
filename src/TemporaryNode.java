@@ -314,8 +314,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
-                    writer.write("START 1 " + name +"\n");
-                    writer.flush();
+                    start(minNodeName,minNodeAddress);
+
+//                    writer.write("START 1 " + name +"\n");
+//                    writer.flush();
 
                     String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
                     //System.out.println(value);
