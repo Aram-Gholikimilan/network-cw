@@ -313,11 +313,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         reader.close();
                         writer.close();
 
-                        InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
-                        int port = Integer.parseInt(minNodeAddress.split(":")[1]);
-                        clientSocket = new Socket(host, port);
-                        reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                        writer = new OutputStreamWriter(clientSocket.getOutputStream());
+//                        InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
+//                        int port = Integer.parseInt(minNodeAddress.split(":")[1]);
+//                        clientSocket = new Socket(host, port);
+//                        reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//                        writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
                         this.startingNodeAddress = minNodeAddress;
                         this.startingNodeName = minNodeName;
