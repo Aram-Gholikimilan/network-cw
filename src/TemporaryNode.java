@@ -66,7 +66,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 writer.flush();
 
                 String response = reader.readLine();
-                System.out.println("The FullNode said : " + response);
+                System.out.println("For START, The FullNode said : " + response);
 
                 if (response != null && response.startsWith("START"))
                 {
@@ -366,9 +366,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                System.out.println("hi!");
 
                 // Wait for a START response if necessary
-                String res = reader.readLine(); // Assume the node responds
-                System.out.println("result of start: \n"+res);
-                // Now send the GET? request
+//                String res = reader.readLine(); // Assume the node responds
+//                System.out.println("result of start: \n"+res);
+//                // Now send the GET? request
                 writer.write("GET? " + key.split("\n").length + "\n" + key);
                 writer.flush();
 
