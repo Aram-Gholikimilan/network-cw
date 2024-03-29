@@ -251,24 +251,25 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     return valueResponse;
 
                 } else if (response.startsWith("NOPE")) {
+                    while(true){
                     // Calculate the hashID of the key to find the nearest nodes
                     byte[] keyHashID = HashID.computeHashID(key + "\n");
                     String hexKeyHashID = HashID.bytesToHex(keyHashID);
 
                     // Get the nearest nodes
                     String nearestNodesInfo = nearest(hexKeyHashID);
-                    System.out.println("nearest nodes: \n"+nearestNodesInfo);
+                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
                     if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
                         System.err.println("Failed to retrieve nearest nodes or none are available.");
                         return null;
                     }
-                   // System.out.println("HERE: " + nearestNodesInfo);
+                    // System.out.println("HERE: " + nearestNodesInfo);
 
                     // Parse the nearestNodesInfo to extract node details
                     String[] lines = nearestNodesInfo.split("\n");
                     int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
 
-                   // System.out.println(Arrays.toString(lines));
+                    // System.out.println(Arrays.toString(lines));
                     // Skip the first line which is "NODES X"
 
 //                for (int i = 1; i < numNodes; i += 2) {
@@ -302,7 +303,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
 
 
-                    System.out.println("min node name: "+minNodeName);
+                    System.out.println("min node name: " + minNodeName);
 
                     clientSocket.close();
                     reader.close();
@@ -316,7 +317,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     this.startingNodeAddress = minNodeAddress;
                     this.startingNodeName = minNodeName;
-                    start(minNodeName,minNodeAddress);
+                    start(minNodeName, minNodeAddress);
 
 //                    writer.write("START 1 " + name +"\n");
 //                    writer.flush();
@@ -327,7 +328,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         System.out.println("Successfully retrieved value from fallback node: " + minNodeName);
                         return value;
                     }
-
+                }
 //                String nodeName = lines[1];
 //                String nodeAddress = lines[2];
 //                attemptGetFromNode(nodeName,nodeAddress,key);
