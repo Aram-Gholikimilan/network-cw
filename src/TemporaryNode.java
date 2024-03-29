@@ -297,7 +297,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         }
                         System.out.println(nodeName + ", distance: " + distance);
                     }
-                    System.out.println(minNodeName);
+                    System.out.println("min node name: "+minNodeName);
                     String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
                     //System.out.println(value);
                     if (value != null && !value.equals("NOPE")) {
@@ -339,8 +339,12 @@ public class TemporaryNode implements TemporaryNodeInterface {
             InetAddress ip = InetAddress.getByName(addressParts[0]);
             int port = Integer.parseInt(addressParts[1]);
 
+            clientSocket = new Socket(ip, port);
+            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
             // Open a new connection to the node
-            try {
+           // try {
 
                 // Initiate protocol communication, e.g., send START command
                 writer.write("START 1 " + name + "\n");
@@ -348,7 +352,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 System.out.println("hi!");
                 // Wait for a START response if necessary
                 String res = reader.readLine(); // Assume the node responds
-                System.out.println(res);
+                System.out.println("result of start: \n"+res);
                 // Now send the GET? request
                 writer.write("GET? " + key.split("\n").length + "\n" + key);
                 writer.flush();
@@ -367,15 +371,17 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
                     return valueBuilder.toString();
                 }
-                return "NOPE";
+                //return "NOPE"; // hereee
 
             } catch (Exception e) {
                 System.err.println("Error attempting to get from node " + nodeName + ": " + e.getMessage());
             }
             return "NOPE";
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
+      //  } catch (UnknownHostException e) {
+        //    throw new RuntimeException(e);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 
@@ -496,11 +502,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                System.out.println("Complete nodes information received:\n" + nodesInfo);
                 return nodesInfo.toString();
             }
-            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+        return null; // hereee
     }
 
 
