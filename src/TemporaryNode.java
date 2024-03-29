@@ -319,8 +319,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                        reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 //                        writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
-                        this.startingNodeAddress = minNodeAddress;
-                        this.startingNodeName = minNodeName;
+//                        this.startingNodeAddress = minNodeAddress;
+//                        this.startingNodeName = minNodeName;
                         start(minNodeName, minNodeAddress);
 
     //                    writer.write("START 1 " + name +"\n");
