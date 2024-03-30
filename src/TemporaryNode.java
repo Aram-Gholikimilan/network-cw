@@ -259,8 +259,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 int keyLines = key.split("\n").length;
 
                 // Sending a message to the server at the other end of the socket
-                System.out.println("Sending a message to the server");
-                writer.write("PUT? " + keyLines + "\n" + key); //  + "\n" + key + "\n" + value
+                System.out.println("Sending a get message to the server");
+                writer.write("GET? " + keyLines + "\n" + key); //  + "\n" + key + "\n" + value
                 writer.flush();
 
                 String response = reader.readLine();
