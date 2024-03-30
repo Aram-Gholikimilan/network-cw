@@ -18,6 +18,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 // DO NOT EDIT starts
 interface TemporaryNodeInterface {
@@ -269,6 +270,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 if (response != null && response.startsWith("VALUE")) {
                     clientSocket.close();
                     //isConnected = true; // Update connection status
+                    String[] res = response.split("\n");
+                    System.out.println("the response contains this:\n"+Arrays.toString(res));
                     return response;
                 } else if (response.startsWith("NOPE")) {
                     // Get the hash ID for the key to find nearest nodes
