@@ -66,11 +66,20 @@ public class FullNode implements FullNodeInterface {
         try {
             serverSocket = new ServerSocket(portNumber, backlog);
             System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
+            clientSocket = serverSocket.accept();
+
+            nodeTime = getCurrentTime();
+            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
+            nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+            // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
+            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+            int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
+            updateNetworkMap(distance, newNodeInfo0);
 
             isOpen = true;
 
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Could not listen on " + ipAddress + ":" + portNumber + ". " + e.getMessage());
             return false;
         }
@@ -100,38 +109,32 @@ public class FullNode implements FullNodeInterface {
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
         this.startingNodeName = startingNodeName;
         this.startingNodeAddress = startingNodeAddress;
+        String[] parts = startingNodeAddress.split(":");
+        if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
+        startingNodeHost = parts[0];
+        startingNodePort = Integer.parseInt(parts[1]);
+
         try {
-            while(isOpen) {
-                Socket clientSocket = serverSocket.accept();
-                isConnected = true;
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                out = new OutputStreamWriter(clientSocket.getOutputStream());
-                out.write("START 1 " + startingNodeName);
-                out.flush();
-
-                String[] parts = startingNodeAddress.split(":");
-                if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
-                startingNodeHost = parts[0];
-                startingNodePort = Integer.parseInt(parts[1]);
-
-                nodeTime = getCurrentTime();
-                NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
-                nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-                // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
-                byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-                int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
-                updateNetworkMap(distance, newNodeInfo0);
-
-                String message;
-                while (isConnected) {
-                    message = in.readLine();
-                    if (message != null) {
-                        System.out.println(message);
-                        handleClient(message);
-                        System.out.println("The -- " + message + " -- is handled!");
-                    }
+            while(true) {
+                if(clientSocket.isClosed() || clientSocket == null){
+                    clientSocket = serverSocket.accept();
+                    isConnected = true;
+                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    out = new OutputStreamWriter(clientSocket.getOutputStream());
+                    out.write("START 1 " + startingNodeName);
+                    out.flush();
                 }
-                clientSocket.close();
+                if(!clientSocket.isClosed() && in.ready()){
+                    String message;
+                   // while (isConnected) {
+                        message = in.readLine();
+                        if (message != null) {
+                            System.out.println(message);
+                            handleClient(message);
+                            System.out.println("The -- " + message + " -- is handled!");
+                        }
+                   // }
+                }
             }
 
         } catch (Exception e) {
@@ -194,6 +197,7 @@ public class FullNode implements FullNodeInterface {
                         break;
                     case END:
                         isConnected = false;
+                        clientSocket.close();
                         break; // Exit the loop and close the connection
                     default:
                         System.err.println("Unknown command: " + line);
@@ -208,14 +212,11 @@ public class FullNode implements FullNodeInterface {
 
     public void end(String reason) {
         try {
-            System.out.println("TCPClient connecting to " + startingNodeAddress);
-            System.out.println(startingNodeHost + "  :  " + startingNodePort);
             Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
             BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Sending a message to the server at the other end of the socket
-            System.out.println("Sending a message to the server");
             writer.write("END " + reason + "\n");
             writer.flush();
 
