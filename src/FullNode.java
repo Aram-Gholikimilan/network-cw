@@ -119,7 +119,8 @@ public class FullNode implements FullNodeInterface {
 
             String message;
             while(true) {
-                if ((message = in.readLine()) != null) {
+                message = in.readLine();
+                if (message!= null) {
                     System.out.println(message);
                     handleClient(message);
                     System.out.println("The -- " + message + " -- is handled!");
