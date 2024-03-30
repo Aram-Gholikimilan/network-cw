@@ -64,21 +64,13 @@ public class FullNode implements FullNodeInterface {
         // Return false otherwise
         //return true;
         try {
-            nodeTime = getCurrentTime();
-            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
-            nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-            // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
-            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-            int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
-            updateNetworkMap(distance, newNodeInfo0);
-
             serverSocket = new ServerSocket(portNumber, backlog);
             System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
 
             isOpen = true;
 
             return true;
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println("Could not listen on " + ipAddress + ":" + portNumber + ". " + e.getMessage());
             return false;
         }
@@ -106,43 +98,45 @@ public class FullNode implements FullNodeInterface {
     }
 
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
-       try {
-           this.startingNodeName = startingNodeName;
-           this.startingNodeAddress = startingNodeAddress;
-           String[] parts = startingNodeAddress.split(":");
-           if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
-           startingNodeHost = parts[0];
-           startingNodePort = Integer.parseInt(parts[1]);
-           clientSocket = serverSocket.accept();
-           try {
-               while (true) {
-                   if (clientSocket.isClosed() || clientSocket == null) {
-                       clientSocket = serverSocket.accept();
-                       isConnected = true;
-                       in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                       out = new OutputStreamWriter(clientSocket.getOutputStream());
-                       out.write("START 1 " + startingNodeName);
-                       out.flush();
-                   }
-                   if (!clientSocket.isClosed() && in.ready()) {
-                       String message;
-                       // while (isConnected) {
-                       message = in.readLine();
-                       if (message != null) {
-                           System.out.println(message);
-                           handleClient(message);
-                           System.out.println("The -- " + message + " -- is handled!");
-                       }
-                       // }
-                   }
-               }
+        this.startingNodeName = startingNodeName;
+        this.startingNodeAddress = startingNodeAddress;
+        try {
+            while(isOpen) {
+                Socket clientSocket = serverSocket.accept();
+                isConnected = true;
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                out = new OutputStreamWriter(clientSocket.getOutputStream());
+                out.write("START 1 " + startingNodeName);
+                out.flush();
 
-           } catch (Exception e) {
-               System.out.println("Error during communication with the client: " + e.getMessage());
-           }
-       }catch (Exception e){
-           System.out.println("Error during communication with the client2: " + e.getMessage());
-       }
+                String[] parts = startingNodeAddress.split(":");
+                if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
+                startingNodeHost = parts[0];
+                startingNodePort = Integer.parseInt(parts[1]);
+
+                nodeTime = getCurrentTime();
+                NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
+                nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+                // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
+                byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+                int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
+                updateNetworkMap(distance, newNodeInfo0);
+
+                String message;
+                while (isConnected) {
+                    message = in.readLine();
+                    if (message != null) {
+                        System.out.println(message);
+                        handleClient(message);
+                        System.out.println("The -- " + message + " -- is handled!");
+                    }
+                }
+                clientSocket.close();
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error during communication with the client: " + e.getMessage());
+        }
     }
 
     private enum CommandType {
@@ -200,7 +194,6 @@ public class FullNode implements FullNodeInterface {
                         break;
                     case END:
                         isConnected = false;
-                        clientSocket.close();
                         break; // Exit the loop and close the connection
                     default:
                         System.err.println("Unknown command: " + line);
@@ -215,11 +208,14 @@ public class FullNode implements FullNodeInterface {
 
     public void end(String reason) {
         try {
+            System.out.println("TCPClient connecting to " + startingNodeAddress);
+            System.out.println(startingNodeHost + "  :  " + startingNodePort);
             Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
             BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Sending a message to the server at the other end of the socket
+            System.out.println("Sending a message to the server");
             writer.write("END " + reason + "\n");
             writer.flush();
 
