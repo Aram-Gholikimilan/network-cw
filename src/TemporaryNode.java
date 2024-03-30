@@ -97,7 +97,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         try {
             while(true){
                 System.out.println("loops: " + loops);
-                
+
 //                boolean startResponse = start(minNodeName,minNodeAddress);
 //                System.out.println("start response: "+startResponse);
 //
@@ -240,6 +240,125 @@ public class TemporaryNode implements TemporaryNodeInterface {
     }
 
     public String get(String key) {
+        int loops=0;
+        int min=99999;
+        String minNodeName=this.startingNodeName;
+        String minNodeAddress=this.startingNodeAddress;
+
+        ArrayList<String> visitedNodes = new ArrayList<>();
+        visitedNodes.add(startingNodeName);
+        try {
+            while(true){
+                System.out.println("loops: " + loops);
+
+//                boolean startResponse = start(minNodeName,minNodeAddress);
+//                System.out.println("start response: "+startResponse);
+//
+//
+// Count the number of lines in both key and value
+                int keyLines = key.split("\n").length;
+
+                // Sending a message to the server at the other end of the socket
+                System.out.println("Sending a message to the server");
+                writer.write("PUT? " + keyLines + "\n" + key); //  + "\n" + key + "\n" + value
+                writer.flush();
+
+                String response = reader.readLine();
+                System.out.println("get response: " + response);
+
+                if (response != null && response.startsWith("VALUE")) {
+                    clientSocket.close();
+                    //isConnected = true; // Update connection status
+                    return response;
+                } else if (response.startsWith("NOPE")) {
+                    // Get the hash ID for the key to find nearest nodes
+                    byte[] keyHash = HashID.computeHashID(key);
+                    String hexKeyHash = HashID.bytesToHex(keyHash);
+
+                    // Call nearest to find nearest nodes
+                    String nearestNodesInfo = nearest(hexKeyHash);
+                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
+
+                    //System.out.println(nearestNodesInfo);
+                    if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
+                        System.err.println("Failed to retrieve nearest nodes or none are available.");
+                        end("COMPLETE");
+                        return null;
+                    }
+
+
+                    // Split the nearestNodesInfo to get individual node details
+                    String[] nodeDetails = nearestNodesInfo.split("\n");
+                    int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
+                    // Skip the first line which is "NODES X"
+                    for (int i = 1; i < numNodes * 2; i += 2) {
+                        String nodeName = nodeDetails[i];
+                        String nodeAddress = nodeDetails[i + 1];
+
+                        byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
+                        byte[] keyHashId = HashID.computeHashID(key + "\n");
+                        int distance = HashID.calculateDistance(nodeHashID, keyHashId);
+                        if (distance < min) {
+                            min = distance;
+                            minNodeName = nodeName;
+                            minNodeAddress = nodeAddress;
+                        }
+                    }
+
+                    end("CANNOT-STORE");
+                    clientSocket.close();
+                    reader.close();
+                    writer.close();
+
+                    //Once smallest node is found,
+                    // check if we have already visited it.
+                    System.out.println("closer node: "+minNodeName+" "+minNodeAddress);
+
+                    if(visitedNodes.contains(minNodeName)){
+                        System.out.println("closer node: "+minNodeName+" is in visitedNodes!");
+                        //We would be in a loop of going to the same
+                        // set of nodes => cant store the key-value pair
+                        return null;
+                    }
+
+                    String[] address = minNodeAddress.split(":");
+                    int port = Integer.parseInt(address[1]);
+                    InetAddress host = InetAddress.getByName(address[0]);
+                    clientSocket = new Socket(host, port);
+
+                    reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+
+                    //start(this.host,this.port);
+                    writer.write("START 1 " + name + "\n");
+                    writer.flush();
+                    String r = reader.readLine();
+                    System.out.println("here --> :" + r);
+                    visitedNodes.add(minNodeName);
+
+                    loops++;
+                    //                String nodeName = nodeDetails[1];
+                    //                String nodeAddress = nodeDetails[2];
+                    //                attemptStoreOnNode(nodeName,nodeAddress,key,value);
+
+//                    System.err.println("Failed to store the key-value pair on any fallback node.");
+//                    return false;
+                }
+
+            }
+        } catch (Exception e){
+            System.out.println("Error during PUT? request handling (Store operation): "+e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    /*
+    public String get(String key) {
+
+
 	// Implement this!
 	// Return the string if the get worked
 	// Return null if it didn't
@@ -383,7 +502,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         }
                     }
 
-                     */
+                     //     there was a(* /) comment
 
                     while(true) {
                         // Get the hash ID for the key to find nearest nodes
@@ -441,7 +560,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
         return null;
     }
-
+*/
     private String attemptGetOnNode2(String nodeName, String nodeAddress, String key) {
         try {
             // Split the address to get IP and port
