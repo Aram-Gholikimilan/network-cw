@@ -70,6 +70,7 @@ public class FullNode implements FullNodeInterface {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new OutputStreamWriter(clientSocket.getOutputStream());
             isConnected = true;
+            isOpen = true;
 
             return true;
         } catch (IOException e) {
@@ -103,34 +104,34 @@ public class FullNode implements FullNodeInterface {
         this.startingNodeName = startingNodeName;
         this.startingNodeAddress = startingNodeAddress;
         try {
+            while(isOpen) {
+                out.write("START 1" + startingNodeName);
+                out.flush();
 
-            out.write("START 1" + startingNodeName);
-            out.flush();
 
+                String[] parts = startingNodeAddress.split(":");
+                if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
+                startingNodeHost = parts[0];
+                startingNodePort = Integer.parseInt(parts[1]);
 
-            String[] parts = startingNodeAddress.split(":");
-            if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
-            startingNodeHost = parts[0];
-            startingNodePort = Integer.parseInt(parts[1]);
+                nodeTime = getCurrentTime();
+                NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
+                nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+                // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
+                byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+                int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
+                updateNetworkMap(distance, newNodeInfo0);
 
-            nodeTime = getCurrentTime();
-            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
-            nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-            // byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName()+"\n");
-            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-            int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
-            updateNetworkMap(distance, newNodeInfo0);
-
-            String message;
-            while(isConnected) {
-                message = in.readLine();
-                if (message!= null) {
-                    System.out.println(message);
-                    handleClient(message);
-                    System.out.println("The -- " + message + " -- is handled!");
+                String message;
+                while (isConnected) {
+                    message = in.readLine();
+                    if (message != null) {
+                        System.out.println(message);
+                        handleClient(message);
+                        System.out.println("The -- " + message + " -- is handled!");
+                    }
                 }
             }
-
 
         } catch (Exception e) {
             System.out.println("Error during communication with the client: " + e.getMessage());
