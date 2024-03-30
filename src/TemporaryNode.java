@@ -70,7 +70,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 writer.flush();
 
                 String response = reader.readLine();
-                System.out.println("For START, The FullNode said : " + response);
+              //  System.out.println("For START, The FullNode said : " + response);
 
                 if (response != null && response.startsWith("START"))
                 {
@@ -86,8 +86,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         return false;
     }
 
-    public boolean store(String key, String value)
-    {
+    public boolean store(String key, String value) {
         int loops=0;
         int min=99999;
         String minNodeName=this.startingNodeName;
@@ -325,7 +324,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     //Once smallest node is found,
                     // check if we have already visited it.
-                    System.out.println("closer node: "+minNodeName+" "+minNodeAddress);
+                 //   System.out.println("closer node: "+minNodeName+" "+minNodeAddress);
 
                     if(visitedNodes.contains(minNodeName)){
                         System.out.println("closer node: "+minNodeName+" is in visitedNodes!");
@@ -347,7 +346,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     writer.write("START 1 " + name + "\n");
                     writer.flush();
                     String r = reader.readLine();
-                    System.out.println("here --> :" + r);
+                //    System.out.println("here --> :" + r);
                     visitedNodes.add(minNodeName);
 
                     loops++;
