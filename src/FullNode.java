@@ -67,7 +67,6 @@ public class FullNode implements FullNodeInterface {
             serverSocket = new ServerSocket(portNumber, backlog);
             System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
 
-            isConnected = true;
             isOpen = true;
 
             return true;
@@ -104,6 +103,7 @@ public class FullNode implements FullNodeInterface {
         try {
             while(isOpen) {
                 Socket clientSocket = serverSocket.accept();
+                isConnected = true;
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 out = new OutputStreamWriter(clientSocket.getOutputStream());
                 out.write("START 1 " + startingNodeName);

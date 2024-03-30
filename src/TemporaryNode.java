@@ -360,7 +360,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
             }
         } catch (Exception e){
-            System.out.println("Error during PUT? request handling (Store operation): "+e.getMessage());
+            System.out.println("Error during GET? request handling: "+e.getMessage());
             e.printStackTrace();
         }
         return null;
