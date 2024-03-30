@@ -160,6 +160,8 @@ public class FullNode implements FullNodeInterface {
 
                 switch (commandType) {
                     case START:
+                        // i can have a list of added nodes to my network map and
+                        // if the incoming START is from one of the nodes it should end the connection
                         // Process START command
                         handleStartCommand(line);
                         break;

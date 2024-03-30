@@ -70,7 +70,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 writer.flush();
 
                 String response = reader.readLine();
-              //  System.out.println("For START, The FullNode said : " + response);
+                System.out.println("For START, The FullNode said : " + response);
 
                 if (response != null && response.startsWith("START"))
                 {
@@ -264,7 +264,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 writer.flush();
 
                 String response = reader.readLine();
-             //   System.out.println("get response: " + response);
+                System.out.println("get response: " + response);
 
                 if (response != null && response.startsWith("VALUE")) {
                     clientSocket.close();
@@ -289,7 +289,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     // Call nearest to find nearest nodes
                     String nearestNodesInfo = nearest(hexKeyHash);
-                 //   System.out.println("nearest nodes: \n" + nearestNodesInfo);
+                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
 
                     //System.out.println(nearestNodesInfo);
                     if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
@@ -858,7 +858,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
         System.out.println("\n===================\n");
         System.out.println("Start: ");
-        tNode.start("aram.gholikimilan@city.ac.uk:MyCoolImplementation,1.41,test-node-2","127.0.0.1:6969");
+        tNode.start("mohammed.siddiqui@city.ac.uk:2D#4Impl,0.1,FullNode,0","10.210.71.249:20000");
 
 /*
         System.out.println("\n===================\n");
