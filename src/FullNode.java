@@ -64,10 +64,6 @@ public class FullNode implements FullNodeInterface {
         // Return false otherwise
         //return true;
         try {
-            serverSocket = new ServerSocket(portNumber, backlog);
-            System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
-            clientSocket = serverSocket.accept();
-
             nodeTime = getCurrentTime();
             NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
             nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
@@ -75,6 +71,9 @@ public class FullNode implements FullNodeInterface {
             byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
             int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
             updateNetworkMap(distance, newNodeInfo0);
+
+            serverSocket = new ServerSocket(portNumber, backlog);
+            System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
 
             isOpen = true;
 
@@ -107,39 +106,43 @@ public class FullNode implements FullNodeInterface {
     }
 
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
-        this.startingNodeName = startingNodeName;
-        this.startingNodeAddress = startingNodeAddress;
-        String[] parts = startingNodeAddress.split(":");
-        if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
-        startingNodeHost = parts[0];
-        startingNodePort = Integer.parseInt(parts[1]);
+       try {
+           this.startingNodeName = startingNodeName;
+           this.startingNodeAddress = startingNodeAddress;
+           String[] parts = startingNodeAddress.split(":");
+           if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
+           startingNodeHost = parts[0];
+           startingNodePort = Integer.parseInt(parts[1]);
+           clientSocket = serverSocket.accept();
+           try {
+               while (true) {
+                   if (clientSocket.isClosed() || clientSocket == null) {
+                       clientSocket = serverSocket.accept();
+                       isConnected = true;
+                       in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                       out = new OutputStreamWriter(clientSocket.getOutputStream());
+                       out.write("START 1 " + startingNodeName);
+                       out.flush();
+                   }
+                   if (!clientSocket.isClosed() && in.ready()) {
+                       String message;
+                       // while (isConnected) {
+                       message = in.readLine();
+                       if (message != null) {
+                           System.out.println(message);
+                           handleClient(message);
+                           System.out.println("The -- " + message + " -- is handled!");
+                       }
+                       // }
+                   }
+               }
 
-        try {
-            while(true) {
-                if(clientSocket.isClosed() || clientSocket == null){
-                    clientSocket = serverSocket.accept();
-                    isConnected = true;
-                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    out = new OutputStreamWriter(clientSocket.getOutputStream());
-                    out.write("START 1 " + startingNodeName);
-                    out.flush();
-                }
-                if(!clientSocket.isClosed() && in.ready()){
-                    String message;
-                   // while (isConnected) {
-                        message = in.readLine();
-                        if (message != null) {
-                            System.out.println(message);
-                            handleClient(message);
-                            System.out.println("The -- " + message + " -- is handled!");
-                        }
-                   // }
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error during communication with the client: " + e.getMessage());
-        }
+           } catch (Exception e) {
+               System.out.println("Error during communication with the client: " + e.getMessage());
+           }
+       }catch (Exception e){
+           System.out.println("Error during communication with the client2: " + e.getMessage());
+       }
     }
 
     private enum CommandType {
