@@ -86,7 +86,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         return false;
     }
 
-    public boolean store(String key, String value) {
+    public boolean store(String key, String value) {    // last test on [ the poem ]
         int loops=0;
         int min=99999;
         String minNodeName=this.startingNodeName;
