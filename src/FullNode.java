@@ -122,7 +122,7 @@ public class FullNode implements FullNodeInterface {
             updateNetworkMap(distance, newNodeInfo0);
 
             String message;
-            while(true) {
+            while(isConnected) {
                 message = in.readLine();
                 if (message!= null) {
                     System.out.println(message);
