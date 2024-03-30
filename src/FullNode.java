@@ -106,7 +106,7 @@ public class FullNode implements FullNodeInterface {
                 isConnected = true;
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 out = new OutputStreamWriter(clientSocket.getOutputStream());
-                out.write("START 1 " + startingNodeName);
+                out.write("START 1 " + startingNodeName + "\n");    // i added a new line
                 out.flush();
 
                 String[] parts = startingNodeAddress.split(":");
