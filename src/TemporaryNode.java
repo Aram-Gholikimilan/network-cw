@@ -96,6 +96,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
         visitedNodes.add(startingNodeName);
         try {
             while(true){
+                System.out.println("loops: " + loops);
+                
 //                boolean startResponse = start(minNodeName,minNodeAddress);
 //                System.out.println("start response: "+startResponse);
 //
