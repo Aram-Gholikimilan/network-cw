@@ -161,6 +161,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     System.out.println("closer node: "+minNodeName+" "+minNodeAddress);
 
                     if(visitedNodes.contains(minNodeName)){
+                        System.out.println("closer node: "+minNodeName+" is in visitedNodes!");
                         //We would be in a loop of going to the same
                         // set of nodes => cant store the key-value pair
                         return false;
@@ -175,9 +176,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
 
-                    start(this.host,this.port);
+                    //start(this.host,this.port);
+                    writer.write("START 1 " + name + "\n");
+                    writer.flush();
                     String r = reader.readLine();
-                    System.out.println(r);
+                    System.out.println("here --> :" + r);
                     visitedNodes.add(minNodeName);
 
     //                String nodeName = nodeDetails[1];
@@ -531,14 +534,14 @@ public class TemporaryNode implements TemporaryNodeInterface {
         public void end (String reason){
 
         try{
-            System.out.println("TCPClient connecting to " + startingNodeAddress);
-            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
+//            System.out.println("TCPClient connecting to " + startingNodeAddress);
+//            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
+//            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
             //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
             // Sending a message to the server at the other end of the socket
-            System.out.println("Sending a message to the server");
+          //  System.out.println("Sending a message to the server");
             writer.write("END " + reason +"\n");
             writer.flush();
 
@@ -626,7 +629,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
 
         try {
-            System.out.println("writer: "+this.startingNodeName+"---"+this.startingNodeAddress);
+           // System.out.println("writer: "+this.startingNodeName+"---"+this.startingNodeAddress);
             writer.write("NEAREST? " + hashID + "\n");
             writer.flush();
 
