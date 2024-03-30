@@ -104,6 +104,10 @@ public class FullNode implements FullNodeInterface {
         this.startingNodeAddress = startingNodeAddress;
         try {
 
+            out.write("START 1" + startingNodeName);
+            out.flush();
+
+
             String[] parts = startingNodeAddress.split(":");
             if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
             startingNodeHost = parts[0];
