@@ -57,13 +57,14 @@ public class FullNode implements FullNodeInterface {
     BufferedReader in;
     Writer out;
     Socket clientSocket;
+    int backlog = 50;
     public boolean listen(String ipAddress, int portNumber) {
         // Implement this!
         // Return true if the node can accept incoming connections
         // Return false otherwise
         //return true;
         try {
-            serverSocket = new ServerSocket(portNumber);
+            serverSocket = new ServerSocket(portNumber, backlog);
             System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
 
             isConnected = true;
@@ -107,7 +108,6 @@ public class FullNode implements FullNodeInterface {
                 out = new OutputStreamWriter(clientSocket.getOutputStream());
                 out.write("START 1" + startingNodeName);
                 out.flush();
-
 
                 String[] parts = startingNodeAddress.split(":");
                 if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
