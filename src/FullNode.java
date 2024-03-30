@@ -65,7 +65,7 @@ public class FullNode implements FullNodeInterface {
         try {
             serverSocket = new ServerSocket(portNumber);
             System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
-            
+
             isConnected = true;
             isOpen = true;
 
@@ -131,6 +131,7 @@ public class FullNode implements FullNodeInterface {
                         System.out.println("The -- " + message + " -- is handled!");
                     }
                 }
+                clientSocket.close();
             }
 
         } catch (Exception e) {
@@ -193,7 +194,6 @@ public class FullNode implements FullNodeInterface {
                         break;
                     case END:
                         isConnected = false;
-                        clientSocket.close();
                         break; // Exit the loop and close the connection
                     default:
                         System.err.println("Unknown command: " + line);
