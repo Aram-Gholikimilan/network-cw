@@ -87,6 +87,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
     public boolean store(String key, String value)
     {
+        int loops=0;
         int min=99999;
         String minNodeName=this.startingNodeName;
         String minNodeAddress=this.startingNodeAddress;
@@ -183,6 +184,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     System.out.println("here --> :" + r);
                     visitedNodes.add(minNodeName);
 
+                    loops++;
     //                String nodeName = nodeDetails[1];
     //                String nodeAddress = nodeDetails[2];
     //                attemptStoreOnNode(nodeName,nodeAddress,key,value);
