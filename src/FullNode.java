@@ -192,6 +192,7 @@ public class FullNode implements FullNodeInterface {
                         break;
                     case END:
                         isConnected = false;
+                        clientSocket.close();
                         break; // Exit the loop and close the connection
                     default:
                         System.err.println("Unknown command: " + line);
