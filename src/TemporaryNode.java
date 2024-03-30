@@ -270,9 +270,19 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 if (response != null && response.startsWith("VALUE")) {
                     clientSocket.close();
                     //isConnected = true; // Update connection status
-                    String[] res = response.split("\n");
-                    System.out.println("the response contains this:\n"+Arrays.toString(res));
-                    return response;
+//                    String[] res = response.split("\n");
+//                    System.out.println("the response contains this:\n"+Arrays.toString(res));
+//
+                    String[] parts = response.split(" ", 2);
+                    int valueLinesCount = Integer.parseInt(parts[1]);
+                    StringBuilder valueBuilder = new StringBuilder();
+                    for (int i = 0; i < valueLinesCount; i++) {
+                        valueBuilder.append(reader.readLine()).append("\n");
+                    }
+
+                    String value = valueBuilder.toString();
+                    System.out.println("the value: --> " + value);
+                    return value;
                 } else if (response.startsWith("NOPE")) {
                     // Get the hash ID for the key to find nearest nodes
                     byte[] keyHash = HashID.computeHashID(key);
