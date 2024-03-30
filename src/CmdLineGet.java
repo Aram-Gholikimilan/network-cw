@@ -30,7 +30,7 @@ public class CmdLineGet {
 		String value = tn.get(key);
 
 		if (value != null) {
-			System.out.println("value found:");
+			//System.out.println("value found:");
 		    System.out.println(value);
 		} else {
 		    System.err.println("Value not found");

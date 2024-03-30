@@ -250,7 +250,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         visitedNodes.add(startingNodeName);
         try {
             while(true){
-                System.out.println("loops: " + loops);
+            //    System.out.println("loops: " + loops);
 
 //                boolean startResponse = start(minNodeName,minNodeAddress);
 //                System.out.println("start response: "+startResponse);
@@ -260,12 +260,12 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 int keyLines = key.split("\n").length;
 
                 // Sending a message to the server at the other end of the socket
-                System.out.println("Sending a get message to the server");
+            //    System.out.println("Sending a get message to the server");
                 writer.write("GET? " + keyLines + "\n" + key); //  + "\n" + key + "\n" + value
                 writer.flush();
 
                 String response = reader.readLine();
-                System.out.println("get response: " + response);
+             //   System.out.println("get response: " + response);
 
                 if (response != null && response.startsWith("VALUE")) {
                     clientSocket.close();
@@ -281,7 +281,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
 
                     String value = valueBuilder.toString();
-                    System.out.println("the value: --> " + value);
+                   // System.out.println("the value: --> " + value);
                     return value;
                 } else if (response.startsWith("NOPE")) {
                     // Get the hash ID for the key to find nearest nodes
@@ -290,7 +290,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     // Call nearest to find nearest nodes
                     String nearestNodesInfo = nearest(hexKeyHash);
-                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
+                 //   System.out.println("nearest nodes: \n" + nearestNodesInfo);
 
                     //System.out.println(nearestNodesInfo);
                     if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
