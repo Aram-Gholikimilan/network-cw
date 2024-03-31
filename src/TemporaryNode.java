@@ -91,7 +91,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 System.out.println("put response: " + response);
 
                 if (response != null && response.startsWith("SUCCESS")) {
-                    clientSocket.close();   //TODO: do i need to close the connection?
+                    clientSocket.close();
                     return true;
                 } else if (response.startsWith("FAILED")) {
                     byte[] keyHash = HashID.computeHashID(key);
@@ -186,6 +186,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
 
                     String value = valueBuilder.toString();
+                    System.out.println("valueeee:\n"+value);
                     return value;
                 } else if (response.startsWith("NOPE")) {
                     // Get the hash ID for the key to find nearest nodes
@@ -204,6 +205,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     // Split the nearestNodesInfo to get individual node details
                     String[] nodeDetails = nearestNodesInfo.split("\n");
+                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
                     int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
                     // Skip the first line which is "NODES X"
                     for (int i = 1; i < numNodes * 2; i += 2) {
