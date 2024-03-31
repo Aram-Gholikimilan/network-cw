@@ -129,6 +129,7 @@ public class FullNode implements FullNodeInterface {
                         System.out.println(message);
                         handleClient(message);
                         System.out.println("The -- " + message + " -- is handled!");
+                        message = null;
                     }
                 }
                 clientSocket.close();
