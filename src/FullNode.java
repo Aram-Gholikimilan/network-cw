@@ -288,9 +288,12 @@ public class FullNode implements FullNodeInterface {
 
             // Determine the three closest nodes to the key's hashID
             List<String> closestNodesAddresses = findClosestNodes(keyHashID);
-
+            System.out.println("closestNodesAddresses:");
+            System.out.println(closestNodesAddresses.toString());
             // Check if the current node is among the three closest
-            boolean isCurrentNodeClosest = closestNodesAddresses.contains(this.startingNodeName);      // isCurrentNodeClosest(closestNodesAddresses);
+            boolean isCurrentNodeClosest = closestNodesAddresses.contains(this.startingNodeName);
+            System.out.println("isCurrentNodeClosest: "+isCurrentNodeClosest);
+            // isCurrentNodeClosest(closestNodesAddresses);
 
             if (isCurrentNodeClosest) {
                 // Store the (key, value) pair if the current node is among the three closest
