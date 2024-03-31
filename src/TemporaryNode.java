@@ -44,50 +44,34 @@ public class TemporaryNode implements TemporaryNodeInterface {
     String host = "127.0.0.1";
     String port = "6969";
     public boolean start(String startingNodeName, String startingNodeAddress) {
-        // Implement this!
-        // Return true if the 2D#4 network can be contacted
-        // Return false if the 2D#4 network can't be contacted
-        //return true;
-            this.startingNodeName=startingNodeName;
-            this.startingNodeAddress=startingNodeAddress;
-            try{
-                String[] parts = startingNodeAddress.split(":");
-                if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
-                String IPAddressString = parts[0];
-                startingNodeHost = InetAddress.getByName(IPAddressString);
-                startingNodePort = Integer.parseInt(parts[1]);
-
-                //System.out.println("TCPClient connecting to " + startingNodeAddress);
-                //System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-                clientSocket = new Socket(startingNodeHost, startingNodePort);
-                reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-                // Sending a message to the server at the other end of the socket
-//                System.out.println("Sending a message to the server");
-//                System.out.println(startingNodeName);
-                writer.write("START 1 " + name +"\n");
-                writer.flush();
-
-                String response = reader.readLine();
-                System.out.println("For START, The FullNode said : " + response);
-
-                if (response != null && response.startsWith("START"))
-                {
-                    isConnected = true; // Update connection status
-                    return true;
-                }
-
-            } catch (Exception e){
-                System.out.println("Connecting attempt failed: " + e.getMessage());
-                e.printStackTrace();
+        this.startingNodeName=startingNodeName;
+        this.startingNodeAddress=startingNodeAddress;
+        try{
+            String[] parts = startingNodeAddress.split(":");
+            if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
+            String IPAddressString = parts[0];
+            startingNodeHost = InetAddress.getByName(IPAddressString);
+            startingNodePort = Integer.parseInt(parts[1]);
+            clientSocket = new Socket(startingNodeHost, startingNodePort);
+            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            writer = new OutputStreamWriter(clientSocket.getOutputStream());
+            writer.write("START 1 " + name +"\n");
+            writer.flush();
+            String response = reader.readLine();
+            System.out.println("For START, The FullNode said : " + response);
+            if (response != null && response.startsWith("START"))
+            {
+                isConnected = true; // Update connection status
+                return true;
             }
-
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
         return false;
     }
 
-    public boolean store(String key, String value) {    // last test on [ the poem ]
-        int loops=0;
+    public boolean store(String key, String value) {
         int min=99999;
         String minNodeName=this.startingNodeName;
         String minNodeAddress=this.startingNodeAddress;
@@ -96,45 +80,30 @@ public class TemporaryNode implements TemporaryNodeInterface {
         visitedNodes.add(startingNodeName);
         try {
             while(true){
-                System.out.println("loops: " + loops);
-
-//                boolean startResponse = start(minNodeName,minNodeAddress);
-//                System.out.println("start response: "+startResponse);
-//
-//
-// Count the number of lines in both key and value
                 int keyLines = key.split("\n").length;
-                int valueLines = value.split("\n").length; // Adjusted to correctly handle the last newline
+                int valueLines = value.split("\n").length;
 
-                // Sending a message to the server at the other end of the socket
                 System.out.println("Sending a message to the server");
                 writer.write("PUT? " + keyLines + " " + valueLines + "\n" + key + value); //  + "\n" + key + "\n" + value
-    //            System.out.println("the value in temp: \n" + value);
                 writer.flush();
 
                 String response = reader.readLine();
                 System.out.println("put response: " + response);
 
                 if (response != null && response.startsWith("SUCCESS")) {
-                    clientSocket.close();
-                    //isConnected = true; // Update connection status
+                    clientSocket.close();   //TODO: do i need to close the connection?
                     return true;
                 } else if (response.startsWith("FAILED")) {
-                    // Get the hash ID for the key to find nearest nodes
                     byte[] keyHash = HashID.computeHashID(key);
                     String hexKeyHash = HashID.bytesToHex(keyHash);
 
-                    // Call nearest to find nearest nodes
                     String nearestNodesInfo = nearest(hexKeyHash);
-                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
 
-                    //System.out.println(nearestNodesInfo);
                     if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
                         System.err.println("Failed to retrieve nearest nodes or none are available.");
                         end("COMPLETE");
                         return false;
                     }
-
 
                     // Split the nearestNodesInfo to get individual node details
                     String[] nodeDetails = nearestNodesInfo.split("\n");
@@ -161,13 +130,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     //Once smallest node is found,
                     // check if we have already visited it.
-                    System.out.println("closer node: "+minNodeName+" "+minNodeAddress);
-
                     if(visitedNodes.contains(minNodeName)){
-                        System.out.println("closer node: "+minNodeName+" is in visitedNodes!");
-                        //We would be in a loop of going to the same
-                        // set of nodes => cant store the key-value pair
-                        return false;
+                         return false;
                     }
 
                     String[] address = minNodeAddress.split(":");
@@ -179,20 +143,12 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
 
-                    //start(this.host,this.port);
                     writer.write("START 1 " + name + "\n");
                     writer.flush();
                     String r = reader.readLine();
                     System.out.println("here --> :" + r);
                     visitedNodes.add(minNodeName);
 
-                    loops++;
-    //                String nodeName = nodeDetails[1];
-    //                String nodeAddress = nodeDetails[2];
-    //                attemptStoreOnNode(nodeName,nodeAddress,key,value);
-
-//                    System.err.println("Failed to store the key-value pair on any fallback node.");
-//                    return false;
                 }
 
             }
@@ -202,46 +158,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
         return false;
     }
-
-    private boolean attemptStoreOnNode(String nodeName, String nodeAddress, String key, String value) {
-        try {
-            // Split the address to get IP and port
-            String[] addressParts = nodeAddress.split(":");
-            String ip = addressParts[0];
-            int port = Integer.parseInt(addressParts[1]);
-
-            // Open a new connection to the node
-            Socket socket = new Socket(ip, port);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            Writer writer = new OutputStreamWriter(socket.getOutputStream());
-
-            // Initiate protocol communication, e.g., send START command
-            writer.write("START 1 " + name + "\n"); // Adjust as needed
-            writer.flush();
-
-            // Wait for a START response if necessary
-            // Assume the node responds with START, indicating ready to communicate
-            reader.readLine(); // Read the response to the START command
-
-            // Now send the PUT? request
-            writer.write("PUT? " + key.split("\n").length + " " + (value.split("\n", -1).length - 1) + "\n" + key + value);
-            writer.flush();
-
-            // Read and check the response
-            String response = reader.readLine();
-            socket.close(); // Always close the socket
-
-            // Check if the response indicates success
-            return "SUCCESS".equals(response);
-        } catch (Exception e) {
-            System.err.println("Error attempting to store on node " + nodeName + ": " + e.getMessage());
-            return false;
-        }
-    }
-
     public String get(String key) {
-        int loops=0;
-        int min=99999;
+        int min=257;
         String minNodeName=this.startingNodeName;
         String minNodeAddress=this.startingNodeAddress;
 
@@ -249,18 +167,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
         visitedNodes.add(startingNodeName);
         try {
             while(true){
-            //    System.out.println("loops: " + loops);
-
-//                boolean startResponse = start(minNodeName,minNodeAddress);
-//                System.out.println("start response: "+startResponse);
-//
-//
-// Count the number of lines in both key and value
                 int keyLines = key.split("\n").length;
 
-                // Sending a message to the server at the other end of the socket
-            //    System.out.println("Sending a get message to the server");
-                writer.write("GET? " + keyLines + "\n" + key); //  + "\n" + key + "\n" + value
+                writer.write("GET? " + keyLines + "\n" + key);
                 writer.flush();
 
                 String response = reader.readLine();
@@ -268,10 +177,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                 if (response != null && response.startsWith("VALUE")) {
                     clientSocket.close();
-                    //isConnected = true; // Update connection status
-//                    String[] res = response.split("\n");
-//                    System.out.println("the response contains this:\n"+Arrays.toString(res));
-//
+
                     String[] parts = response.split(" ", 2);
                     int valueLinesCount = Integer.parseInt(parts[1]);
                     StringBuilder valueBuilder = new StringBuilder();
@@ -280,7 +186,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
 
                     String value = valueBuilder.toString();
-                   // System.out.println("the value: --> " + value);
                     return value;
                 } else if (response.startsWith("NOPE")) {
                     // Get the hash ID for the key to find nearest nodes
@@ -289,9 +194,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     // Call nearest to find nearest nodes
                     String nearestNodesInfo = nearest(hexKeyHash);
-                    System.out.println("nearest nodes: \n" + nearestNodesInfo);
 
-                    //System.out.println(nearestNodesInfo);
                     if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
                         System.err.println("Failed to retrieve nearest nodes or none are available.");
                         end("COMPLETE");
@@ -322,15 +225,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     reader.close();
                     writer.close();
 
-                    //Once smallest node is found,
-                    // check if we have already visited it.
-                 //   System.out.println("closer node: "+minNodeName+" "+minNodeAddress);
-
                     if(visitedNodes.contains(minNodeName)){
-                        System.out.println("closer node: "+minNodeName+" is in visitedNodes!");
-                        //We would be in a loop of going to the same
-                        // set of nodes => cant store the key-value pair
-                        return null;
+                          return null;
                     }
 
                     String[] address = minNodeAddress.split(":");
@@ -342,20 +238,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
 
-                    //start(this.host,this.port);
                     writer.write("START 1 " + name + "\n");
                     writer.flush();
                     String r = reader.readLine();
-                //    System.out.println("here --> :" + r);
                     visitedNodes.add(minNodeName);
-
-                    loops++;
-                    //                String nodeName = nodeDetails[1];
-                    //                String nodeAddress = nodeDetails[2];
-                    //                attemptStoreOnNode(nodeName,nodeAddress,key,value);
-
-//                    System.err.println("Failed to store the key-value pair on any fallback node.");
-//                    return false;
                 }
 
             }
@@ -365,323 +251,11 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
         return null;
     }
-
-
-    /*
-    public String get(String key) {
-
-
-	// Implement this!
-	// Return the string if the get worked
-	// Return null if it didn't
-	//return "Not implemented";
-
-        if (!isConnected){
-            System.out.println("Not connected to any node. Please start connection first");
-            return null;
-        }
-
-        int min=99999;
-        String minNodeName="";
-        String minNodeAddress="";
-        int count = 0;
+    public void end (String reason){
         try{
-            //while(true){
-                count++;
-                System.out.println("get: "+count);
-                // ensure the key ends with a newline
-                //if (!key.endsWith("\n")) key += "\n";
-                // Count the number of lines in both key and value
-                int keyLines = key.split("\n").length;
-
-                // you have the host and port from start
-                //System.out.println("TCPClient connecting to " + startingNodeAddress);
-                //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-                //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-                //String threeClosestNodes = nearest(key);
-                // Sending a message to the server at the other end of the socket
-                //System.out.println("Sending a message to the server");
-                writer.write("GET? " + keyLines + "\n"+key);
-                writer.flush();
-
-                String response = reader.readLine();
-                System.out.println("the response, sdfof: "+ response);
-                //String[] parts = response.split(" ", 1);
-                if (response.startsWith("VALUE"))
-                {
-                    //int valueLinesCount = Integer.parseInt(parts[1]);
-                    int valueLinesCount2 = Integer.parseInt(response.split(" ")[1]);
-                    StringBuilder valueBuilder = new StringBuilder();
-                    valueBuilder.append(response).append("\n");
-                    for (int i = 0; i < valueLinesCount2; i++) {
-                        valueBuilder.append(reader.readLine()).append("\n");
-                    }
-
-                    String valueResponse = valueBuilder.toString();
-
-                    System.out.println("The sdjcbshkhgsraubserver said : \n" + valueResponse); //valueResponse
-                    //String response2 = reader.readLine();
-                    //System.out.println("The server said2 : " + response2);
-
-
-                    return valueResponse;
-
-                } else if (response.startsWith("NOPE")) {
-                    /*
-                    int countNopes=0;
-                    while(true){
-                        countNopes++;
-                        System.out.println("nopes: " + countNopes);
-                        // Calculate the hashID of the key to find the nearest nodes
-                        byte[] keyHashID = HashID.computeHashID(key + "\n");
-                        String hexKeyHashID = HashID.bytesToHex(keyHashID);
-
-                        System.out.println("name and address of new node: \n"+this.startingNodeName+" "+this.startingNodeAddress);
-                        // Get the nearest nodes
-                        String nearestNodesInfo = nearest(hexKeyHashID);
-                        System.out.println("nearest nodes: \n" + nearestNodesInfo);
-                        if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
-                            System.err.println("Failed to retrieve nearest nodes or none are available.");
-                            return null;
-                        }
-                        // System.out.println("HERE: " + nearestNodesInfo);
-
-                        // Parse the nearestNodesInfo to extract node details
-                        String[] lines = nearestNodesInfo.split("\n");
-                        int numNodes = Integer.parseInt(lines[0].split(" ")[1]);
-
-                        // System.out.println(Arrays.toString(lines));
-                        // Skip the first line which is "NODES X"
-
-    //                for (int i = 1; i < numNodes; i += 2) {
-    //                    String nodeName = lines[i]; // Node name
-    //                    String nodeAddress = lines[i + 1]; // Node address
-    //                    System.out.println(nodeName + "\n" + nodeAddress);
-    //                    System.out.println("value " + i);
-    //                    // Attempt to get from the nearest node
-    //                    String value = attemptGetFromNode(nodeName, nodeAddress, key);
-    //                    if (value != null && !value.equals("NOPE")) {
-    //                        System.out.println("Successfully retrieved value from fallback node: " + nodeName);
-    //                        return value; // Successfully retrieved value from a fallback node
-    //                    }
-    //                    System.out.println("i: " + i);
-    //                }
-                        // Adjusted loop to start from the first node's information
-                        for (int i = 1; i < numNodes * 2; i += 2) {
-                            String nodeName = lines[i]; // Adjust index for node name
-                            String nodeAddress = lines[i + 1]; // Adjust index for node address
-                            //System.out.println(i+" "+minNodeName);
-
-                            byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
-                            byte[] keyHashId = HashID.computeHashID(key + "\n");
-                            int distance = HashID.calculateDistance(nodeHashID, keyHashId);
-                            if (distance < min) {
-                                min = distance;
-                                minNodeName = nodeName;
-                                minNodeAddress = nodeAddress;
-                            }
-                            System.out.println(nodeName + ", distance: " + distance);
-                        }
-
-
-                        System.out.println("min node name: " + minNodeName);
-
-                        clientSocket.close();
-                        reader.close();
-                        writer.close();
-
-//                        InetAddress host = InetAddress.getByName(minNodeAddress.split(":")[0]);
-//                        int port = Integer.parseInt(minNodeAddress.split(":")[1]);
-//                        clientSocket = new Socket(host, port);
-//                        reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//                        writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-//                        this.startingNodeAddress = minNodeAddress;
-//                        this.startingNodeName = minNodeName;
-                        start(minNodeName, minNodeAddress);
-
-    //                    writer.write("START 1 " + name +"\n");
-    //                    writer.flush();
-
-                        String value = attemptGetFromNode(minNodeName, minNodeAddress, key);
-                        System.out.println("attempGetFromNode value: " + response);
-
-                        if (value != null && !value.equals("NOPE")) {
-                            System.out.println("Successfully retrieved value from fallback node: " + minNodeName);
-                            return value;
-                        }
-                    }
-
-                     //     there was a(* /) comment
-
-                    while(true) {
-                        // Get the hash ID for the key to find nearest nodes
-                        byte[] keyHash = HashID.computeHashID(key);
-                        String hexKeyHash = HashID.bytesToHex(keyHash);
-
-                        // Call nearest to find nearest nodes
-                        String nearestNodesInfo = nearest(hexKeyHash);
-                        System.out.println("nearest nodes: \n" + nearestNodesInfo);
-                        //System.out.println(nearestNodesInfo);
-                        if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
-                            System.err.println("Failed to retrieve nearest nodes or none are available.");
-                            return null;
-                        }
-
-
-                        // Split the nearestNodesInfo to get individual node details
-                        String[] nodeDetails = nearestNodesInfo.split("\n");
-                        int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
-                        // Skip the first line which is "NODES X"
-                        for (int i = 1; i < numNodes; i += 2) {
-                            String nodeName = nodeDetails[i];
-                            String nodeAddress = nodeDetails[i + 1];
-
-                            String result = attemptGetOnNode2(nodeName, nodeAddress, key);
-                            // Attempt to store on the nearest node
-                            if (result.startsWith("VALUE")) {
-                                System.out.println("Successfully got the value on fallback node: " + nodeName);
-                                return result;
-                            }
-                        }
-
-//                String nodeName = nodeDetails[1];
-//                String nodeAddress = nodeDetails[2];
-//                attemptStoreOnNode(nodeName,nodeAddress,key,value);
-
-//                        System.err.println("Failed to store the key-value pair on any fallback node.");
-//                        return "NOPEE";
-                    }
-//                String nodeName = lines[1];
-//                String nodeAddress = lines[2];
-//                attemptGetFromNode(nodeName,nodeAddress,key);
-
-
-
-
-//                    System.err.println("Failed to retrieve the key-value pair from any fallback node.");
-//                    return null;
-                }
-          //  }
-
-        } catch (Exception e){
-            System.out.println("Error during GET? request handling: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return null;
-    }
-*/
-    private String attemptGetOnNode2(String nodeName, String nodeAddress, String key) {
-        try {
-            // Split the address to get IP and port
-            String[] addressParts = nodeAddress.split(":");
-            String ip = addressParts[0];
-            int port = Integer.parseInt(addressParts[1]);
-
-            // Open a new connection to the node
-            Socket socket = new Socket(ip, port);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            Writer writer = new OutputStreamWriter(socket.getOutputStream());
-
-            // Initiate protocol communication, e.g., send START command
-            writer.write("START 1 " + name + "\n"); // Adjust as needed
-            writer.flush();
-
-            // Wait for a START response if necessary
-            // Assume the node responds with START, indicating ready to communicate
-            reader.readLine(); // Read the response to the START command
-
-            writer.write("GET? " + key.split("\n").length + "\n" + key);
-            writer.flush();
-
-            // Read and check the response
-            String response = reader.readLine();
-            socket.close(); // Always close the socket
-
-            // Check if the response indicates success
-            if(response.startsWith("VALUE")){
-                return response;
-            }
-            return "NOPEE";
-        } catch (Exception e) {
-            System.err.println("Error attempting to store on node " + nodeName + ": " + e.getMessage());
-            return "NOPEE";
-        }
-    }
-
-    private String attemptGetFromNode(String nodeName, String nodeAddress, String key) {
-        try {
-            System.out.println("LOOK: " + nodeAddress);
-            // Split the address to get IP and port
-            String[] addressParts = nodeAddress.split(":");
-            InetAddress ip = InetAddress.getByName(addressParts[0]);
-            int port = Integer.parseInt(addressParts[1]);
-
-//            clientSocket = new Socket(ip, port);
-//            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//            writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-            // Open a new connection to the node
-           // try {
-
-                // Initiate protocol communication, e.g., send START command
-//                writer.write("START 1 " + name + "\n");
-//                writer.flush();
-//                System.out.println("hi!");
-
-                // Wait for a START response if necessary
-//                String res = reader.readLine(); // Assume the node responds
-//                System.out.println("result of start: \n"+res);
-//                // Now send the GET? request
-                writer.write("GET? " + key.split("\n").length + "\n" + key);
-                writer.flush();
-
-                // Read and process the response
-                String response = reader.readLine();
-            //    System.out.println("get message 2: " + response);
-
-                if (response.startsWith("VALUE")) {
-                    StringBuilder valueBuilder = new StringBuilder(response);
-                    String[] parts = response.split(" ");
-                    System.out.println("l:" + parts[0]);
-                    int lines = Integer.parseInt(parts[1]);
-                    for (int i = 0; i < lines; i++) {
-                        valueBuilder.append("\n").append(reader.readLine());
-                    }
-                    return valueBuilder.toString();
-                }
-                //return "NOPE"; // hereee
-
-            } catch (Exception e) {
-                System.err.println("Error attempting to get from node " + nodeName + ": " + e.getMessage());
-            }
-            return "NOPE";
-      //  } catch (UnknownHostException e) {
-        //    throw new RuntimeException(e);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-    }
-
-
-        public void end (String reason){
-
-        try{
-//            System.out.println("TCPClient connecting to " + startingNodeAddress);
-//            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-//            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-            // Sending a message to the server at the other end of the socket
-          //  System.out.println("Sending a message to the server");
             writer.write("END " + reason +"\n");
             writer.flush();
-
             isConnected = false;
-
             // Close down the connection
             clientSocket.close();
         } catch (Exception e){
@@ -690,26 +264,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
     }
     public boolean echo (){
-
         if (!isConnected){
             System.out.println("Not connected to any node. Please start connection first");
             return false;
         }
-
         try{
-            System.out.println("TCPClient connecting to " + startingNodeAddress);
-            System.out.println(startingNodeHost.toString() + "  :  "+startingNodePort);
-            //Socket clientSocket = new Socket(startingNodeHost, startingNodePort);
-            //BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            //Writer writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-            // Sending a message to the server at the other end of the socket
-            System.out.println("Sending a message to the server");
             writer.write("ECHO?" +"\n");
             writer.flush();
 
             String response = reader.readLine();
-            System.out.println("The server said : " + response);
 
             if (response != null && response.startsWith("OHCE"))
             {
@@ -724,7 +287,6 @@ public class TemporaryNode implements TemporaryNodeInterface {
         return false;
     }
     public boolean notifyRequest (String request) {
-
         if (!isConnected){
             System.out.println("Not connected to any node. Please start connection first");
             return false;
@@ -737,12 +299,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
             String fullNodeAddress = parts[1];
 
             // Sending a message to the server at the other end of the socket
-            System.out.println("Sending a message to the server");
             writer.write("NOTIFY? \n" + fullNodeName + "\n" + fullNodeAddress + "\n");
             writer.flush();
 
             String response = reader.readLine();
-            System.out.println("The server said : " + response);
 
             if (response != null && response.startsWith("NOTIFIED"))
             {
@@ -756,20 +316,16 @@ public class TemporaryNode implements TemporaryNodeInterface {
         }
         return false;
     }
-
     public String nearest(String hashID) {
         if (!isConnected) {
             System.out.println("Not connected to any node. Please start connection first.");
             return null;
         }
-
         try {
-           // System.out.println("writer: "+this.startingNodeName+"---"+this.startingNodeAddress);
             writer.write("NEAREST? " + hashID + "\n");
             writer.flush();
 
             String response = reader.readLine();
-        //    System.out.println("RESP: " + response);
             if (response.startsWith("NODES")) {
                 int numberOfNodes = Integer.parseInt(response.split(" ")[1]);
                 StringBuilder nodesInfo = new StringBuilder();
@@ -779,80 +335,14 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     String nodeAddress = reader.readLine().trim(); // Trim any trailing newlines
                     nodesInfo.append(nodeName).append("\n").append(nodeAddress).append("\n");
                 }
-        //        System.out.println(nodesInfo);
-                // Print the complete nodes information for debugging before returning
-//                System.out.println("Complete nodes information received:\n" + nodesInfo);
                 return nodesInfo.toString();
             }
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-        return null; // hereee
-    }
-
-
-/*
-    public String nearest (String hash){// the string is a hashID written in hex
-        if (!isConnected){
-            System.out.println("Not connected to any node. Please start connection first");
-            return null;
-        }
-        try{
-            // Sending a message to the server at the other end of the socket
-            System.out.println("Sending a message to the server");
-            writer.write("NEAREST? ");
-            writer.write(hash + "\n");
-            writer.flush();
-
-            String response = reader.readLine();
-
-            String[] parts = response.split(" ", 2);
-
-            System.out.println(Arrays.toString(parts));
-            int nodesCount = Integer.parseInt(parts[1]);
-            System.out.println(nodesCount);
-            StringBuilder valueBuilder = new StringBuilder();
-            valueBuilder.append(response).append("\n");
-            for (int i = 0; i < nodesCount ; i++) {
-                valueBuilder.append(reader.readLine()).append("\n");
-                valueBuilder.append(reader.readLine()).append("\n");
-                System.out.println(i+":"+valueBuilder);
-            }
-
-            String valueResponse = valueBuilder.toString();
-            System.out.println("last: "+valueBuilder);
-
-            System.out.println("The server said : \n" + valueResponse);
-
-
-            if (response.startsWith("NODES"))
-            {
-                isConnected = true; // Update connection status
-                return valueResponse;
-            }
-
-        } catch (Exception e){
-            System.out.println("Connecting attempt failed: " + e.getMessage());
-            e.printStackTrace();
-        }
         return null;
     }
-
-
- */
-    public static String bytesToHex(byte[] hash) {
-        StringBuilder hexString = new StringBuilder(2 * hash.length);
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-        }
-        return hexString.toString();
-    }
-
     public static void main(String[] args) throws IOException {
         TemporaryNode tNode = new TemporaryNode();
 
