@@ -103,6 +103,7 @@ public class FullNode implements FullNodeInterface {
         try {
             while(isOpen) {
                 Socket clientSocket = serverSocket.accept();
+                System.out.println("client is accepted.");
                 isConnected = true;
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 out = new OutputStreamWriter(clientSocket.getOutputStream());
@@ -125,6 +126,7 @@ public class FullNode implements FullNodeInterface {
                 String message;
                 while (isConnected) {
                     message = in.readLine();
+                    System.out.println("sender: "+message);
                     if (message != null) {
                         System.out.println(message);
                         handleClient(message);

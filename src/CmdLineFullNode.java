@@ -23,7 +23,7 @@ public class CmdLineFullNode {
 	    String ipAddress = args[2];
 	    int portNumber;
 	    try {
-                portNumber = Integer.parseInt(args[3]);
+            portNumber = Integer.parseInt(args[3]);
             } catch (Exception e) {
                 System.err.println("Exception parsing the port number");
                 System.err.println(e);
