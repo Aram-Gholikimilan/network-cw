@@ -219,6 +219,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                             minNodeAddress = nodeAddress;
                         }
                     }
+                    System.out.println("min node: "+ minNodeName);
 
                     end("CANNOT-STORE");
                     clientSocket.close();

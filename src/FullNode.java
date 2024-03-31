@@ -51,12 +51,20 @@ public class FullNode implements FullNodeInterface {
     private boolean isOpen;
     private BufferedReader in;
     private Writer out;
-    int backlog = 50;   //TODO: what number should i give?
+    private Socket clientSocket;
+    private String nodeName = "aram.gholikimilan@city.ac.uk:2D#4Impl,1.0,FullNode,1";
+    private String nodeAddress = "";
+    private String ip;
+    private int port;
+    int backlog = 5;   //TODO: what number should i give?
     public boolean listen(String ipAddress, int portNumber) {
         try {
             serverSocket = new ServerSocket(portNumber, backlog);
             System.out.println("FullNode listening on " + ipAddress + ":" + portNumber + ". . .");
             isOpen = true;
+            nodeAddress = ipAddress + ":" + portNumber;
+            this.port=portNumber;
+            this.ip=ipAddress;
             return true;
         } catch (IOException e) {
             System.err.println("Could not listen on " + ipAddress + ":" + portNumber + ". " + e.getMessage());
@@ -66,14 +74,49 @@ public class FullNode implements FullNodeInterface {
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
         this.startingNodeName = startingNodeName;
         this.startingNodeAddress = startingNodeAddress;
+
         try {
+            nodeTime = getCurrentTime();
+            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
+            nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+            int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
+            updateNetworkMap(distance, newNodeInfo0);
+
+            String[] address = startingNodeAddress.split(":");
+            InetAddress host = InetAddress.getByName(address[0]);
+            int port = Integer.parseInt(address[1]);
+
+            clientSocket = new Socket(host, port);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            out = new OutputStreamWriter(clientSocket.getOutputStream());
+
+            out.write("START 1 " + nodeName + "\n");    // i added a new line
+            out.flush();
+
+            writer.write("NOTIFY? \n" + nodeName + "\n" + nodeAddress + "\n");
+            writer.flush();
+
+            writer.write("END " + "NOTIFIED!" +"\n");
+            writer.flush();
+            clientSocket.close();
+
+            System.out.println("srtdrghjkdfuhjlk");
+            String nodeTime2 = getCurrentTime();
+
+            NodeInfo newNodeInfo1 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime2);
+            nodeHashID = HashID.computeHashID(nodeName + "\n");
+            byte[] newNodeHashID = HashID.computeHashID(startingNodeName + "\n");
+            int distance2 = HashID.calculateDistance(nodeHashID, newNodeHashID);
+            updateNetworkMap(distance2, newNodeInfo1);
+
             while(isOpen) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("A node is accepted.");
                 isConnected = true;
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 out = new OutputStreamWriter(clientSocket.getOutputStream());
-                out.write("START 1 " + startingNodeName + "\n");    // i added a new line
+                out.write("START 1 " + nodeName + "\n");    // i added a new line
                 out.flush();
 
                 String[] parts = startingNodeAddress.split(":");
@@ -81,12 +124,7 @@ public class FullNode implements FullNodeInterface {
                 startingNodeHost = parts[0];
                 startingNodePort = Integer.parseInt(parts[1]);
 
-                nodeTime = getCurrentTime();
-                NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
-                nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-                byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-                int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
-                updateNetworkMap(distance, newNodeInfo0);
+
 
                 String message;
                 while (isConnected) {
@@ -189,7 +227,7 @@ public class FullNode implements FullNodeInterface {
 //            NodeInfo newNodeInfo = new NodeInfo(newNodeName,nodeAddress, newNodeTime);
 //            updateNetworkMap(distance, newNodeInfo);
 
-            out.write("START " + protocolVersion + " " + startingNodeName + "\n");
+            out.write("START " + protocolVersion + " " + nodeName + "\n");
             out.flush();
         } else {
             // Handle invalid START command
