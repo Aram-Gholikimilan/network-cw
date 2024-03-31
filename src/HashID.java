@@ -7,12 +7,10 @@ import java.lang.StringBuilder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
-
 import static java.lang.Integer.numberOfLeadingZeros;
 import static java.lang.Integer.toBinaryString;
 
 public class HashID {
-
     public static byte [] computeHashID(String line) throws Exception {
 	if (line.endsWith("\n")) {
 	    // What this does and how it works is covered in a later lecture
@@ -25,12 +23,9 @@ public class HashID {
 	    throw new Exception("No new line at the end of input to HashID");
 	}
 	}
-
 	public static int calculateDistance(byte[] hash01, byte[] hash02) {
 		String hash1 = bytesToHex(hash01);
 		String hash2 = bytesToHex(hash02);
-//		System.out.println("HASH 1: " + hash1);
-//		System.out.println("HASH 2: " + hash2);
 		int traversed = 0;
 		String binaryString = "";
 
@@ -59,65 +54,8 @@ public class HashID {
 				break;
 			}
 		}
-		//System.out.println(finalBinaryString.toCharArray());
-		//System.out.println(count);
 		return 256 - (4 * (traversed) + count);
 	}
-
-	private static int countLeadingZeros(String binaryString) {
-		int count = 0;
-		for (char bit : binaryString.toCharArray()) {
-			if (bit == '0') {
-				count++;
-			} else {
-				break; // Stop counting at the first '1'
-			}
-		}
-		return count;
-	}
-	public static int calDistance (byte[] hash1, byte[]hash2){
-
-		byte b1 = 0;
-		byte b2 = 0;
-		int counter = 256;
-		for(int i=0; i< hash1.length-1;i++){
-			if(hash1[i] != hash2[i]){
-				b1 = hash1[i];
-				b2 = hash2[i];
-				int result = ((b1 ^ b2)&0xff);
-				int numberDiff = 32 - numberOfLeadingZeros(result);
-				System.out.println(result);
-				System.out.println(numberDiff);
-				System.out.println(counter);
-				return counter - numberDiff;
-			} else {
-				counter-=8;
-			}
-		}
-		return 0;
-	}
-
-	public static int calDistance2(byte[] hash1, byte[] hash2) {
-		int matchBits = 0;
-		for (int i = 0; i < hash1.length; i++) {
-			byte xorResult = (byte) (hash1[i] ^ hash2[i]);
-			if (xorResult == 0) {
-				matchBits += 8; // If bytes are equal, all 8 bits match
-			} else {
-				// Count the number of leading zeros in the XOR result
-				for (int j = 7; j >= 0; j--) {
-					if ((xorResult & (1 << j)) == 0) {
-						matchBits++;
-					} else {
-						break; // Stop at the first 1 bit
-					}
-				}
-				break; // Stop after finding the first byte that is not equal
-			}
-		}
-		return 256 - matchBits;
-	}
-
 	public static void main(String[] args) throws Exception {
 		String hexHash1 = "a890e1aa36481e399939d32680dab2005c299f2bb9c3ba6b151ac0cc821fec7a"; // "0f033be6cea034bd45a0352775a219ef5dc7825ce55d1f7dae9762d80ce64411";
 		String hexHash2 = "b97835cb52c81981355dcbc78c1f6167dbcce122004ebb202bdda90cb86ad0e6"; // "0f0139b167bb7b4a416b8f6a7e0daa7e24a08172b9892171e5fdc615bb7f999b";
@@ -154,7 +92,6 @@ public class HashID {
 		 */
 	}
 	// Helper method to convert byte array to hex string
-
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
 		byte[] data = new byte[len / 2];
