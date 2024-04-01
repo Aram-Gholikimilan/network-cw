@@ -108,7 +108,7 @@ public class HashID {
 		}
 		return sb.toString();
 	}
-	
+
 	public static int countLeadingMatchingBits(byte[] array1, byte[] array2) {
 		if (array1 == null || array2 == null) {
 			throw new IllegalArgumentException("Input arrays must not be null");
