@@ -132,12 +132,12 @@ public class FullNode implements FullNodeInterface {
                 String message;
                 while (isConnected) {
                     message = in.readLine();
-                   // if (message != null) {
+                    if (message != null) {
                         System.out.println(message);
                         handleClient(message);
                         System.out.println("The - " + message + " - is handled!");
                         message = null;
-                   // }
+                    }
                 }
                 clientSocket.close();
             }
