@@ -76,6 +76,8 @@ public class FullNode implements FullNodeInterface {
         this.startingNodeAddress = startingNodeAddress;
 
         try {
+
+            /*
             nodeTime = getCurrentTime();
             NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
             nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
@@ -100,6 +102,7 @@ public class FullNode implements FullNodeInterface {
             writer.write("END " + "NOTIFIED!" +"\n");
             writer.flush();
             clientSocket.close();
+            */
 
             System.out.println("srtdrghjkdfuhjlk");
             String nodeTime2 = getCurrentTime();
@@ -129,18 +132,19 @@ public class FullNode implements FullNodeInterface {
                 String message;
                 while (isConnected) {
                     message = in.readLine();
-                    if (message != null) {
+                   // if (message != null) {
                         System.out.println(message);
                         handleClient(message);
                         System.out.println("The - " + message + " - is handled!");
                         message = null;
-                    }
+                   // }
                 }
                 clientSocket.close();
             }
 
         } catch (Exception e) {
             System.out.println("Error during communication with the client: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     private enum CommandType {
