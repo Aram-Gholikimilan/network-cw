@@ -224,6 +224,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         }
 
                     }
+                    min = 257;
+                    distance = 257;
 
                     System.out.println("min node: "+ minNodeName);
 
