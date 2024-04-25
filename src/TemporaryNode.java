@@ -186,7 +186,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
 
                     String value = valueBuilder.toString();
-                    System.out.println("valueeee:\n"+value);
+                    //System.out.println("valueeee:\n"+value);
                     return value;
                 } else if (response.startsWith("NOPE")) {
                     // Get the hash ID for the key to find nearest nodes
