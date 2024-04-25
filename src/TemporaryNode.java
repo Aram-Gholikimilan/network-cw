@@ -115,7 +115,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                         byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
                         byte[] keyHashId = HashID.computeHashID(key + "\n");
-                        int distance = HashID.calculateDistance(nodeHashID, keyHashId);
+                        //int distance = HashID.calculateDistance(nodeHashID, keyHashId);
+                        int distance = HashID.countLeadingMatchingBits(nodeHashID, keyHashId);
                         if (distance < min) {
                             min = distance;
                             minNodeName = nodeName;
@@ -215,7 +216,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                         byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
                         byte[] keyHashId = HashID.computeHashID(key + "\n");
-                        distance = HashID.calculateDistance(nodeHashID, keyHashId);
+                        //distance = HashID.calculateDistance(nodeHashID, keyHashId);
+                        distance = HashID.countLeadingMatchingBits(nodeHashID, keyHashId);
                         System.out.println(nodeName+" d: "+distance);
                         if (distance < min) {
                             min = distance;
