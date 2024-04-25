@@ -231,7 +231,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     writer.close();
 
                     if(visitedNodes.contains(minNodeName)){
-                          return null;
+                        System.out.println("* dont want to loop *");
+                        return null;
                     }
 
                     String[] address = minNodeAddress.split(":");
