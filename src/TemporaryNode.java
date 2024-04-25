@@ -160,6 +160,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
     }
     public String get(String key) {
         int min=257;
+        int distance=257;
         String minNodeName=this.startingNodeName;
         String minNodeAddress=this.startingNodeAddress;
 
@@ -214,7 +215,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                         byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
                         byte[] keyHashId = HashID.computeHashID(key + "\n");
-                        int distance = HashID.calculateDistance(nodeHashID, keyHashId);
+                        distance = HashID.calculateDistance(nodeHashID, keyHashId);
                         System.out.println(nodeName+" d: "+distance);
                         if (distance < min) {
                             min = distance;
@@ -223,6 +224,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         }
 
                     }
+
                     System.out.println("min node: "+ minNodeName);
 
                     end("CANNOT-STORE");
