@@ -57,6 +57,9 @@ public class FullNode implements FullNodeInterface {
     private String ip;
     private int port;
     int backlog = 5;   //TODO: what number should i give?
+    private boolean started = false;
+
+
     public boolean listen(String ipAddress, int portNumber) {
         try {
             serverSocket = new ServerSocket(portNumber, backlog);
@@ -102,7 +105,9 @@ public class FullNode implements FullNodeInterface {
             writer.write("END " + "NOTIFIED!" +"\n");
             writer.flush();
             clientSocket.close();
-            */
+
+
+             */
 
             System.out.println("srtdrghjkdfuhjlk");
             String nodeTime2 = getCurrentTime();
@@ -198,6 +203,7 @@ public class FullNode implements FullNodeInterface {
                         break;
                     case END:
                         isConnected = false;
+                        started = false;
                         break; // Exit the loop and close the connection
                     default:
                         System.err.println("Unknown command: " + line);
@@ -211,31 +217,38 @@ public class FullNode implements FullNodeInterface {
     }
     // Placeholder for request handling methods
     private void handleStartCommand(String line) throws Exception {
-        // Split the line by spaces to extract the parts
-        String[] parts = line.split(" ");
-        if (parts.length >= 3) {
-            // Assuming the START command format is: START <number> <string>
-            String protocolVersion = parts[1];
-            String newNodeName = parts[2]; // This could potentially include more parts if the name contains spaces
-            String[] nodeNamePart = newNodeName.split(":");
-            String nodeAddress = nodeNamePart[1];
+        if(!started) {
+            // Split the line by spaces to extract the parts
+            String[] parts = line.split(" ");
+            if (parts.length >= 3) {
+                // Assuming the START command format is: START <number> <string>
+                String protocolVersion = parts[1];
+                String newNodeName = parts[2]; // This could potentially include more parts if the name contains spaces
+                String[] nodeNamePart = newNodeName.split(":");
+                String nodeAddress = nodeNamePart[1];
 
 
-            //TODO: Do i need to add the temporary node to the network map?
-            // i think we do not have to add those,
-            // so i need an if statement to check if it is FullNode then update the network map,
-            // otherwise do not add it.
+                //TODO: Do i need to add the temporary node to the network map?
+                // i think we do not have to add those,
+                // so i need an if statement to check if it is FullNode then update the network map,
+                // otherwise do not add it.
 //            byte[] newNodeHashID = HashID.computeHashID(newNodeName+"\n");
 //            int distance = HashID.calculateDistance(nodeHashID, newNodeHashID);
 //            String newNodeTime = getCurrentTime();
 //            NodeInfo newNodeInfo = new NodeInfo(newNodeName,nodeAddress, newNodeTime);
 //            updateNetworkMap(distance, newNodeInfo);
 
-            out.write("START " + protocolVersion + " " + nodeName + "\n");
-            out.flush();
+                    out.write("START " + protocolVersion + " " + nodeName + "\n");
+                    out.flush();
+                    started = true;
+
+            } else {
+                // Handle invalid START command
+                System.err.println("Invalid START command received: " + line);
+            }
         } else {
-            // Handle invalid START command
-            System.err.println("Invalid START command received: " + line);
+            out.write("CONNECTION HAS ALREADY STARTED\n");
+            out.flush();
         }
     }
     public static String getCurrentTime() {
