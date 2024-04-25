@@ -230,9 +230,9 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     reader.close();
                     writer.close();
 
-//                    if(visitedNodes.contains(minNodeName)){
-//                          return null;
-//                    }
+                    if(visitedNodes.contains(minNodeName)){
+                          return null;
+                    }
 
                     String[] address = minNodeAddress.split(":");
                     int port = Integer.parseInt(address[1]);
