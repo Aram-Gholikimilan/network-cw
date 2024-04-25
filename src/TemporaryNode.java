@@ -322,10 +322,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
         return false;
     }
     public String nearest(String hashID) {
-        if (!isConnected) {
-            System.out.println("Not connected to any node. Please start connection first.");
-            return null;
-        }
+//        if (!isConnected) {
+//            System.out.println("Not connected to any node. Please start connection first.");
+//            return null;
+//        }
         try {
             writer.write("NEAREST? " + hashID + "\n");
             writer.flush();
