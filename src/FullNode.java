@@ -190,30 +190,45 @@ public class FullNode implements FullNodeInterface {
                         if(started) {
                             handlePutRequest(line);
                             break;
+                        } else{
+                            isConnected = false;
+                            started = false;
                         }
                     case GET:
                         // Process GET? command
                         if(started) {
                             handleGetRequest(line);
                             break;
+                        } else {
+                            isConnected = false;
+                            started = false;
                         }
                     case NOTIFY:
                         // Process NOTIFY? command
                         if(started) {
                             handleNotifyRequest();
                             break;
+                        } else {
+                            isConnected = false;
+                            started = false;
                         }
                     case NEAREST:
                         // Process NEAREST? command
                         if(started) {
                             handleNearestRequest(line);
                             break;
+                        }else {
+                            isConnected = false;
+                            started = false;
                         }
                     case ECHO:
                         // ECHO command
                         if(started) {
                             out.write("OHCE\n");
                             out.flush();
+                        }else {
+                            isConnected = false;
+                            started = false;
                         }
                         break;
                     case END:
@@ -221,6 +236,9 @@ public class FullNode implements FullNodeInterface {
                             isConnected = false;
                             started = false;
                             break; // Exit the loop and close the connection
+                        } else {
+                            isConnected = false;
+                            started = false;
                         }
                     default:
                         System.err.println("Unknown command: " + line);
