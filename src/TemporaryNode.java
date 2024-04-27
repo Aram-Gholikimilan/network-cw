@@ -68,6 +68,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
             System.out.println("Connecting attempt failed: " + e.getMessage());
             e.printStackTrace();
         }
+
+        end("INVALID RESPONSE");
         return false;
     }
 
@@ -237,7 +239,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     System.out.println("min node: "+ minNodeName);
 
-                    end("CANNOT-STORE");
+                    end("CANNOT-GET");
                     clientSocket.close();
                     reader.close();
                     writer.close();

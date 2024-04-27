@@ -190,7 +190,7 @@ public class FullNode implements FullNodeInterface {
                         if(started) {
                             handlePutRequest(line);
                         } else{
-                            endConnection();
+                            end("START-A-CONNECTION");
                         }
                         break;
                     case GET:
@@ -198,7 +198,7 @@ public class FullNode implements FullNodeInterface {
                         if(started) {
                             handleGetRequest(line);
                         } else {
-                            endConnection();
+                            end("START-A-CONNECTION");
                         }
                         break;
                     case NOTIFY:
@@ -206,7 +206,7 @@ public class FullNode implements FullNodeInterface {
                         if(started) {
                             handleNotifyRequest();
                         } else {
-                            endConnection();
+                            end("START-A-CONNECTION");
                         }
                         break;
                     case NEAREST:
@@ -214,7 +214,7 @@ public class FullNode implements FullNodeInterface {
                         if(started) {
                             handleNearestRequest(line);
                         }else {
-                            endConnection();
+                            end("START-A-CONNECTION");
                         }
                         break;
                     case ECHO:
@@ -223,7 +223,7 @@ public class FullNode implements FullNodeInterface {
                             out.write("OHCE\n");
                             out.flush();
                         }else {
-                            endConnection();
+                            end("START-A-CONNECTION");
                         }
                         break;
                     case END:
@@ -232,10 +232,11 @@ public class FullNode implements FullNodeInterface {
                             started = false;
                             break; // Exit the loop and close the connection
                         }else {
-                            endConnection();
+                            end("START-A-CONNECTION");
                         }
                     default:
                         System.err.println("Unknown command: " + line);
+                        end("INVALID REQUEST");
                         break;
                 }
                 line = null; // Or read the next line if in a loop
@@ -244,11 +245,20 @@ public class FullNode implements FullNodeInterface {
             System.err.println("Error handling client. Error: " + e.getMessage());
         }
     }
-    private void endConnection() throws IOException {
-        isConnected = false;
-        started = false;
-        out.write("CONNECTION ENDED: START THE CONNECTION FIRST! \n");
-        out.flush();
+
+    public void end (String reason){
+        try{
+            writer.write("END " + reason +"\n");
+            writer.flush();
+            isConnected = false;
+            started = false;
+            // Close down the connection
+           // clientSocket.close();
+            System.out.println("connection ended.");
+        } catch (Exception e){
+            System.out.println("Connecting attempt failed: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     // Placeholder for request handling methods
     private void handleStartCommand(String line) throws Exception {
