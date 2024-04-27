@@ -6,6 +6,7 @@
 // This should make your testing easier.
 
 // DO NOT EDIT starts
+
 public class CmdLineFullNode {
 
     public static void main(String[] args) throws Exception {

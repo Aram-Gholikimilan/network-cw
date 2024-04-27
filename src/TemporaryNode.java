@@ -360,7 +360,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
         System.out.println("\n===================\n");
         System.out.println("Start: ");
-        tNode.start("mohammed.siddiqui@city.ac.uk:2D#4Impl,0.1,FullNode,0","10.210.71.249:20000");
+        tNode.start("mohammed.siddiqui@city.ac.uk:2D#4Impl,0.1,FullNode,0","127.0.0.1:6969");
 
 /*
         System.out.println("\n===================\n");

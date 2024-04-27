@@ -65,9 +65,10 @@ public class HashID {
 		byte[] hash2 = hexStringToByteArray(hexHash2);
 
 		// Calculate and print the distance between the two hash IDs
-		int distance = calculateDistance(hash1, hash2);
+		int distance = countLeadingMatchingBits(hash1, hash2);
 		System.out.println("Distance: " + distance);
-
+		int distance2 = calculateDistance(hash1, hash2);
+		System.out.println("Distance2: " + distance);
 		/*
 		// Two example strings, ensuring they end with a newline as required
 		String text1 = "Hello World!\n";

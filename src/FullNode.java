@@ -80,7 +80,7 @@ public class FullNode implements FullNodeInterface {
 
         try {
 
-            /*
+
             nodeTime = getCurrentTime();
             NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
             nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
@@ -99,15 +99,15 @@ public class FullNode implements FullNodeInterface {
             out.write("START 1 " + nodeName + "\n");    // i added a new line
             out.flush();
 
-            writer.write("NOTIFY? \n" + nodeName + "\n" + nodeAddress + "\n");
-            writer.flush();
+            out.write("NOTIFY? \n" + nodeName + "\n" + nodeAddress + "\n");
+            out.flush();
 
-            writer.write("END " + "NOTIFIED!" +"\n");
-            writer.flush();
+            out.write("END " + "NOTIFIED!" +"\n");
+            out.flush();
             clientSocket.close();
 
 
-             */
+
 
             System.out.println("srtdrghjkdfuhjlk");
             String nodeTime2 = getCurrentTime();
@@ -115,7 +115,7 @@ public class FullNode implements FullNodeInterface {
             NodeInfo newNodeInfo1 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime2);
             nodeHashID = HashID.computeHashID(nodeName + "\n");
             byte[] newNodeHashID = HashID.computeHashID(startingNodeName + "\n");
-            int distance2 = HashID.calculateDistance(nodeHashID, newNodeHashID);
+            int distance2 = HashID.countLeadingMatchingBits(nodeHashID, newNodeHashID);
             updateNetworkMap(distance2, newNodeInfo1);
 
             while(isOpen) {
@@ -124,8 +124,8 @@ public class FullNode implements FullNodeInterface {
                 isConnected = true;
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 out = new OutputStreamWriter(clientSocket.getOutputStream());
-                out.write("START 1 " + nodeName + "\n");    // i added a new line
-                out.flush();
+//                out.write("START 1 " + nodeName + "\n");    // i added a new line
+//                out.flush();
 
                 String[] parts = startingNodeAddress.split(":");
                 if (parts.length != 2) throw new IllegalArgumentException("Invalid address format");
@@ -330,7 +330,7 @@ public class FullNode implements FullNodeInterface {
             String nodeTime = getCurrentTime();
             byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
             this.nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
-            int distance = HashID.calculateDistance(nodeHashID,this.nodeHashID);
+            int distance = HashID.countLeadingMatchingBits(nodeHashID,this.nodeHashID);
             NodeInfo nodeInfo = new NodeInfo(nodeName,nodeAddress,nodeTime);
             updateNetworkMap(distance,nodeInfo);
 
@@ -408,7 +408,7 @@ public class FullNode implements FullNodeInterface {
         // Calculate distance for each node and sort
         allNodes.sort(Comparator.comparingInt(node -> {
             try {
-                return HashID.calculateDistance(targetHashID, HashID.computeHashID(node.getNodeName() + "\n"));
+                return HashID.countLeadingMatchingBits(targetHashID, HashID.computeHashID(node.getNodeName() + "\n"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -429,7 +429,7 @@ public class FullNode implements FullNodeInterface {
                 // Add the node's name to the list of names
                 String nodeName = node.getNodeName(); // Extract the node's name
                 byte[] nodeHashID = HashID.computeHashID(nodeName + "\n"); // Compute the hashID for the node name
-                int distance = HashID.calculateDistance(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
+                int distance = HashID.countLeadingMatchingBits(targetHashIDHex, nodeHashID); // Calculate the distance to the target hashID
                 // Add the node's address and its calculated distance to the list
                 nodeNameDist.put(nodeName, distance);
             }
@@ -513,7 +513,7 @@ public class FullNode implements FullNodeInterface {
             NodeInfo newNodeInfo = new NodeInfo("2aram.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-0\n","127.0.0.1:3456",newNodeTime);
             byte[] newNodeHashID = HashID.computeHashID(newNodeInfo.getNodeName());
             byte[] nodeHashID = HashID.computeHashID(startingnodename);
-            int distance = HashID.calculateDistance(nodeHashID,newNodeHashID);
+            int distance = HashID.countLeadingMatchingBits(nodeHashID,newNodeHashID);
             System.out.println("distance: " + distance);
             fNode.updateNetworkMap(distance,newNodeInfo);
 
@@ -521,7 +521,7 @@ public class FullNode implements FullNodeInterface {
             NodeInfo newNodeInfo1 = new NodeInfo("66artin@city.ac.uk:MyCoolImplementation,1.41,test-node-21\n","127.0.0.1:3456",newNodeTime1);
             byte[] newNodeHashID1 = HashID.computeHashID(newNodeInfo1.getNodeName());
             byte[] nodeHashID1 = HashID.computeHashID(startingnodename);
-            int distance1 = HashID.calculateDistance(nodeHashID1,newNodeHashID1);
+            int distance1 = HashID.countLeadingMatchingBits(nodeHashID1,newNodeHashID1);
             System.out.println("distance2: " + distance1);
             fNode.updateNetworkMap(distance1,newNodeInfo1);
 
@@ -529,7 +529,7 @@ public class FullNode implements FullNodeInterface {
             NodeInfo newNodeInfo2 = new NodeInfo("fetul.wejbdwhb@city.ac.uk:MyCoolImplementation,1.41,test-node-22\n","127.0.0.1:3456",newNodeTime2);
             byte[] newNodeHashID2 = HashID.computeHashID(newNodeInfo2.getNodeName());
             byte[] nodeHashID2 = HashID.computeHashID(startingnodename);
-            int distance2 = HashID.calculateDistance(nodeHashID2,newNodeHashID2);
+            int distance2 = HashID.countLeadingMatchingBits(nodeHashID2,newNodeHashID2);
             System.out.println("distance2: " + distance2);
             fNode.updateNetworkMap(distance2,newNodeInfo2);
 
@@ -537,7 +537,7 @@ public class FullNode implements FullNodeInterface {
             NodeInfo newNodeInfo3 = new NodeInfo("eetin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n","127.0.0.1:3456",newNodeTime3);
             byte[] newNodeHashID3 = HashID.computeHashID(newNodeInfo3.getNodeName());
             byte[] nodeHashID3 = HashID.computeHashID(startingnodename);
-            int distance3 = HashID.calculateDistance(nodeHashID3,newNodeHashID3);
+            int distance3 = HashID.countLeadingMatchingBits(nodeHashID3,newNodeHashID3);
             System.out.println("distance3: " + distance3);
             fNode.updateNetworkMap(distance3,newNodeInfo3);
 
