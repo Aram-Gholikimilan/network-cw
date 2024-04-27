@@ -187,29 +187,41 @@ public class FullNode implements FullNodeInterface {
                         break;
                     case PUT:
                         // Process PUT? command
-                        handlePutRequest(line);
-                        break;
+                        if(started) {
+                            handlePutRequest(line);
+                            break;
+                        }
                     case GET:
                         // Process GET? command
-                        handleGetRequest(line);
-                        break;
+                        if(started) {
+                            handleGetRequest(line);
+                            break;
+                        }
                     case NOTIFY:
                         // Process NOTIFY? command
-                        handleNotifyRequest();
-                        break;
+                        if(started) {
+                            handleNotifyRequest();
+                            break;
+                        }
                     case NEAREST:
                         // Process NEAREST? command
-                        handleNearestRequest(line);
-                        break;
+                        if(started) {
+                            handleNearestRequest(line);
+                            break;
+                        }
                     case ECHO:
                         // ECHO command
-                        out.write("OHCE\n");
-                        out.flush();
+                        if(started) {
+                            out.write("OHCE\n");
+                            out.flush();
+                        }
                         break;
                     case END:
-                        isConnected = false;
-                        started = false;
-                        break; // Exit the loop and close the connection
+                        if(started) {
+                            isConnected = false;
+                            started = false;
+                            break; // Exit the loop and close the connection
+                        }
                     default:
                         System.err.println("Unknown command: " + line);
                         break;
