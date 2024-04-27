@@ -270,6 +270,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             isConnected = false;
             // Close down the connection
             clientSocket.close();
+            System.out.println("connection ended.");
         } catch (Exception e){
             System.out.println("Connecting attempt failed: " + e.getMessage());
             e.printStackTrace();
@@ -315,6 +316,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
             writer.flush();
 
             String response = reader.readLine();
+            System.out.println(" "+response);
 
             if (response != null && response.startsWith("NOTIFIED"))
             {
@@ -380,24 +382,23 @@ public class TemporaryNode implements TemporaryNodeInterface {
         System.out.println("Echo: ");
         tNode.echo();
 
+ */
+
         System.out.println("\n===================\n");
         System.out.println("Notify: ");
         tNode.notifyRequest("martin.brain@city.ac.uk:MyCoolImplementation,1.41,test-node-2\n"+ "127.0.0.1:3456");
 
 
- */
+
         System.out.println("\n===================\n");
         System.out.println("Nearest: ");
         String nearestNodes = tNode.nearest("0f003b106b2ce5e1f95df39fffa34c2341f2141383ca46709269b13b1e6b4832");
         System.out.println(nearestNodes);
 
-        /*
+
         System.out.println("\n===================\n");
         System.out.println("End: ");
         tNode.end("no requests!");
-
-
- */
 
 
     }

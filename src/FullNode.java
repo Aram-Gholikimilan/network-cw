@@ -98,13 +98,18 @@ public class FullNode implements FullNodeInterface {
 
             out.write("START 1 " + nodeName + "\n");    // i added a new line
             out.flush();
+            System.out.println("start sent.");
 
             out.write("NOTIFY? \n" + nodeName + "\n" + nodeAddress + "\n");
             out.flush();
+            System.out.println("notify sent.");
 
             out.write("END " + "NOTIFIED!" +"\n");
             out.flush();
+            System.out.println("end sent.");
             clientSocket.close();
+            in.close();
+            out.close();
 
 
 
@@ -326,6 +331,9 @@ public class FullNode implements FullNodeInterface {
         try {
             String nodeName = in.readLine(); // Read node name
             String nodeAddress = in.readLine(); // Read node address
+
+            System.out.println("nodeName: " + nodeName);
+            System.out.println("nodeAddress: " + nodeAddress);
 
             String nodeTime = getCurrentTime();
             byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
