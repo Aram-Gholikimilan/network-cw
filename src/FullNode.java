@@ -112,11 +112,11 @@ public class FullNode implements FullNodeInterface {
             System.out.println("srtdrghjkdfuhjlk");
             String nodeTime2 = getCurrentTime();
 
-            NodeInfo newNodeInfo1 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime2);
-            nodeHashID = HashID.computeHashID(nodeName + "\n");
-            byte[] newNodeHashID = HashID.computeHashID(startingNodeName + "\n");
-            int distance2 = HashID.countLeadingMatchingBits(nodeHashID, newNodeHashID);
-            updateNetworkMap(distance2, newNodeInfo1);
+//            NodeInfo newNodeInfo1 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime2);
+//            nodeHashID = HashID.computeHashID(nodeName + "\n");
+//            byte[] newNodeHashID = HashID.computeHashID(startingNodeName + "\n");
+//            int distance2 = HashID.countLeadingMatchingBits(nodeHashID, newNodeHashID);
+//            updateNetworkMap(distance2, newNodeInfo1);
 
             while(isOpen) {
                 Socket clientSocket = serverSocket.accept();
