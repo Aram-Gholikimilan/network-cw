@@ -72,7 +72,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
     }
 
     public boolean store(String key, String value) {
-        int min=99999;
+        int min=257;
+        int distance=257;
         String minNodeName=this.startingNodeName;
         String minNodeAddress=this.startingNodeAddress;
 
@@ -116,13 +117,15 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
                         byte[] keyHashId = HashID.computeHashID(key + "\n");
                         //int distance = HashID.calculateDistance(nodeHashID, keyHashId);
-                        int distance = HashID.countLeadingMatchingBits(nodeHashID, keyHashId);
+                        distance = HashID.countLeadingMatchingBits(nodeHashID, keyHashId);
                         if (distance < min) {
                             min = distance;
                             minNodeName = nodeName;
                             minNodeAddress = nodeAddress;
                         }
                     }
+                    min = 257;
+                    distance = 257;
 
                     end("CANNOT-STORE");
                     clientSocket.close();
