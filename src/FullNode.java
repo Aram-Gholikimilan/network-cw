@@ -81,12 +81,12 @@ public class FullNode implements FullNodeInterface {
         try {
 
 
-            nodeTime = getCurrentTime();
-            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
-            nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
-            int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
-            updateNetworkMap(distance, newNodeInfo0);
+//            nodeTime = getCurrentTime();
+//            NodeInfo newNodeInfo0 = new NodeInfo(startingNodeName, startingNodeAddress, nodeTime);
+//            nodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+//            byte[] sameNodeHashID = HashID.computeHashID(this.startingNodeName + "\n");
+//            int distance = HashID.calculateDistance(nodeHashID, sameNodeHashID);
+//            updateNetworkMap(distance, newNodeInfo0);
 
             String[] address = startingNodeAddress.split(":");
             InetAddress host = InetAddress.getByName(address[0]);
