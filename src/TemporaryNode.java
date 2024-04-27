@@ -172,6 +172,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         visitedNodes.add(startingNodeName);
         try {
             while(true){
+
                 int keyLines = key.split("\n").length;
 
                 writer.write("GET? " + keyLines + "\n" + key);
@@ -200,6 +201,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     // Call nearest to find nearest nodes
                     String nearestNodesInfo = nearest(hexKeyHash);
+
+
 
                     if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
                         System.err.println("Failed to retrieve nearest nodes or none are available.");
