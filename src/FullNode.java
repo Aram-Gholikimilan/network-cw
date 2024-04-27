@@ -189,46 +189,41 @@ public class FullNode implements FullNodeInterface {
                         // Process PUT? command
                         if(started) {
                             handlePutRequest(line);
-                            break;
                         } else{
-                            isConnected = false;
-                            started = false;
+                            endConnection();
                         }
+                        break;
                     case GET:
                         // Process GET? command
                         if(started) {
                             handleGetRequest(line);
-                            break;
                         } else {
-                            isConnected = false;
-                            started = false;
+                            endConnection();
                         }
+                        break;
                     case NOTIFY:
                         // Process NOTIFY? command
                         if(started) {
                             handleNotifyRequest();
-                            break;
                         } else {
-                            isConnected = false;
-                            started = false;
+                            endConnection();
                         }
+                        break;
                     case NEAREST:
                         // Process NEAREST? command
                         if(started) {
                             handleNearestRequest(line);
-                            break;
                         }else {
-                            isConnected = false;
-                            started = false;
+                            endConnection();
                         }
+                        break;
                     case ECHO:
                         // ECHO command
                         if(started) {
                             out.write("OHCE\n");
                             out.flush();
                         }else {
-                            isConnected = false;
-                            started = false;
+                            endConnection();
                         }
                         break;
                     case END:
@@ -236,9 +231,8 @@ public class FullNode implements FullNodeInterface {
                             isConnected = false;
                             started = false;
                             break; // Exit the loop and close the connection
-                        } else {
-                            isConnected = false;
-                            started = false;
+                        }else {
+                            endConnection();
                         }
                     default:
                         System.err.println("Unknown command: " + line);
@@ -249,6 +243,12 @@ public class FullNode implements FullNodeInterface {
         } catch (Exception e) {
             System.err.println("Error handling client. Error: " + e.getMessage());
         }
+    }
+    private void endConnection() throws IOException {
+        isConnected = false;
+        started = false;
+        out.write("CONNECTION ENDED: START THE CONNECTION FIRST! \n");
+        out.flush();
     }
     // Placeholder for request handling methods
     private void handleStartCommand(String line) throws Exception {
