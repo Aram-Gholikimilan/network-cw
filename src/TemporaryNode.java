@@ -306,8 +306,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     }
 
                     for (String[] details : nodeDetails) {
-                        String nodeName = details[0]; // Node name
-                        String nodeAddress = details[1]; // Node address
+                        String nodeName3 = details[0]; // Node name
+                        String nodeAddress3 = details[1]; // Node address
 
                     /*
                     // Split the nearestNodesInfo to get individual node details
@@ -348,7 +348,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
 //                            return null;
 //                        }
 
-                        String[] address = minNodeAddress2.split(":");
+                        String[] address = nodeAddress3.split(":");
                         int port = Integer.parseInt(address[1]);
                         InetAddress host = InetAddress.getByName(address[0]);
                         clientSocket = new Socket(host, port);
@@ -360,7 +360,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         writer.write("START 1 " + name + "\n");
                         writer.flush();
                         String r = reader.readLine();
-                        visitedNodes.add(minNodeName2);
+                        visitedNodes.add(nodeName3);
 
                         writer.write("GET? " + keyLines + "\n" + key);
                         writer.flush();
