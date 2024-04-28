@@ -87,7 +87,10 @@ public class FullNode implements FullNodeInterface {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new OutputStreamWriter(clientSocket.getOutputStream());
 
-            out.write("START 1 " + startingNodeName + "\n");    // i added a new line
+            out.write("START 1 " + nodeName + "\n");    // i added a new line
+            out.flush();
+
+            out.write("NOTIFY? \n" + nodeName + "\n" + nodeAddress + "\n");
             out.flush();
 
             out.write("END " + "NOTIFIED!" +"\n");
