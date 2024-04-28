@@ -16,9 +16,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 // DO NOT EDIT starts
 interface TemporaryNodeInterface {
@@ -82,7 +80,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         ArrayList<String> visitedNodes = new ArrayList<>();
         visitedNodes.add(startingNodeName);
         try {
-            while(true){
+            while(true) {
                 int keyLines = key.split("\n").length;
                 int valueLines = value.split("\n").length;
 
@@ -97,6 +95,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     clientSocket.close();
                     return true;
                 } else if (response.startsWith("FAILED")) {
+        //    while(true){
                     byte[] keyHash = HashID.computeHashID(key);
                     String hexKeyHash = HashID.bytesToHex(keyHash);
 
@@ -108,6 +107,41 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         return false;
                     }
 
+                    // TreeMap to store distances and corresponding node names
+                    TreeMap<Integer, List<String[]>> sortedNodes = convertStringNodesToMap(nearestNodesInfo, key);
+
+                    // Now sortedNodes contains all node names sorted by the distance in ascending order
+                    List<String> sortedNamesByDistance = new ArrayList<>();
+                    List<String[]> nodeDetails = new ArrayList<>();
+
+                    for (Map.Entry<Integer, List<String[]>> entry : sortedNodes.entrySet()) {
+                        nodeDetails = entry.getValue(); // List of node details arrays
+
+                    }
+
+                    String minNodeName2=null;
+                    String minNodeAddress2=null;
+
+                // Check if the TreeMap is not empty to prevent accessing non-existing entries
+                if (!sortedNodes.isEmpty()) {
+                    // Retrieve the first (minimum distance) entry from the TreeMap
+                    Map.Entry<Integer, List<String[]>> firstEntry = sortedNodes.firstEntry();
+
+                    // Check if there is at least one node in the list of this entry
+                    if (!firstEntry.getValue().isEmpty()) {
+                        // Get the first node's details from the list
+                        String[] details = firstEntry.getValue().get(0);
+                        minNodeName2 = details[0];  // Node name
+                        minNodeAddress2 = details[1];  // Node address
+                    }
+                }
+
+                    for (String[] details : nodeDetails) {
+                        String nodeName = details[0]; // Node name
+                        String nodeAddress = details[1]; // Node address
+
+
+                    /*
                     // Split the nearestNodesInfo to get individual node details
                     String[] nodeDetails = nearestNodesInfo.split("\n");
                     int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
@@ -129,34 +163,65 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     min = 257;
                     distance = 257;
 
-                    end("CANNOT-STORE");
-                    clientSocket.close();
-                    reader.close();
-                    writer.close();
+                     */
 
-                    //Once smallest node is found,
-                    // check if we have already visited it.
-                    if(visitedNodes.contains(minNodeName)){
-                         return false;
+
+                        end("CANNOT-STORE");
+                        clientSocket.close();
+                        reader.close();
+                        writer.close();
+
+                        //Once smallest node is found,
+                        // check if we have already visited it.
+                        if (visitedNodes.contains(nodeName)) {
+                            return false;
+                        }
+
+                        String[] address = nodeAddress.split(":");
+                        int port = Integer.parseInt(address[1]);
+                        InetAddress host = InetAddress.getByName(address[0]);
+                        clientSocket = new Socket(host, port);
+
+                        reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                        writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+
+                        writer.write("START 1 " + name + "\n");
+                        writer.flush();
+                        String r = reader.readLine();
+                        System.out.println("here --> :" + r);
+                        visitedNodes.add(nodeName);
+
+                        writer.write("PUT? " + keyLines + " " + valueLines + "\n" + key + value); //  + "\n" + key + "\n" + value
+                        writer.flush();
+
+                        String response2 = reader.readLine();
+                        System.out.println("put response: " + response2);
+                        if (response2 != null && response2.startsWith("SUCCESS")) {
+                            clientSocket.close();
+                            return true;
+                        }
                     }
+                end("CANNOT-STORE");
+                clientSocket.close();
+                reader.close();
+                writer.close();
 
-                    String[] address = minNodeAddress.split(":");
-                    int port = Integer.parseInt(address[1]);
-                    InetAddress host = InetAddress.getByName(address[0]);
-                    clientSocket = new Socket(host, port);
+                String[] address = minNodeAddress2.split(":");
+                int port = Integer.parseInt(address[1]);
+                InetAddress host = InetAddress.getByName(address[0]);
+                clientSocket = new Socket(host, port);
 
-                    reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    writer = new OutputStreamWriter(clientSocket.getOutputStream());
+                reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                writer = new OutputStreamWriter(clientSocket.getOutputStream());
 
 
-                    writer.write("START 1 " + name + "\n");
-                    writer.flush();
-                    String r = reader.readLine();
-                    System.out.println("here --> :" + r);
-                    visitedNodes.add(minNodeName);
-
+                writer.write("START 1 " + name + "\n");
+                writer.flush();
+                String r = reader.readLine();
+                System.out.println("here --> :" + r);
+                visitedNodes.add(minNodeName2);
                 }
-
             }
         } catch (Exception e){
             System.out.println("Error during PUT? request handling (Store operation): "+e.getMessage());
@@ -364,6 +429,26 @@ public class TemporaryNode implements TemporaryNodeInterface {
             return null;
         }
         return null;
+    }
+
+    public TreeMap<Integer, List<String[]>> convertStringNodesToMap(String nearestNodesInfo, String key) throws Exception {
+        TreeMap<Integer, List<String[]>> map = new TreeMap<>();
+        String[] nodeDetails = nearestNodesInfo.split("\n");
+        int numNodes = Integer.parseInt(nodeDetails[0].split(" ")[1]);
+        // Skip the first line which is "NODES X"
+        for (int i = 1; i < numNodes * 2; i += 2) {
+            String nodeName = nodeDetails[i];
+            String nodeAddress = nodeDetails[i + 1];
+
+            // Calculate distance for the node using HashID functions.
+            byte[] nodeHashID = HashID.computeHashID(nodeName + "\n");
+            byte[] keyHashId = HashID.computeHashID(key + "\n");
+            int distance = HashID.countLeadingMatchingBits(nodeHashID, keyHashId);
+
+            // Ensure the list for this distance exists and add the node details
+            map.computeIfAbsent(distance, k -> new ArrayList<>()).add(new String[]{nodeName, nodeAddress});
+        }
+        return map;
     }
     public static void main(String[] args) throws IOException {
         TemporaryNode tNode = new TemporaryNode();
