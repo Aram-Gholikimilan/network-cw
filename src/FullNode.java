@@ -79,23 +79,23 @@ public class FullNode implements FullNodeInterface {
         this.startingNodeAddress = startingNodeAddress;
 
         try {
-            String[] address = startingNodeAddress.split(":");
-            InetAddress host = InetAddress.getByName(address[0]);
-            int port = Integer.parseInt(address[1]);
-
-            clientSocket = new Socket(host, port);
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            out = new OutputStreamWriter(clientSocket.getOutputStream());
-
-            out.write("START 1 " + startingNodeName + "\n");    // i added a new line
-            out.flush();
-
-//            out.write("END " + "NOTIFIED!" +"\n");
+//            String[] address = startingNodeAddress.split(":");
+//            InetAddress host = InetAddress.getByName(address[0]);
+//            int port = Integer.parseInt(address[1]);
+//
+//            clientSocket = new Socket(host, port);
+//            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//            out = new OutputStreamWriter(clientSocket.getOutputStream());
+//
+//            out.write("START 1 " + startingNodeName + "\n");    // i added a new line
 //            out.flush();
-
-            clientSocket.close();
-            in.close();
-            out.close();
+//
+////            out.write("END " + "NOTIFIED!" +"\n");
+////            out.flush();
+//
+//            clientSocket.close();
+//            in.close();
+//            out.close();
 
             while(isOpen) {
                 Socket clientSocket = serverSocket.accept();
