@@ -355,6 +355,7 @@ public class FullNode implements FullNodeInterface {
             out.flush();
         } catch (Exception e) {
             System.err.println("Error processing NOTIFY? request: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     private void handleNearestRequest(String line) throws Exception {
