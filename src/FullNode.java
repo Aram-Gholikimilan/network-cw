@@ -90,8 +90,6 @@ public class FullNode implements FullNodeInterface {
             out.write("START 1 " + nodeName + "\n");    // i added a new line
             out.flush();
 
-//            out.write("NOTIFY? \n" + nodeName + "\n" + nodeAddress + "\n");
-//            out.flush();
             String nodeTime0 = getCurrentTime();
             byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
             this.nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
@@ -124,7 +122,7 @@ public class FullNode implements FullNodeInterface {
                     if (message != null) {
                         //  System.out.println(message);
                         handleClient(message);
-                        //  System.out.println("The - " + message + " - is handled!");
+                        System.out.println("The - " + message + " - is handled!");
                         message = null;
                     }
                 }
