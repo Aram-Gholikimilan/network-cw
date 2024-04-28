@@ -238,7 +238,7 @@ public class TemporaryNode implements TemporaryNodeInterface {
         ArrayList<String> visitedNodes = new ArrayList<>();
         visitedNodes.add(startingNodeName);
         try {
-            while(true){
+            while(true) {
 
                 int keyLines = key.split("\n").length;
 
@@ -270,14 +270,46 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     String nearestNodesInfo = nearest(hexKeyHash);
 
 
-
                     if (nearestNodesInfo == null || nearestNodesInfo.isEmpty()) {
                         System.err.println("Failed to retrieve nearest nodes or none are available.");
                         end("COMPLETE");
                         return null;
                     }
 
+                    // TreeMap to store distances and corresponding node names
+                    TreeMap<Integer, List<String[]>> sortedNodes = convertStringNodesToMap(nearestNodesInfo, key);
 
+                    // Now sortedNodes contains all node names sorted by the distance in ascending order
+                    List<String> sortedNamesByDistance = new ArrayList<>();
+                    List<String[]> nodeDetails = new ArrayList<>();
+
+                    for (Map.Entry<Integer, List<String[]>> entry : sortedNodes.entrySet()) {
+                        nodeDetails = entry.getValue(); // List of node details arrays
+
+                    }
+
+                    String minNodeName2 = null;
+                    String minNodeAddress2 = null;
+
+                    // Check if the TreeMap is not empty to prevent accessing non-existing entries
+                    if (!sortedNodes.isEmpty()) {
+                        // Retrieve the first (minimum distance) entry from the TreeMap
+                        Map.Entry<Integer, List<String[]>> firstEntry = sortedNodes.firstEntry();
+
+                        // Check if there is at least one node in the list of this entry
+                        if (!firstEntry.getValue().isEmpty()) {
+                            // Get the first node's details from the list
+                            String[] details = firstEntry.getValue().get(0);
+                            minNodeName2 = details[0];  // Node name
+                            minNodeAddress2 = details[1];  // Node address
+                        }
+                    }
+
+                    for (String[] details : nodeDetails) {
+                        String nodeName = details[0]; // Node name
+                        String nodeAddress = details[1]; // Node address
+
+                    /*
                     // Split the nearestNodesInfo to get individual node details
                     String[] nodeDetails = nearestNodesInfo.split("\n");
                     System.out.println("nearest nodes: \n" + nearestNodesInfo);
@@ -304,31 +336,55 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                     System.out.println("min node: "+ minNodeName);
 
-                    end("CANNOT-GET");
-                    clientSocket.close();
-                    reader.close();
-                    writer.close();
 
-                    if(visitedNodes.contains(minNodeName)){
-                        System.out.println("* dont want to loop *");
-                        return null;
+                     */
+                        end("CANNOT-GET");
+                        clientSocket.close();
+                        reader.close();
+                        writer.close();
+
+                        if (visitedNodes.contains(minNodeName2)) {
+                            System.out.println("* dont want to loop *");
+                            return null;
+                        }
+
+                        String[] address = minNodeAddress2.split(":");
+                        int port = Integer.parseInt(address[1]);
+                        InetAddress host = InetAddress.getByName(address[0]);
+                        clientSocket = new Socket(host, port);
+
+                        reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                        writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+
+                        writer.write("START 1 " + name + "\n");
+                        writer.flush();
+                        String r = reader.readLine();
+                        visitedNodes.add(minNodeName2);
+
+                        writer.write("GET? " + keyLines + "\n" + key);
+                        writer.flush();
+
+                        String response2 = reader.readLine();
+                        System.out.println("get response: " + response2);
+
+                        if (response2 != null && response2.startsWith("VALUE")) {
+                            clientSocket.close();
+
+                            String[] parts = response2.split(" ", 2);
+                            int valueLinesCount2 = Integer.parseInt(parts[1]);
+                            StringBuilder valueBuilder = new StringBuilder();
+                            for (int i = 0; i < valueLinesCount2; i++) {
+                                valueBuilder.append(reader.readLine()).append("\n");
+                            }
+
+                            String value2 = valueBuilder.toString();
+                            //System.out.println("valueeee:\n"+value);
+                            return value2;
+                        }
                     }
 
-                    String[] address = minNodeAddress.split(":");
-                    int port = Integer.parseInt(address[1]);
-                    InetAddress host = InetAddress.getByName(address[0]);
-                    clientSocket = new Socket(host, port);
-
-                    reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    writer = new OutputStreamWriter(clientSocket.getOutputStream());
-
-
-                    writer.write("START 1 " + name + "\n");
-                    writer.flush();
-                    String r = reader.readLine();
-                    visitedNodes.add(minNodeName);
                 }
-
             }
         } catch (Exception e){
             System.out.println("Error during GET? request handling: "+e.getMessage());
