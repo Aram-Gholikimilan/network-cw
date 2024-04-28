@@ -338,20 +338,20 @@ public class FullNode implements FullNodeInterface {
     }
     private void handleNotifyRequest() {
         try {
-            String nodeName = in.readLine(); // Read node name
-            String nodeAddress = in.readLine(); // Read node address
+//            String nodeName = in.readLine(); // Read node name
+//            String nodeAddress = in.readLine(); // Read node address
+//
+//            System.out.println("nodeName: " + nodeName);
+//            System.out.println("nodeAddress: " + nodeAddress);
+//
+//            String nodeTime = getCurrentTime();
+//            byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
+//            this.nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
+//            int distance = HashID.countLeadingMatchingBits(nodeHashID,this.nodeHashID);
+//            NodeInfo nodeInfo = new NodeInfo(nodeName,nodeAddress,nodeTime);
+//            updateNetworkMap(distance,nodeInfo);
 
-            System.out.println("nodeName: " + nodeName);
-            System.out.println("nodeAddress: " + nodeAddress);
-
-            String nodeTime = getCurrentTime();
-            byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
-            this.nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
-            int distance = HashID.countLeadingMatchingBits(nodeHashID,this.nodeHashID);
-            NodeInfo nodeInfo = new NodeInfo(nodeName,nodeAddress,nodeTime);
-            updateNetworkMap(distance,nodeInfo);
-
-            out.write("NOTIFIED"+"\n");
+            out.write("NOTIFIED\n");
             out.flush();
         } catch (Exception e) {
             System.err.println("Error processing NOTIFY? request: " + e.getMessage());
