@@ -236,7 +236,8 @@ public class FullNode implements FullNodeInterface {
                         }
                     default:
                         System.err.println("Unknown command: " + line);
-                        end("INVALID REQUEST");
+                        isConnected = false;
+                        started = false;
                         break;
                 }
                 line = null; // Or read the next line if in a loop
