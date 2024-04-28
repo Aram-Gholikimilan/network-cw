@@ -77,6 +77,7 @@ public class FullNode implements FullNodeInterface {
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
         this.startingNodeName = startingNodeName;
         this.startingNodeAddress = startingNodeAddress;
+        nodeName = startingNodeName;
 
         try {
             String[] address = startingNodeAddress.split(":");
@@ -338,18 +339,18 @@ public class FullNode implements FullNodeInterface {
     }
     private void handleNotifyRequest() {
         try {
-//            String nodeName = in.readLine(); // Read node name
-//            String nodeAddress = in.readLine(); // Read node address
-//
-//            System.out.println("nodeName: " + nodeName);
-//            System.out.println("nodeAddress: " + nodeAddress);
-//
-//            String nodeTime = getCurrentTime();
-//            byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
-//            this.nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
-//            int distance = HashID.countLeadingMatchingBits(nodeHashID,this.nodeHashID);
-//            NodeInfo nodeInfo = new NodeInfo(nodeName,nodeAddress,nodeTime);
-//            updateNetworkMap(distance,nodeInfo);
+            String nodeName = in.readLine(); // Read node name
+            String nodeAddress = in.readLine(); // Read node address
+
+            System.out.println("nodeName: " + nodeName);
+            System.out.println("nodeAddress: " + nodeAddress);
+
+            String nodeTime = getCurrentTime();
+            byte[] nodeHashID = HashID.computeHashID(nodeName+"\n");
+            this.nodeHashID = HashID.computeHashID(this.startingNodeName+"\n");
+            int distance = HashID.countLeadingMatchingBits(nodeHashID,this.nodeHashID);
+            NodeInfo nodeInfo = new NodeInfo(nodeName,nodeAddress,nodeTime);
+            updateNetworkMap(distance,nodeInfo);
 
             out.write("NOTIFIED\n");
             out.flush();
