@@ -236,8 +236,9 @@ public class FullNode implements FullNodeInterface {
                         }
                     default:
                         System.err.println("Unknown command: " + line);
-                        isConnected = false;
-                        started = false;
+//                        isConnected = false;
+//                        started = false;
+                        end("INVALID-REQUEST");
                         break;
                 }
                 line = null; // Or read the next line if in a loop
@@ -249,8 +250,8 @@ public class FullNode implements FullNodeInterface {
 
     public void end (String reason){
         try{
-            writer.write("END " + reason +"\n");
-            writer.flush();
+            out.write("END " + reason +"\n");
+            out.flush();
             isConnected = false;
             started = false;
             // Close down the connection
