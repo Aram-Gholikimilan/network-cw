@@ -90,11 +90,8 @@ public class FullNode implements FullNodeInterface {
             out.write("START 1 " + startingNodeName + "\n");    // i added a new line
             out.flush();
 
-            out.write("NOTIFY? \n" + startingNodeName + "\n" + nodeAddress + "\n");
-            out.flush();
-
-            out.write("END " + "NOTIFIED!" +"\n");
-            out.flush();
+//            out.write("END " + "NOTIFIED!" +"\n");
+//            out.flush();
 
             clientSocket.close();
             in.close();
