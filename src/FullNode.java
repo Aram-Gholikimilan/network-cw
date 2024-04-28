@@ -52,7 +52,7 @@ public class FullNode implements FullNodeInterface {
     private BufferedReader in;
     private Writer out;
     private Socket clientSocket;
-    private String nodeName = "aram.gholikimilan@city.ac.uk:2D#4Impl,1.0,FullNode,1";
+    private String nodeName = "aram.gholikimilan@city.ac.uk:2D#4Impl,1.0,FullNode,0";
     private String nodeAddress = "";
     private String ip;
     private int port;
@@ -77,7 +77,7 @@ public class FullNode implements FullNodeInterface {
     public void handleIncomingConnections(String startingNodeName, String startingNodeAddress) {
         this.startingNodeName = startingNodeName;
         this.startingNodeAddress = startingNodeAddress;
-        nodeName = startingNodeName;
+        //nodeName = startingNodeName;
 
         try {
             String[] address = startingNodeAddress.split(":");
