@@ -284,9 +284,20 @@ public class TemporaryNode implements TemporaryNodeInterface {
                     List<String[]> nodeDetails = new ArrayList<>();
 
                     for (Map.Entry<Integer, List<String[]>> entry : sortedNodes.entrySet()) {
+                        // Retrieve the distance (key of the TreeMap) and the associated list of node details
+                        Integer distance2 = entry.getKey();
                         nodeDetails = entry.getValue(); // List of node details arrays
 
+                        // Print the distance first
+                        System.out.println("Distance: " + distance2);
+
+                        // Iterate over each node detail array in the list for this specific distance
+                        for (String[] details : nodeDetails) {
+                            // Each 'details' array contains the node name at index 0 and the address at index 1
+                            System.out.println("  Node Name: " + details[0] + ", Address: " + details[1]);
+                        }
                     }
+
 
                     String minNodeName2 = null;
                     String minNodeAddress2 = null;
@@ -383,6 +394,26 @@ public class TemporaryNode implements TemporaryNodeInterface {
                             return value2;
                         }
                     }
+
+                    end("CANNOT-GET");
+                    clientSocket.close();
+                    reader.close();
+                    writer.close();
+
+                    String[] address = minNodeAddress2.split(":");
+                    int port = Integer.parseInt(address[1]);
+                    InetAddress host = InetAddress.getByName(address[0]);
+                    clientSocket = new Socket(host, port);
+
+                    reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    writer = new OutputStreamWriter(clientSocket.getOutputStream());
+
+
+                    writer.write("START 1 " + name + "\n");
+                    writer.flush();
+                    String r = reader.readLine();
+                    System.out.println("here --> :" + r);
+                    visitedNodes.add(minNodeName2);
 
                 }
             }
