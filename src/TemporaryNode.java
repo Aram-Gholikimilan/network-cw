@@ -245,6 +245,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
                 writer.write("GET? " + keyLines + "\n" + key);
                 writer.flush();
 
+                System.out.println("get from: "+ writer.toString()+"* HERE HERE *");
+
                 String response = reader.readLine();
                 System.out.println("get response: " + response);
 
@@ -375,6 +377,8 @@ public class TemporaryNode implements TemporaryNodeInterface {
 
                         writer.write("GET? " + keyLines + "\n" + key);
                         writer.flush();
+
+                        System.out.println("get from: "+ nodeName3);
 
                         String response2 = reader.readLine();
                         System.out.println("get response: " + response2);
