@@ -351,7 +351,7 @@ public class FullNode implements FullNodeInterface {
             NodeInfo nodeInfo = new NodeInfo(nodeName,nodeAddress,nodeTime);
             updateNetworkMap(distance,nodeInfo);
 
-            out.write("NOTIFIED\n");
+            out.write("NOTIFIED"+"\n");
             out.flush();
         } catch (Exception e) {
             System.err.println("Error processing NOTIFY? request: " + e.getMessage());
