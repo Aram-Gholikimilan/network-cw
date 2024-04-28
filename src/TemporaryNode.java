@@ -343,10 +343,10 @@ public class TemporaryNode implements TemporaryNodeInterface {
                         reader.close();
                         writer.close();
 
-                        if (visitedNodes.contains(minNodeName2)) {
-                            System.out.println("* dont want to loop *");
-                            return null;
-                        }
+//                        if (visitedNodes.contains(minNodeName2)) {
+//                            System.out.println("* dont want to loop *");
+//                            return null;
+//                        }
 
                         String[] address = minNodeAddress2.split(":");
                         int port = Integer.parseInt(address[1]);
